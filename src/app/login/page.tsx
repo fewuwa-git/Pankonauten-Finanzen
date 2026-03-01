@@ -93,9 +93,6 @@ export default function LoginPage() {
                     </button>
                 </form>
 
-                <p style={{ marginTop: '24px', fontSize: '12px', color: 'var(--text-muted)', textAlign: 'center' }}>
-                    Demo: admin@pankonauten.de · password
-                </p>
             </div>
         </div>
     );
