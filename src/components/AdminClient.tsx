@@ -181,8 +181,8 @@ export default function AdminClient({ currentUser }: AdminClientProps) {
                     )}
                 </div>
 
-                <div className="card mb-6">
-                    <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px', alignItems: 'center' }}>
+                {currentUser.role === 'admin' && <div className="card mb-6">
+                    <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px', alignItems: 'center', paddingBottom: '16px' }}>
                         <div className="card-title" style={{ marginBottom: 0 }}>🔍 Suchen & Filtern</div>
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px', alignItems: 'center' }}>
                             <div className="period-selector">
@@ -211,7 +211,7 @@ export default function AdminClient({ currentUser }: AdminClientProps) {
                             </div>
                         </div>
                     </div>
-                </div>
+                </div>}
 
                 <div className="page-body">
                     <div className="user-list">
