@@ -1,8 +1,10 @@
 import { SignJWT, jwtVerify } from 'jose';
 
-const JWT_SECRET = new TextEncoder().encode(
-    process.env.JWT_SECRET || 'pankonauten-finance-secret-key-2024'
-);
+const jwtSecretValue = process.env.JWT_SECRET;
+if (!jwtSecretValue) {
+    throw new Error('JWT_SECRET environment variable is not set. Server cannot start without a secure secret.');
+}
+const JWT_SECRET = new TextEncoder().encode(jwtSecretValue);
 
 export interface JWTPayload {
     userId: string;

@@ -3,7 +3,53 @@ import bcrypt from 'bcryptjs';
 import { getUserByEmail, updateUserLastLogin } from '@/lib/data';
 import { signToken } from '@/lib/auth';
 
+// ─── In-memory rate limiter ────────────────────────────────────────────────────
+// Tracks failed login attempts per IP. Resets after WINDOW_MS.
+// Note: resets on server restart. For multi-instance deployments use Redis.
+const loginAttempts = new Map<string, { count: number; resetAt: number }>();
+const MAX_ATTEMPTS = 5;
+const WINDOW_MS = 15 * 60 * 1000; // 15 minutes
+
+function getClientIP(req: NextRequest): string {
+    return req.headers.get('x-forwarded-for')?.split(',')[0].trim() ?? 'unknown';
+}
+
+function checkRateLimit(ip: string): { allowed: boolean; retryAfter?: number } {
+    const now = Date.now();
+    const entry = loginAttempts.get(ip);
+
+    if (!entry || now > entry.resetAt) {
+        loginAttempts.set(ip, { count: 1, resetAt: now + WINDOW_MS });
+        return { allowed: true };
+    }
+
+    if (entry.count >= MAX_ATTEMPTS) {
+        return { allowed: false, retryAfter: Math.ceil((entry.resetAt - now) / 1000) };
+    }
+
+    entry.count++;
+    return { allowed: true };
+}
+
+function clearRateLimit(ip: string) {
+    loginAttempts.delete(ip);
+}
+
+// ─── POST /api/auth — Login ────────────────────────────────────────────────────
 export async function POST(req: NextRequest) {
+    const ip = getClientIP(req);
+    const rateLimit = checkRateLimit(ip);
+
+    if (!rateLimit.allowed) {
+        return NextResponse.json(
+            { error: `Zu viele Anmeldeversuche. Bitte warte ${rateLimit.retryAfter} Sekunden.` },
+            {
+                status: 429,
+                headers: { 'Retry-After': String(rateLimit.retryAfter) },
+            }
+        );
+    }
+
     try {
         const { email, password } = await req.json();
 
@@ -21,11 +67,13 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'Ungültige Anmeldedaten' }, { status: 401 });
         }
 
-        // Update the user's last login timestamp without waiting to block the response
-        updateUserLastLogin(user.id, new Date().toISOString()).catch(err => {
-            console.error('Failed to update last_login_at:', err);
-        });
+        // Login successful — clear rate limit counter
+        clearRateLimit(ip);
 
+        // Update last login timestamp without blocking the response
+        updateUserLastLogin(user.id, new Date().toISOString()).catch(() => {
+            console.error('Failed to update last_login_at for user:', user.id);
+        });
 
         const token = await signToken({
             userId: user.id,
@@ -46,27 +94,23 @@ export async function POST(req: NextRequest) {
         });
 
         return response;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (error: any) {
-        console.error('Login error detail:', {
-            message: error.message,
-            code: error.code,
-            errno: error.errno,
-            stack: error.stack
-        });
+    } catch (error: unknown) {
+        // Log full error details server-side only — never expose to client
+        console.error('Login error:', error instanceof Error ? error.message : 'Unknown error');
 
-        // Specific error for database connection issues
-        if (error.code === 'ECONNREFUSED' || error.code === 'ETIMEDOUT') {
+        const code = (error as NodeJS.ErrnoException).code;
+        if (code === 'ECONNREFUSED' || code === 'ETIMEDOUT') {
             return NextResponse.json(
-                { error: 'Datenbank-Verbindung fehlgeschlagen. Bitte prüfe den SSH-Tunnel.' },
+                { error: 'Datenbankverbindung fehlgeschlagen. Bitte prüfe den SSH-Tunnel.' },
                 { status: 503 }
             );
         }
 
-        return NextResponse.json({ error: 'Server-Fehler: ' + (error.message || 'Unbekannt') }, { status: 500 });
+        return NextResponse.json({ error: 'Interner Serverfehler' }, { status: 500 });
     }
 }
 
+// ─── DELETE /api/auth — Logout ─────────────────────────────────────────────────
 export async function DELETE() {
     const response = NextResponse.json({ success: true });
     response.cookies.delete('token');

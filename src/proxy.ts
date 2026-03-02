@@ -10,7 +10,7 @@ export async function proxy(req: NextRequest) {
     }
 
     // API routes
-    if (pathname.startsWith('/api') && !pathname.startsWith('/api/test-db')) {
+    if (pathname.startsWith('/api')) {
         const token = req.cookies.get('token')?.value;
         if (!token) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -23,9 +23,6 @@ export async function proxy(req: NextRequest) {
     }
 
     // Protected pages
-    if (pathname.startsWith('/api/test-db')) {
-        return NextResponse.next();
-    }
     const token = req.cookies.get('token')?.value;
     if (!token) {
         return NextResponse.redirect(new URL('/login', req.url));
