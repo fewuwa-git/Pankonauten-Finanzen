@@ -1214,6 +1214,35 @@ body {
   }
 }
 
+/* Abrechnung Form */
+.abrechnung-tage-mobile {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .abrechnung-tage-table {
+    display: none;
+  }
+
+  .abrechnung-tage-mobile {
+    display: block;
+  }
+
+  .add-tag-form {
+    grid-template-columns: 1fr !important;
+  }
+
+  .add-tag-form .time-inputs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr 1fr !important;
+  }
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;

@@ -1,3 +1,4 @@
+import React from 'react';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { verifyToken } from '@/lib/auth';
@@ -123,8 +124,8 @@ export default async function AbrechnungPage({
                                                 }
                                             }
                                             return groups.map(group => (
-                                                <>
-                                                    <tr key={`header-${group.key}`}>
+                                                <React.Fragment key={group.key}>
+                                                    <tr>
                                                         <td colSpan={5} style={{
                                                             background: 'var(--bg)',
                                                             padding: '8px 16px',
@@ -215,7 +216,7 @@ export default async function AbrechnungPage({
                                                             </tr>
                                                         );
                                                     })}
-                                                </>
+                                                </React.Fragment>
                                             ));
                                         })()}
                                     </tbody>

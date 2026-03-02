@@ -561,56 +561,58 @@ export default function AbrechnungForm({
                                             required
                                         />
                                     </div>
-                                    <div className="form-group" style={{ marginBottom: 0 }}>
-                                        <label className="form-label">Von</label>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                            <select
-                                                className="form-select"
-                                                value={von.split(':')[0] || ''}
-                                                onChange={e => setVon(`${e.target.value}:${von.split(':')[1] || '00'}`)}
-                                                required
-                                                style={{ padding: '10px 8px' }}
-                                            >
-                                                <option value="">Std</option>
-                                                {HOURS.map(h => <option key={h} value={h}>{h}</option>)}
-                                            </select>
-                                            <span style={{ fontWeight: 'bold' }}>:</span>
-                                            <select
-                                                className="form-select"
-                                                value={von.split(':')[1] || ''}
-                                                onChange={e => setVon(`${von.split(':')[0] || '07'}:${e.target.value}`)}
-                                                required
-                                                style={{ padding: '10px 8px' }}
-                                            >
-                                                <option value="">Min</option>
-                                                {MINUTES.map(m => <option key={m} value={m}>{m}</option>)}
-                                            </select>
+                                    <div className="time-inputs">
+                                        <div className="form-group" style={{ marginBottom: 0 }}>
+                                            <label className="form-label">Von</label>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                <select
+                                                    className="form-select"
+                                                    value={von.split(':')[0] || ''}
+                                                    onChange={e => setVon(`${e.target.value}:${von.split(':')[1] || '00'}`)}
+                                                    required
+                                                    style={{ padding: '10px 8px' }}
+                                                >
+                                                    <option value="">Std</option>
+                                                    {HOURS.map(h => <option key={h} value={h}>{h}</option>)}
+                                                </select>
+                                                <span style={{ fontWeight: 'bold' }}>:</span>
+                                                <select
+                                                    className="form-select"
+                                                    value={von.split(':')[1] || ''}
+                                                    onChange={e => setVon(`${von.split(':')[0] || '07'}:${e.target.value}`)}
+                                                    required
+                                                    style={{ padding: '10px 8px' }}
+                                                >
+                                                    <option value="">Min</option>
+                                                    {MINUTES.map(m => <option key={m} value={m}>{m}</option>)}
+                                                </select>
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div className="form-group" style={{ marginBottom: 0 }}>
-                                        <label className="form-label">Bis</label>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                            <select
-                                                className="form-select"
-                                                value={bis.split(':')[0] || ''}
-                                                onChange={e => setBis(`${e.target.value}:${bis.split(':')[1] || '00'}`)}
-                                                required
-                                                style={{ padding: '10px 8px' }}
-                                            >
-                                                <option value="">Std</option>
-                                                {HOURS.map(h => <option key={h} value={h}>{h}</option>)}
-                                            </select>
-                                            <span style={{ fontWeight: 'bold' }}>:</span>
-                                            <select
-                                                className="form-select"
-                                                value={bis.split(':')[1] || ''}
-                                                onChange={e => setBis(`${bis.split(':')[0] || '07'}:${e.target.value}`)}
-                                                required
-                                                style={{ padding: '10px 8px' }}
-                                            >
-                                                <option value="">Min</option>
-                                                {MINUTES.map(m => <option key={m} value={m}>{m}</option>)}
-                                            </select>
+                                        <div className="form-group" style={{ marginBottom: 0 }}>
+                                            <label className="form-label">Bis</label>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                <select
+                                                    className="form-select"
+                                                    value={bis.split(':')[0] || ''}
+                                                    onChange={e => setBis(`${e.target.value}:${bis.split(':')[1] || '00'}`)}
+                                                    required
+                                                    style={{ padding: '10px 8px' }}
+                                                >
+                                                    <option value="">Std</option>
+                                                    {HOURS.map(h => <option key={h} value={h}>{h}</option>)}
+                                                </select>
+                                                <span style={{ fontWeight: 'bold' }}>:</span>
+                                                <select
+                                                    className="form-select"
+                                                    value={bis.split(':')[1] || ''}
+                                                    onChange={e => setBis(`${bis.split(':')[0] || '07'}:${e.target.value}`)}
+                                                    required
+                                                    style={{ padding: '10px 8px' }}
+                                                >
+                                                    <option value="">Min</option>
+                                                    {MINUTES.map(m => <option key={m} value={m}>{m}</option>)}
+                                                </select>
+                                            </div>
                                         </div>
                                     </div>
                                     <div style={{ minWidth: '160px' }}>
@@ -629,7 +631,8 @@ export default function AbrechnungForm({
                             {loading && <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Lade...</span>}
                         </div>
                         <div className="card-body" style={{ padding: 0, marginTop: '1.5rem' }}>
-                            <div className="table-responsive">
+                            {/* Desktop table */}
+                            <div className="table-responsive abrechnung-tage-table">
                                 <table className="data-table">
                                     <thead>
                                         <tr>
@@ -671,17 +674,7 @@ export default function AbrechnungForm({
                                                             <button
                                                                 onClick={() => tag.id && setDeleteTagId(tag.id)}
                                                                 className="btn-icon"
-                                                                style={{
-                                                                    background: 'none',
-                                                                    border: 'none',
-                                                                    cursor: 'pointer',
-                                                                    padding: '6px',
-                                                                    borderRadius: '4px',
-                                                                    display: 'flex',
-                                                                    alignItems: 'center',
-                                                                    justifyContent: 'center',
-                                                                    transition: 'background 0.2s'
-                                                                }}
+                                                                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '6px', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.2s' }}
                                                                 onMouseEnter={e => e.currentTarget.style.background = 'var(--red-bg)'}
                                                                 onMouseLeave={e => e.currentTarget.style.background = 'none'}
                                                                 title="Löschen"
@@ -708,6 +701,55 @@ export default function AbrechnungForm({
                                         </tfoot>
                                     )}
                                 </table>
+                            </div>
+
+                            {/* Mobile card list */}
+                            <div className="abrechnung-tage-mobile">
+                                {tage.length === 0 ? (
+                                    <div style={{ textAlign: 'center', padding: '48px 16px', color: 'var(--text-muted)' }}>
+                                        <div style={{ fontSize: '24px', marginBottom: '8px' }}>☕</div>
+                                        Noch keine Einträge für diesen Monat vorhanden.
+                                    </div>
+                                ) : (
+                                    <>
+                                        {tage.map(tag => (
+                                            <div key={tag.id} style={{ padding: '14px 16px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px' }}>
+                                                <div style={{ flex: 1, minWidth: 0 }}>
+                                                    <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px', flexWrap: 'wrap' }}>
+                                                        <span style={{ fontWeight: 600, fontSize: '14px' }}>
+                                                            {new Date(tag.datum).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })}
+                                                        </span>
+                                                        <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+                                                            {new Date(tag.datum).toLocaleDateString('de-DE', { weekday: 'long' })}
+                                                        </span>
+                                                    </div>
+                                                    <div style={{ fontSize: '13px', color: 'var(--text-muted)', marginTop: '4px' }}>
+                                                        {tag.von.slice(0, 5)} – {tag.bis.slice(0, 5)} · {tag.stunden.toFixed(2)} h · {tag.stundensatz.toFixed(2)} €/h
+                                                    </div>
+                                                    <div style={{ fontWeight: 700, color: 'var(--navy)', marginTop: '4px', fontSize: '15px' }}>
+                                                        {tag.betrag.toLocaleString('de-DE', { minimumFractionDigits: 2 })} €
+                                                    </div>
+                                                </div>
+                                                {!isLocked && (
+                                                    <button
+                                                        onClick={() => tag.id && setDeleteTagId(tag.id)}
+                                                        style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', fontSize: '18px', flexShrink: 0 }}
+                                                        title="Löschen"
+                                                    >
+                                                        🗑️
+                                                    </button>
+                                                )}
+                                            </div>
+                                        ))}
+                                        <div style={{ padding: '14px 16px', background: 'var(--bg)', borderTop: '2px solid var(--border)', display: 'flex', justifyContent: 'space-between', fontWeight: 700 }}>
+                                            <span>SUMME</span>
+                                            <div style={{ textAlign: 'right' }}>
+                                                <div style={{ fontSize: '13px', color: 'var(--text-muted)', fontWeight: 500 }}>{totalStunden.toFixed(2)} h</div>
+                                                <div style={{ color: 'var(--navy)', fontSize: '16px' }}>{totalBetrag.toLocaleString('de-DE', { minimumFractionDigits: 2 })} €</div>
+                                            </div>
+                                        </div>
+                                    </>
+                                )}
                             </div>
                         </div>
                     </div>
