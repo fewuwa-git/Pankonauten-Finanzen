@@ -40,14 +40,24 @@ export default async function AbrechnungPage({
 
     const searchParamsMap = await searchParams;
     const selectedSpringerinId = searchParamsMap?.springerinId as string | undefined;
+    const selectedMonat = searchParamsMap?.monat ? parseInt(searchParamsMap.monat as string) : undefined;
+    const selectedJahr = searchParamsMap?.jahr ? parseInt(searchParamsMap.jahr as string) : undefined;
 
-    const [abrechnungen, currentUser, springerinnen] = await Promise.all([
+    const [abrechnungenRaw, currentUser, springerinnen] = await Promise.all([
         payload.role === 'admin'
             ? getAllAbrechnungen(selectedSpringerinId)
             : getAllAbrechnungen(payload.userId),
         getUserById(payload.userId),
         payload.role === 'admin' ? getSpringerinUsers() : Promise.resolve([])
     ]);
+
+    const availableJahre = [...new Set(abrechnungenRaw.map((ab: any) => ab.jahr as number))].sort((a, b) => b - a);
+
+    const abrechnungen = abrechnungenRaw.filter((ab: any) => {
+        if (selectedJahr && ab.jahr !== selectedJahr) return false;
+        if (selectedMonat && ab.monat !== selectedMonat) return false;
+        return true;
+    });
 
     if (!currentUser) redirect('/login');
 
@@ -71,9 +81,11 @@ export default async function AbrechnungPage({
                     </div>
                 </div>
                 <div className="page-body">
-                    {payload.role === 'admin' && (
-                        <SpringerinFilter springerinnen={springerinnen} />
-                    )}
+                    <SpringerinFilter
+                        springerinnen={springerinnen}
+                        availableJahre={availableJahre}
+                        isAdmin={payload.role === 'admin'}
+                    />
                     <div className="card">
                         <div className="card-header">
                             <h2 className="card-title">📋 Alle Abrechnungen</h2>

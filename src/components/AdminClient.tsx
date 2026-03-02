@@ -214,8 +214,15 @@ export default function AdminClient({ currentUser }: AdminClientProps) {
                 </div>}
 
                 <div className="page-body">
-                    <div className="user-list">
-                        {users
+                    {(() => {
+                        const ROLE_SECTIONS = [
+                            { role: 'admin',      label: 'Finanzvorstand',    icon: '⭐' },
+                            { role: 'member',     label: 'Vorstandsmitglieder', icon: '👤' },
+                            { role: 'eltern',     label: 'Eltern',            icon: '👪' },
+                            { role: 'springerin', label: 'Springerinnen',     icon: '🏃' },
+                        ];
+
+                        const visibleUsers = users
                             .filter(u => {
                                 if (currentUser.role !== 'admin') return u.email === currentUser.email;
                                 return true;
@@ -226,54 +233,91 @@ export default function AdminClient({ currentUser }: AdminClientProps) {
                                     u.email.toLowerCase().includes(searchQuery.toLowerCase());
                                 const matchesRole = roleFilter === 'all' || u.role === roleFilter;
                                 return matchesSearch && matchesRole;
-                            })
-                            .map((u) => {
-                                const initials = u.name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2);
-                                const isMe = u.email === currentUser.email;
-                                const canEdit = currentUser.role === 'admin' || isMe;
-                                return (
-                                    <div key={u.id} className="user-item" style={{ opacity: u.status === 'inactive' ? 0.6 : 1 }}>
-                                        <div className="user-item-avatar">{initials}</div>
-                                        <div className="user-item-info">
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                                <div className="user-item-name">{u.name}</div>
-                                                <span className={`role-badge ${u.role}`}>
-                                                    {u.role === 'admin' ? '⭐ Finanzvorstand' :
-                                                        u.role === 'eltern' ? '👪 Eltern' :
-                                                            u.role === 'springerin' ? '🏃 Springerin' : '👤 Mitglied'}
-                                                </span>
+                            });
+
+                        const sections = ROLE_SECTIONS
+                            .map(s => ({ ...s, users: visibleUsers.filter(u => u.role === s.role) }))
+                            .filter(s => s.users.length > 0);
+
+                        if (sections.length === 0) {
+                            return (
+                                <div style={{ textAlign: 'center', padding: '48px 16px', color: 'var(--text-muted)' }}>
+                                    Keine Benutzer gefunden.
+                                </div>
+                            );
+                        }
+
+                        return sections.map((section, sIdx) => (
+                            <div key={section.role} style={{ marginBottom: sIdx < sections.length - 1 ? '2rem' : 0 }}>
+                                <div style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '10px',
+                                    marginBottom: '0.75rem',
+                                }}>
+                                    <span style={{ fontSize: '16px' }}>{section.icon}</span>
+                                    <span style={{ fontWeight: 700, fontSize: '15px', color: 'var(--navy)' }}>
+                                        {section.label}
+                                    </span>
+                                    <span style={{
+                                        background: 'var(--bg)',
+                                        border: '1px solid var(--border)',
+                                        borderRadius: '20px',
+                                        fontSize: '12px',
+                                        fontWeight: 600,
+                                        color: 'var(--text-muted)',
+                                        padding: '1px 8px',
+                                    }}>
+                                        {section.users.length}
+                                    </span>
+                                    <div style={{ flex: 1, height: '1px', background: 'var(--border)' }} />
+                                </div>
+                                <div className="user-list">
+                                    {section.users.map((u) => {
+                                        const initials = u.name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2);
+                                        const isMe = u.email === currentUser.email;
+                                        const canEdit = currentUser.role === 'admin' || isMe;
+                                        return (
+                                            <div key={u.id} className="user-item" style={{ opacity: u.status === 'inactive' ? 0.6 : 1 }}>
+                                                <div className="user-item-avatar">{initials}</div>
+                                                <div className="user-item-info">
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                        <div className="user-item-name">{u.name}</div>
+                                                    </div>
+                                                    <div className="user-item-email">{u.email}</div>
+                                                </div>
+                                                <div style={{ fontSize: '12px', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
+                                                    <div>Seit {formatDate(u.created_at)}</div>
+                                                    <div>Login: {formatDateTime(u.last_login_at)}</div>
+                                                </div>
+                                                <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                                                    {canEdit && (
+                                                        <button
+                                                            className="btn btn-secondary btn-sm"
+                                                            onClick={() => openEdit(u)}
+                                                        >
+                                                            Bearbeiten
+                                                        </button>
+                                                    )}
+                                                    {currentUser.role === 'admin' && !isMe && (
+                                                        <button
+                                                            className={`btn btn-sm ${u.status === 'inactive' ? 'btn-secondary' : 'btn-danger'}`}
+                                                            onClick={() => handleToggleStatus(u.id, u.name, u.status)}
+                                                        >
+                                                            {u.status === 'inactive' ? 'Aktivieren' : 'Deaktivieren'}
+                                                        </button>
+                                                    )}
+                                                    {isMe && (
+                                                        <span style={{ fontSize: '12px', color: 'var(--text-muted)', fontStyle: 'italic' }}>Du</span>
+                                                    )}
+                                                </div>
                                             </div>
-                                            <div className="user-item-email">{u.email}</div>
-                                        </div>
-                                        <div style={{ fontSize: '12px', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
-                                            <div>Seit {formatDate(u.created_at)}</div>
-                                            <div>Login: {formatDateTime(u.last_login_at)}</div>
-                                        </div>
-                                        <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
-                                            {canEdit && (
-                                                <button
-                                                    className="btn btn-secondary btn-sm"
-                                                    onClick={() => openEdit(u)}
-                                                >
-                                                    Bearbeiten
-                                                </button>
-                                            )}
-                                            {currentUser.role === 'admin' && !isMe && (
-                                                <button
-                                                    className={`btn btn-sm ${u.status === 'inactive' ? 'btn-secondary' : 'btn-danger'}`}
-                                                    onClick={() => handleToggleStatus(u.id, u.name, u.status)}
-                                                >
-                                                    {u.status === 'inactive' ? 'Aktivieren' : 'Deaktivieren'}
-                                                </button>
-                                            )}
-                                            {isMe && (
-                                                <span style={{ fontSize: '12px', color: 'var(--text-muted)', fontStyle: 'italic' }}>Du</span>
-                                            )}
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                    </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        ));
+                    })()}
                 </div>
             </main>
 
