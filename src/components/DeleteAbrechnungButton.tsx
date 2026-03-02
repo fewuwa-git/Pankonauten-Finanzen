@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import ConfirmModal from '@/components/ConfirmModal';
 
 interface DeleteAbrechnungButtonProps {
     id: string;
@@ -9,20 +10,17 @@ interface DeleteAbrechnungButtonProps {
 }
 
 export default function DeleteAbrechnungButton({ id, label }: DeleteAbrechnungButtonProps) {
+    const [showModal, setShowModal] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
     const router = useRouter();
 
-    const handleDelete = async () => {
-        const confirmed = window.confirm(`Möchtest du die Abrechnung "${label}" wirklich unwiderruflich löschen?`);
-        if (!confirmed) return;
-
+    const handleConfirm = async () => {
         setIsDeleting(true);
         try {
-            const res = await fetch(`/api/abrechnungen?id=${id}`, {
-                method: 'DELETE',
-            });
+            const res = await fetch(`/api/abrechnungen?id=${id}`, { method: 'DELETE' });
 
             if (res.ok) {
+                setShowModal(false);
                 router.refresh();
             } else {
                 const errorData = await res.json();
@@ -37,24 +35,25 @@ export default function DeleteAbrechnungButton({ id, label }: DeleteAbrechnungBu
     };
 
     return (
-        <button
-            onClick={handleDelete}
-            disabled={isDeleting}
-            className="btn btn-sm btn-danger"
-            style={{
-                padding: '4px 10px',
-                backgroundColor: 'var(--danger, #dc3545)',
-                color: 'white',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: isDeleting ? 'not-allowed' : 'pointer',
-                opacity: isDeleting ? 0.7 : 1,
-                fontSize: '12px',
-                fontWeight: '500'
-            }}
-            title="Abrechnung löschen"
-        >
-            {isDeleting ? '...' : 'Löschen'}
-        </button>
+        <>
+            <button
+                onClick={() => setShowModal(true)}
+                className="btn btn-sm btn-danger"
+                style={{ padding: '4px 10px' }}
+                title="Abrechnung löschen"
+            >
+                Löschen
+            </button>
+            <ConfirmModal
+                isOpen={showModal}
+                title="Abrechnung löschen"
+                message={`Möchtest du die Abrechnung „${label}" wirklich unwiderruflich löschen?`}
+                confirmLabel="Ja, löschen"
+                confirmClass="btn-danger"
+                isLoading={isDeleting}
+                onConfirm={handleConfirm}
+                onCancel={() => setShowModal(false)}
+            />
+        </>
     );
 }

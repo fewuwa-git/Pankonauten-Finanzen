@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { generateAbrechnungPDF } from '@/lib/pdf';
+import ConfirmModal from '@/components/ConfirmModal';
 
 interface User {
     id: string;
@@ -99,6 +100,8 @@ export default function AbrechnungForm({
     const [saving, setSaving] = useState(false);
     const [submitting, setSubmitting] = useState(false);
     const [generating, setGenerating] = useState(false);
+    const [showSubmitModal, setShowSubmitModal] = useState(false);
+    const [deleteTagId, setDeleteTagId] = useState<string | null>(null);
     const [recalculating, setRecalculating] = useState(false);
     const [error, setError] = useState('');
     const [pdfUrl, setPdfUrl] = useState<string | null>(null);
@@ -250,8 +253,6 @@ export default function AbrechnungForm({
     };
 
     const handleDelete = async (tagId: string) => {
-        if (!confirm('Soll dieser Tag wirklich gelöscht werden?')) return;
-
         setError('');
         try {
             const res = await fetch(`/api/abrechnungen?tagId=${tagId}`, { method: 'DELETE' });
@@ -262,13 +263,13 @@ export default function AbrechnungForm({
             setTage(tage.filter(t => t.id !== tagId));
         } catch (err: any) {
             setError(err.message);
+        } finally {
+            setDeleteTagId(null);
         }
     };
 
     const handleSubmit = async () => {
         if (!abrechnung?.id) return;
-        if (!confirm('Abrechnung wirklich einreichen? Sie kann danach nicht mehr bearbeitet werden.')) return;
-
         setSubmitting(true);
         setError('');
         try {
@@ -289,6 +290,7 @@ export default function AbrechnungForm({
 
             const data = await res.json();
             setAbrechnung(data.abrechnung);
+            setShowSubmitModal(false);
         } catch (err: any) {
             setError(err.message);
         } finally {
@@ -667,7 +669,7 @@ export default function AbrechnungForm({
                                                     {!isLocked && (
                                                         <td style={{ textAlign: 'right' }}>
                                                             <button
-                                                                onClick={() => tag.id && handleDelete(tag.id)}
+                                                                onClick={() => tag.id && setDeleteTagId(tag.id)}
                                                                 className="btn-icon"
                                                                 style={{
                                                                     background: 'none',
@@ -713,16 +715,37 @@ export default function AbrechnungForm({
                     {user.role === 'springerin' && !isLocked && tage.length > 0 && (
                         <div style={{ marginTop: '2rem', display: 'flex', justifyContent: 'flex-end' }}>
                             <button
-                                onClick={handleSubmit}
+                                onClick={() => setShowSubmitModal(true)}
                                 className="btn btn-success"
                                 disabled={submitting}
                             >
-                                {submitting ? 'Wird eingereicht...' : '✅ Abrechnung einreichen'}
+                                ✅ Abrechnung einreichen
                             </button>
                         </div>
                     )}
                 </>
             )}
+
+            <ConfirmModal
+                isOpen={showSubmitModal}
+                title="Abrechnung einreichen"
+                message="Möchtest du diese Abrechnung wirklich einreichen? Sie kann danach nicht mehr bearbeitet werden."
+                confirmLabel="✅ Ja, einreichen"
+                confirmClass="btn-success"
+                isLoading={submitting}
+                onConfirm={handleSubmit}
+                onCancel={() => setShowSubmitModal(false)}
+            />
+
+            <ConfirmModal
+                isOpen={deleteTagId !== null}
+                title="Tag löschen"
+                message="Soll dieser Eintrag wirklich gelöscht werden?"
+                confirmLabel="Ja, löschen"
+                confirmClass="btn-danger"
+                onConfirm={() => deleteTagId && handleDelete(deleteTagId)}
+                onCancel={() => setDeleteTagId(null)}
+            />
         </div>
     );
 }

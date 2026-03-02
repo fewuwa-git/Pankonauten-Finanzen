@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import ConfirmModal from '@/components/ConfirmModal';
 
 interface MarkAsBezahltButtonProps {
     id: string;
@@ -10,20 +11,15 @@ interface MarkAsBezahltButtonProps {
 }
 
 export default function MarkAsBezahltButton({ id, label, targetStatus }: MarkAsBezahltButtonProps) {
+    const [showModal, setShowModal] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const router = useRouter();
 
     const isBezahlt = targetStatus === 'bezahlt';
-    const confirmText = isBezahlt
-        ? `Abrechnung "${label}" als bezahlt markieren?`
-        : `Abrechnung "${label}" als eingereicht markieren?`;
     const buttonLabel = isBezahlt ? '✅ Bezahlt' : '📤 Einreichen';
     const btnClass = isBezahlt ? 'btn btn-sm btn-success' : 'btn btn-sm btn-primary';
 
-    const handleClick = async () => {
-        const confirmed = window.confirm(confirmText);
-        if (!confirmed) return;
-
+    const handleConfirm = async () => {
         setIsLoading(true);
         try {
             const res = await fetch('/api/abrechnungen', {
@@ -33,6 +29,7 @@ export default function MarkAsBezahltButton({ id, label, targetStatus }: MarkAsB
             });
 
             if (res.ok) {
+                setShowModal(false);
                 router.refresh();
             } else {
                 const errorData = await res.json();
@@ -47,13 +44,26 @@ export default function MarkAsBezahltButton({ id, label, targetStatus }: MarkAsB
     };
 
     return (
-        <button
-            onClick={handleClick}
-            disabled={isLoading}
-            className={btnClass}
-            style={{ padding: '4px 10px', cursor: isLoading ? 'not-allowed' : 'pointer', opacity: isLoading ? 0.7 : 1 }}
-        >
-            {isLoading ? '...' : buttonLabel}
-        </button>
+        <>
+            <button
+                onClick={() => setShowModal(true)}
+                className={btnClass}
+                style={{ padding: '4px 10px' }}
+            >
+                {buttonLabel}
+            </button>
+            <ConfirmModal
+                isOpen={showModal}
+                title={isBezahlt ? 'Als bezahlt markieren' : 'Abrechnung einreichen'}
+                message={isBezahlt
+                    ? `Möchtest du die Abrechnung von „${label}" wirklich als bezahlt markieren?`
+                    : `Möchtest du die Abrechnung von „${label}" als eingereicht markieren?`}
+                confirmLabel={isBezahlt ? '✅ Ja, als bezahlt markieren' : '📤 Ja, einreichen'}
+                confirmClass={isBezahlt ? 'btn-success' : 'btn-primary'}
+                isLoading={isLoading}
+                onConfirm={handleConfirm}
+                onCancel={() => setShowModal(false)}
+            />
+        </>
     );
 }
