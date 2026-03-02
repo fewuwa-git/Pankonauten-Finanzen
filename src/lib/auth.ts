@@ -1,10 +1,14 @@
 import { SignJWT, jwtVerify } from 'jose';
 
-const jwtSecretValue = process.env.JWT_SECRET;
-if (!jwtSecretValue) {
-    throw new Error('JWT_SECRET environment variable is not set. Server cannot start without a secure secret.');
+// Lazily resolved at request time — not at build/import time.
+// Throws clearly if JWT_SECRET is missing when actually needed.
+function getJWTSecret(): Uint8Array {
+    const secret = process.env.JWT_SECRET;
+    if (!secret) {
+        throw new Error('JWT_SECRET environment variable is not set. Server cannot handle auth requests without a secure secret.');
+    }
+    return new TextEncoder().encode(secret);
 }
-const JWT_SECRET = new TextEncoder().encode(jwtSecretValue);
 
 export interface JWTPayload {
     userId: string;
@@ -18,12 +22,12 @@ export async function signToken(payload: JWTPayload): Promise<string> {
         .setProtectedHeader({ alg: 'HS256' })
         .setIssuedAt()
         .setExpirationTime('7d')
-        .sign(JWT_SECRET);
+        .sign(getJWTSecret());
 }
 
 export async function verifyToken(token: string): Promise<JWTPayload | null> {
     try {
-        const { payload } = await jwtVerify(token, JWT_SECRET);
+        const { payload } = await jwtVerify(token, getJWTSecret());
         return payload as unknown as JWTPayload;
     } catch {
         return null;
