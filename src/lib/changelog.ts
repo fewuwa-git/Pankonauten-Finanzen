@@ -7,6 +7,13 @@ export const CHANGELOG: ChangelogEntry[] = [
     {
         date: '03.03.2026',
         changes: [
+            'Neue Seite „Meine Buchungen" für Eltern und Vorstandsmitglieder: zeigt ausschließlich Buchungen des eingeloggten Nutzers (gefiltert nach Name im Gegenüber-Feld)',
+            'Neuer Sidebar-Bereich „Eltern" mit Link zu Meine Buchungen',
+        ],
+    },
+    {
+        date: '03.03.2026',
+        changes: [
             'Automatischer Logout nach 24 Stunden Inaktivität – wer aktiv ist, bleibt eingeloggt',
             'Favicon: Das Pankonauten-Logo erscheint jetzt im Browser-Tab',
             'Login-Seite: Passwortfeld wird beim Klick geleert, damit Autofill-Punkte nicht verwirren',

@@ -222,6 +222,26 @@ export async function addTransactions(newTransactions: Transaction[]): Promise<n
 
     return uniqueNewTransactions.length;
 }
+export async function getTransactionsByCounterparty(name: string): Promise<Transaction[]> {
+    const { data, error } = await supabase
+        .from('pankonauten_transactions')
+        .select('*')
+        .ilike('counterparty', `%${name}%`)
+        .order('date', { ascending: true });
+
+    if (error) {
+        console.error('Database error in getTransactionsByCounterparty:', error);
+        return [];
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return (data || []).map((t: any) => ({
+        ...t,
+        amount: Number(t.amount),
+        balance: Number(t.balance),
+    }));
+}
+
 export async function updateTransactionCategory(id: string, category: string): Promise<void> {
     const { error } = await supabase
         .from('pankonauten_transactions')
