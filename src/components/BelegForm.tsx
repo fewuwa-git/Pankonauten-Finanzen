@@ -66,7 +66,7 @@ export default function BelegForm({ userId }: { userId: string }) {
                 <div className="card-body">
                     {/* Adresse des Users */}
                     {profile && (
-                        <div style={{ marginBottom: '24px', padding: '12px 16px', background: 'var(--bg)', borderRadius: '8px', border: '1px solid var(--border)' }}>
+                        <div style={{ margin: '16px 0 24px 0', padding: '12px 16px', background: 'var(--bg)', borderRadius: '8px', border: '1px solid var(--border)' }}>
                             <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-muted)', letterSpacing: '0.05em', marginBottom: '6px' }}>EMPFANGEN VON</div>
                             <div style={{ fontWeight: 700, color: 'var(--navy)' }}>{profile.name}</div>
                             {profile.strasse && <div style={{ fontSize: '14px', color: 'var(--text-muted)' }}>{profile.strasse}</div>}
