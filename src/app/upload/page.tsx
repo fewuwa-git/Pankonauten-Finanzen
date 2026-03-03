@@ -1,6 +1,9 @@
+import type { Metadata } from 'next';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import UploadClient from '@/components/UploadClient';
+
+export const metadata: Metadata = { title: 'Daten importieren' };
 
 export default async function UploadPage() {
     const headersList = await headers();

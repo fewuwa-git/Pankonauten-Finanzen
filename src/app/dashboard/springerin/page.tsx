@@ -1,8 +1,11 @@
+import type { Metadata } from 'next';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { Suspense } from 'react';
 import { getAllAbrechnungen, getSpringerinNotes } from '@/lib/data';
 import Sidebar from '@/components/Sidebar';
+
+export const metadata: Metadata = { title: 'Dashboard' };
 import SpringerinDashboard from '@/components/SpringerinDashboard';
 
 async function SpringerinSection({ currentUserName }: { currentUserName: string }) {

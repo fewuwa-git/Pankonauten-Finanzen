@@ -2,7 +2,10 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Pankonauten Finanzen",
+  title: {
+    template: '%s | Pankonauten Finanzen',
+    default: 'Pankonauten Finanzen',
+  },
   description: "Finance Dashboard für den Vorstand der Kita Pankonauten",
 };
 

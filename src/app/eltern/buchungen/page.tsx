@@ -1,8 +1,11 @@
+import type { Metadata } from 'next';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { Suspense } from 'react';
 import { getTransactionsByCounterparty, getUsers } from '@/lib/data';
 import Sidebar from '@/components/Sidebar';
+
+export const metadata: Metadata = { title: 'Meine Buchungen' };
 import KontoauszugClient from '@/components/KontoauszugClient';
 import ElternUserSelector from '@/components/ElternUserSelector';
 

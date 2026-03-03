@@ -1,8 +1,11 @@
+import type { Metadata } from 'next';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { Suspense } from 'react';
 import { getTransactions } from '@/lib/data';
 import Sidebar from '@/components/Sidebar';
+
+export const metadata: Metadata = { title: 'Kontoauszug' };
 import KontoauszugClient from '@/components/KontoauszugClient';
 
 async function KontoauszugSection({ role }: { role: 'admin' | 'member' }) {

@@ -1,8 +1,11 @@
+import type { Metadata } from 'next';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { Suspense } from 'react';
 import { getCategories } from '@/lib/data';
 import Sidebar from '@/components/Sidebar';
+
+export const metadata: Metadata = { title: 'Kategorien' };
 import KategorienVerwaltungClient from '@/components/KategorienVerwaltungClient';
 
 async function KategorienSection() {

@@ -1,8 +1,11 @@
+import type { Metadata } from 'next';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { Suspense } from 'react';
 import Link from 'next/link';
 import { getBelege, getUsers } from '@/lib/data';
+
+export const metadata: Metadata = { title: 'Meine Belege' };
 import Sidebar from '@/components/Sidebar';
 import BelegeTable from '@/components/BelegeTable';
 

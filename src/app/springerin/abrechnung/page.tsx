@@ -1,5 +1,8 @@
+import type { Metadata } from 'next';
 import React from 'react';
 import { headers } from 'next/headers';
+
+export const metadata: Metadata = { title: 'Abrechnung' };
 import { redirect } from 'next/navigation';
 import { Suspense } from 'react';
 import { getAllAbrechnungen, getUserById, getSpringerinUsers } from '@/lib/data';

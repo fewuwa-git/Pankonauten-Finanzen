@@ -1,7 +1,10 @@
+import type { Metadata } from 'next';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import Sidebar from '@/components/Sidebar';
 import { CHANGELOG } from '@/lib/changelog';
+
+export const metadata: Metadata = { title: 'Changelog' };
 
 export default async function ChangelogPage() {
     const headersList = await headers();

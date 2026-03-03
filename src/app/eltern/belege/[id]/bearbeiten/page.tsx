@@ -1,8 +1,11 @@
+import type { Metadata } from 'next';
 import { headers } from 'next/headers';
 import { redirect, notFound } from 'next/navigation';
 import Sidebar from '@/components/Sidebar';
 import BelegForm from '@/components/BelegForm';
 import { getBelegById } from '@/lib/data';
+
+export const metadata: Metadata = { title: 'Beleg bearbeiten' };
 
 export default async function BelegBearbeitenPage({
     params,

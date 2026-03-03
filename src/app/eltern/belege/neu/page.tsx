@@ -1,8 +1,11 @@
+import type { Metadata } from 'next';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import Sidebar from '@/components/Sidebar';
 import BelegForm from '@/components/BelegForm';
 import { getUsers } from '@/lib/data';
+
+export const metadata: Metadata = { title: 'Neuer Beleg' };
 
 export default async function BelegNeuPage() {
     const headersList = await headers();

@@ -1,6 +1,9 @@
+import type { Metadata } from 'next';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import AdminClient from '@/components/AdminClient';
+
+export const metadata: Metadata = { title: 'Benutzerverwaltung' };
 
 export default async function AdminPage() {
     const headersList = await headers();

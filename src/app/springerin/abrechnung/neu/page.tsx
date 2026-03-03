@@ -1,8 +1,11 @@
+import type { Metadata } from 'next';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { getUserById, getUsers } from '@/lib/data';
 import Sidebar from '@/components/Sidebar';
 import Link from 'next/link';
+
+export const metadata: Metadata = { title: 'Neue Abrechnung' };
 import AbrechnungForm from '@/components/AbrechnungForm';
 
 export default async function NeueAbrechnungPage({
