@@ -517,7 +517,9 @@ export async function getBelege(userId?: string): Promise<Beleg[]> {
 }
 
 export async function saveBeleg(beleg: Partial<Beleg>): Promise<Beleg> {
-    const payload = { ...beleg, updated_at: new Date().toISOString() };
+    // Strip the join field – it's not a column in the table
+    const { pankonauten_users: _, ...rest } = beleg as any;
+    const payload = { ...rest, updated_at: new Date().toISOString() };
     const { data, error } = await supabase
         .from('pankonauten_belege')
         .upsert(payload, { onConflict: 'id' })
