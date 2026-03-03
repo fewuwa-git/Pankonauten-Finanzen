@@ -175,6 +175,10 @@ export async function generateBelegPDF(beleg: Beleg): Promise<string> {
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(NAVY[0], NAVY[1], NAVY[2]);
     doc.text('Pankonauten e.V.', margin, y);
+    y += 4.5;
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9);
+    doc.text('Ravenéstraße 10, 13347 Berlin', margin, y);
     y += 6;
 
     // ─── Trennlinie ──────────────────────────────────────────────────────────

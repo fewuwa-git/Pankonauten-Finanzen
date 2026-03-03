@@ -138,7 +138,7 @@ export default function BelegForm({ userId }: { userId: string }) {
 
                         {/* Zu Gunsten/Lasten */}
                         <div style={{ padding: '10px 16px', background: 'var(--bg)', borderRadius: '8px', border: '1px solid var(--border)', fontSize: '13px', color: 'var(--text-muted)' }}>
-                            <strong style={{ color: 'var(--navy)' }}>Zu Gunsten / Lasten von:</strong> Pankonauten e.V.
+                            <strong style={{ color: 'var(--navy)' }}>Zu Gunsten / Lasten von:</strong> Pankonauten e.V., Ravenéstraße 10, 13347 Berlin
                         </div>
 
                         {/* Unterschrift-Vorschau */}
