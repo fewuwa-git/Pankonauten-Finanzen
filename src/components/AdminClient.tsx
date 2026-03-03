@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Sidebar from '@/components/Sidebar';
+import SignaturePad from '@/components/SignaturePad';
 
 interface User {
     id: string;
@@ -15,6 +16,7 @@ interface User {
     steuerid?: string;
     handynummer?: string;
     stundensatz?: number;
+    unterschrift?: string;
     created_at: string;
     last_login_at?: string | null;
 }
@@ -30,7 +32,7 @@ interface AdminClientProps {
 }
 
 const emptyCreateForm = { name: '', email: '', password: '', role: 'member' };
-const emptyEditForm = { name: '', email: '', password: '', role: 'member', strasse: '', ort: '', iban: '', steuerid: '', handynummer: '', stundensatz: 0 };
+const emptyEditForm = { name: '', email: '', password: '', role: 'member', strasse: '', ort: '', iban: '', steuerid: '', handynummer: '', stundensatz: 0, unterschrift: '' };
 
 export default function AdminClient({ currentUser }: AdminClientProps) {
     const [users, setUsers] = useState<User[]>([]);
@@ -46,6 +48,7 @@ export default function AdminClient({ currentUser }: AdminClientProps) {
     const [editForm, setEditForm] = useState(emptyEditForm);
     const [editError, setEditError] = useState('');
     const [editLoading, setEditLoading] = useState(false);
+    const [showSignaturePad, setShowSignaturePad] = useState(false);
 
     // Filter and Search
     const [searchQuery, setSearchQuery] = useState('');
@@ -96,8 +99,10 @@ export default function AdminClient({ currentUser }: AdminClientProps) {
             iban: u.iban || '',
             steuerid: u.steuerid || '',
             handynummer: u.handynummer || '',
-            stundensatz: u.stundensatz || 0
+            stundensatz: u.stundensatz || 0,
+            unterschrift: u.unterschrift || '',
         });
+        setShowSignaturePad(false);
         setEditError('');
     };
 
@@ -113,9 +118,12 @@ export default function AdminClient({ currentUser }: AdminClientProps) {
                 role: editForm.role,
             };
             if (editForm.password) body.password = editForm.password;
-            if (editForm.role === 'springerin') {
+            if (['springerin', 'eltern', 'member'].includes(editForm.role)) {
                 body.strasse = editForm.strasse;
                 body.ort = editForm.ort;
+                body.unterschrift = editForm.unterschrift;
+            }
+            if (editForm.role === 'springerin') {
                 body.iban = editForm.iban;
                 body.steuerid = editForm.steuerid;
                 body.handynummer = editForm.handynummer;
@@ -398,18 +406,47 @@ export default function AdminClient({ currentUser }: AdminClientProps) {
                                 </select>
                             </div>
 
-                            {editForm.role === 'springerin' && (
+                            {['springerin', 'eltern', 'member'].includes(editForm.role) && (
                                 <>
                                     <div className="form-group">
                                         <label className="form-label">Straße + Hausnummer</label>
-                                        <input className="form-input" type="text" placeholder="Musterstraße 12"
+                                        <input className="form-input" type="text"
                                             value={editForm.strasse} onChange={(e) => setEditForm({ ...editForm, strasse: e.target.value })} />
                                     </div>
                                     <div className="form-group">
                                         <label className="form-label">PLZ + Ort</label>
-                                        <input className="form-input" type="text" placeholder="12345 Berlin"
+                                        <input className="form-input" type="text"
                                             value={editForm.ort} onChange={(e) => setEditForm({ ...editForm, ort: e.target.value })} />
                                     </div>
+                                    <div className="form-group">
+                                        <label className="form-label">Unterschrift</label>
+                                        {!showSignaturePad ? (
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+                                                {editForm.unterschrift ? (
+                                                    <img src={editForm.unterschrift} alt="Unterschrift" style={{ maxHeight: '60px', border: '1px solid var(--border)', borderRadius: '6px', padding: '4px', background: '#fff' }} />
+                                                ) : (
+                                                    <span style={{ fontSize: '13px', color: 'var(--text-muted)' }}>Noch keine Unterschrift hinterlegt</span>
+                                                )}
+                                                <button type="button" className="btn btn-secondary btn-sm" onClick={() => setShowSignaturePad(true)}>
+                                                    {editForm.unterschrift ? 'Unterschrift ändern' : 'Unterschrift erstellen'}
+                                                </button>
+                                            </div>
+                                        ) : (
+                                            <SignaturePad
+                                                existing={editForm.unterschrift || null}
+                                                onSave={(dataUrl) => {
+                                                    setEditForm({ ...editForm, unterschrift: dataUrl });
+                                                    setShowSignaturePad(false);
+                                                }}
+                                                onCancel={() => setShowSignaturePad(false)}
+                                            />
+                                        )}
+                                    </div>
+                                </>
+                            )}
+
+                            {editForm.role === 'springerin' && (
+                                <>
                                     <div className="form-group">
                                         <label className="form-label">IBAN</label>
                                         <input className="form-input" type="text"

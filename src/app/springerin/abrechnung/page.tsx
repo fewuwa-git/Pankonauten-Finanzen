@@ -31,12 +31,14 @@ async function AbrechnungTable({
     selectedSpringerinId,
     selectedMonat,
     selectedJahr,
+    selectedStatus,
 }: {
     role: string;
     userId: string;
     selectedSpringerinId?: string;
     selectedMonat?: number;
     selectedJahr?: number;
+    selectedStatus?: string;
 }) {
     const [abrechnungenRaw, currentUser, springerinnen] = await Promise.all([
         role === 'admin' ? getAllAbrechnungen(selectedSpringerinId) : getAllAbrechnungen(userId),
@@ -51,6 +53,7 @@ async function AbrechnungTable({
     const abrechnungen = abrechnungenRaw.filter((ab: any) => {
         if (selectedJahr && ab.jahr !== selectedJahr) return false;
         if (selectedMonat && ab.monat !== selectedMonat) return false;
+        if (selectedStatus && ab.status !== selectedStatus) return false;
         return true;
     });
 
@@ -229,6 +232,7 @@ export default async function AbrechnungPage({
     const selectedSpringerinId = params?.springerinId as string | undefined;
     const selectedMonat = params?.monat ? parseInt(params.monat as string) : undefined;
     const selectedJahr = params?.jahr ? parseInt(params.jahr as string) : undefined;
+    const selectedStatus = params?.status as string | undefined;
 
     return (
         <div className="app-layout">
@@ -253,6 +257,7 @@ export default async function AbrechnungPage({
                             selectedSpringerinId={selectedSpringerinId}
                             selectedMonat={selectedMonat}
                             selectedJahr={selectedJahr}
+                            selectedStatus={selectedStatus}
                         />
                     </Suspense>
                 </div>

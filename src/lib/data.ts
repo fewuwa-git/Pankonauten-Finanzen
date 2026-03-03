@@ -19,6 +19,7 @@ export interface User {
     steuerid?: string;
     handynummer?: string;
     stundensatz?: number;
+    unterschrift?: string;
     created_at: string;
     last_login_at?: string | null;
 }
@@ -121,6 +122,7 @@ export async function saveUser(user: User): Promise<void> {
                 steuerid: user.steuerid,
                 handynummer: user.handynummer,
                 stundensatz: user.stundensatz,
+                unterschrift: user.unterschrift,
                 created_at: user.created_at,
                 ...(user.last_login_at !== undefined && { last_login_at: user.last_login_at }),
             },

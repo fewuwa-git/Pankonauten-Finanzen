@@ -76,6 +76,17 @@ export default function SpringerinFilter({ springerinnen, availableJahre, isAdmi
                     <option key={y} value={String(y)}>{y}</option>
                 ))}
             </select>
+            <select
+                value={searchParams.get('status') || ''}
+                onChange={(e) => updateParam('status', e.target.value)}
+                className="form-control"
+                style={{ padding: '8px 12px', borderRadius: '6px', border: '1px solid var(--border)', backgroundColor: 'var(--card-bg)', minWidth: '140px' }}
+            >
+                <option value="">Alle Status</option>
+                <option value="entwurf">Entwurf</option>
+                <option value="eingereicht">Eingereicht</option>
+                <option value="bezahlt">Bezahlt</option>
+            </select>
         </div>
     );
 }

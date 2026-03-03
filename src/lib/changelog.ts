@@ -7,6 +7,17 @@ export const CHANGELOG: ChangelogEntry[] = [
     {
         date: '03.03.2026',
         changes: [
+            'Unterschrift-Funktion: Springerinnen, Eltern und Vorstandsmitglieder können ihre Unterschrift per Maus, Trackpad oder Touch hinterlegen',
+            'Adressfelder (Straße + Hausnummer, PLZ + Ort) jetzt auch für Eltern- und Vorstandsmitglieder-Accounts bearbeitbar',
+            'Abrechnung: Neuer Statusfilter (Entwurf / Eingereicht / Bezahlt) neben den bestehenden Filtern',
+            'PDF-Öffnung in Safari: Popup-Blockierung umgangen – PDFs öffnen jetzt zuverlässig in einem neuen Tab',
+            'Sidebar: Menüpunkt „Eltern-Buchungen" heißt jetzt „Meine Buchungen"',
+        ],
+    },
+    {
+    {
+        date: '03.03.2026',
+        changes: [
             'Eltern-Accounts können sich jetzt einloggen und sehen ihre Buchungen sowie ihr Benutzerprofil',
             'Neue Seite „Eltern-Buchungen": Eltern sehen nur ihre eigenen Buchungen, Admins können per Dropdown zwischen allen Eltern-Accounts wechseln',
             'Neuer Sidebar-Bereich „Eltern" mit Link zu Eltern-Buchungen (sichtbar für Eltern, Vorstandsmitglieder und Admins)',
