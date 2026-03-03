@@ -18,6 +18,8 @@ export const CHANGELOG: ChangelogEntry[] = [
 
             '— Eltern-Bereich —',
             'Neue Seite „Meine Belege": Eltern, Vorstandsmitglieder und Admins können Belege verwalten – mit Filter nach Benutzer und Status (Entwurf / Eingereicht / Genehmigt / Abgelehnt)',
+            'Beleg erstellen: Formular mit Netto/Brutto-Berechnung, optionaler 19% MwSt., automatischer Belegnummer (BEL-YYYY-NNN), Adresse aus dem Profil und Ort/Datum vorausgefüllt mit Berlin und aktuellem Datum',
+            'Beleg-PDF: Quittung im Avery-Zweckform-Stil mit allen Pflichtfeldern, Betrag in Worten, Unterschrift aus dem Profil und Footer mit Vereinsadresse',
             'Eltern-Accounts können sich einloggen und sehen ihre eigenen Buchungen sowie ihr Benutzerprofil',
             'Neue Seite „Meine Buchungen": Eltern sehen ausschließlich ihre eigenen Buchungen; Admins können per Dropdown zwischen allen Eltern-Accounts wechseln',
             'Neuer Sidebar-Bereich „Eltern" mit direktem Link zu den Buchungen – sichtbar für Eltern, Vorstandsmitglieder und Admins',

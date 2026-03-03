@@ -481,23 +481,39 @@ export interface Beleg {
     user_id: string;
     titel: string;
     beschreibung?: string;
-    betrag: number;
+    netto: number;
+    mwst_satz: number;
+    betrag: number; // brutto
+    belegnummer?: string;
     datum: string;
     status: 'entwurf' | 'eingereicht' | 'genehmigt' | 'abgelehnt';
     created_at?: string;
     updated_at?: string;
-    pankonauten_users?: { id: string; name: string; email: string };
+    pankonauten_users?: { id: string; name: string; email: string; strasse?: string; ort?: string; unterschrift?: string };
+}
+
+export async function getNextBelegnummer(): Promise<string> {
+    const year = new Date().getFullYear();
+    const { data } = await supabase
+        .from('pankonauten_belege')
+        .select('belegnummer')
+        .like('belegnummer', `BEL-${year}-%`);
+    const max = (data || []).reduce((acc: number, b: any) => {
+        const n = parseInt((b.belegnummer || '').split('-')[2] || '0');
+        return n > acc ? n : acc;
+    }, 0);
+    return `BEL-${year}-${String(max + 1).padStart(3, '0')}`;
 }
 
 export async function getBelege(userId?: string): Promise<Beleg[]> {
     let query = supabase
         .from('pankonauten_belege')
-        .select('*, pankonauten_users(id, name, email)')
+        .select('*, pankonauten_users(id, name, email, strasse, ort, unterschrift)')
         .order('datum', { ascending: false });
     if (userId) query = query.eq('user_id', userId);
     const { data, error } = await query;
     if (error) { console.error('Error fetching belege:', error); return []; }
-    return (data || []).map((b: any) => ({ ...b, betrag: Number(b.betrag) }));
+    return (data || []).map((b: any) => ({ ...b, netto: Number(b.netto), betrag: Number(b.betrag) }));
 }
 
 export async function saveBeleg(beleg: Partial<Beleg>): Promise<Beleg> {

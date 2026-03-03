@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyToken } from '@/lib/auth';
-import { getBelege, saveBeleg } from '@/lib/data';
+import { getBelege, saveBeleg, getNextBelegnummer } from '@/lib/data';
 
 export async function GET(req: NextRequest) {
     const token = req.cookies.get('token')?.value;
@@ -19,11 +19,15 @@ export async function POST(req: NextRequest) {
     if (!payload) return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
 
     const body = await req.json();
+    const belegnummer = await getNextBelegnummer();
     const beleg = await saveBeleg({
         user_id: body.user_id ?? payload.sub,
         titel: body.titel,
         beschreibung: body.beschreibung,
+        netto: Number(body.netto),
+        mwst_satz: Number(body.mwst_satz ?? 0),
         betrag: Number(body.betrag),
+        belegnummer,
         datum: body.datum,
         status: body.status ?? 'entwurf',
     });
