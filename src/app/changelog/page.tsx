@@ -30,13 +30,28 @@ export default async function ChangelogPage() {
                                     <h2 className="card-title" style={{ fontSize: '15px' }}>{entry.date}</h2>
                                 </div>
                                 <div className="card-body">
-                                    <ul style={{ margin: 0, padding: '0 0 0 20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                        {entry.changes.map((change, j) => (
-                                            <li key={j} style={{ fontSize: '14px', color: 'var(--text)', lineHeight: '1.5' }}>
-                                                {change}
-                                            </li>
-                                        ))}
-                                    </ul>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                        {entry.changes.map((change, j) => {
+                                            const isSection = change.startsWith('—');
+                                            if (isSection) {
+                                                const label = change.replace(/^—\s*/, '').replace(/\s*—$/, '');
+                                                return (
+                                                    <div key={j} style={{ display: 'flex', alignItems: 'center', gap: '10px', margin: j === 0 ? '0 0 6px 0' : '14px 0 6px 0' }}>
+                                                        <span style={{ fontWeight: 700, fontSize: '12px', color: 'var(--navy)', whiteSpace: 'nowrap', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+                                                            {label}
+                                                        </span>
+                                                        <div style={{ flex: 1, height: '1px', background: 'var(--border)' }} />
+                                                    </div>
+                                                );
+                                            }
+                                            return (
+                                                <div key={j} style={{ display: 'flex', gap: '8px', alignItems: 'baseline', paddingLeft: '2px' }}>
+                                                    <span style={{ color: 'var(--text-muted)', flexShrink: 0, fontSize: '12px' }}>–</span>
+                                                    <span style={{ fontSize: '14px', color: 'var(--text)', lineHeight: '1.5' }}>{change}</span>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
                                 </div>
                             </div>
                         ))}
