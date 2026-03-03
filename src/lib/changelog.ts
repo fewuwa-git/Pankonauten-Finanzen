@@ -7,8 +7,8 @@ export const CHANGELOG: ChangelogEntry[] = [
     {
         date: '03.03.2026',
         changes: [
-            'Neue Seite „Meine Buchungen" für Eltern und Vorstandsmitglieder: zeigt ausschließlich Buchungen des eingeloggten Nutzers (gefiltert nach Name im Gegenüber-Feld)',
-            'Neuer Sidebar-Bereich „Eltern" mit Link zu Meine Buchungen',
+            'Neue Seite „Eltern-Buchungen": Eltern sehen nur ihre eigenen Buchungen, Admins können per Dropdown zwischen allen Eltern-Accounts wechseln',
+            'Neuer Sidebar-Bereich „Eltern" mit Link zu Eltern-Buchungen (sichtbar für Eltern, Vorstandsmitglieder und Admins)',
         ],
     },
     {
