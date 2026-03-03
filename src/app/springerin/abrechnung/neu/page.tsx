@@ -1,6 +1,5 @@
-import { cookies } from 'next/headers';
+import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { verifyToken } from '@/lib/auth';
 import { getUserById, getUsers } from '@/lib/data';
 import Sidebar from '@/components/Sidebar';
 import Link from 'next/link';
@@ -16,29 +15,28 @@ export default async function NeueAbrechnungPage({
     const initialMonth = params.monat ? parseInt(params.monat as string) : undefined;
     const springerinId = params.springerinId as string | undefined;
 
-    const cookieStore = await cookies();
-    const token = cookieStore.get('token')?.value;
-    if (!token) redirect('/login');
+    const headersList = await headers();
+    const userId = headersList.get('x-user-id');
+    const role = headersList.get('x-user-role') as 'admin' | 'member' | 'eltern' | 'springerin' | null;
+    const name = headersList.get('x-user-name') || '';
+    const email = headersList.get('x-user-email') || '';
 
-    const payload = await verifyToken(token);
-    if (!payload) redirect('/login');
+    if (!userId || !role) redirect('/login');
+    if (role !== 'admin' && role !== 'springerin') redirect('/dashboard');
 
-    // Allow both admin and springerin roles
-    const isAuthorized = payload.role === 'admin' || payload.role === 'springerin';
-    if (!isAuthorized) redirect('/dashboard');
+    const [currentUser, initialSpringer, allUsers] = await Promise.all([
+        getUserById(userId),
+        springerinId ? getUserById(springerinId) : Promise.resolve(undefined),
+        role === 'admin' ? getUsers() : Promise.resolve(undefined),
+    ]);
 
-    const currentUser = await getUserById(payload.userId);
     if (!currentUser) redirect('/login');
 
-    const initialSpringer = springerinId ? await getUserById(springerinId) : undefined;
-
-    const springerList = payload.role === 'admin'
-        ? (await getUsers()).filter(u => u.role === 'springerin')
-        : undefined;
+    const springerList = allUsers?.filter(u => u.role === 'springerin');
 
     return (
         <div className="app-layout">
-            <Sidebar user={{ name: payload.name, email: payload.email, role: payload.role }} />
+            <Sidebar user={{ name, email, role }} />
             <main className="main-content">
                 <div className="page-header">
                     <div className="page-header-left">

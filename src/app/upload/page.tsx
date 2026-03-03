@@ -1,17 +1,18 @@
-import { cookies } from 'next/headers';
+import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { verifyToken } from '@/lib/auth';
 import UploadClient from '@/components/UploadClient';
 
 export default async function UploadPage() {
-    const cookieStore = await cookies();
-    const token = cookieStore.get('token')?.value;
-    if (!token) redirect('/login');
-    const payload = await verifyToken(token);
-    if (!payload) redirect('/login');
-    if (payload.role !== 'admin') redirect('/dashboard');
+    const headersList = await headers();
+    const userId = headersList.get('x-user-id');
+    const role = headersList.get('x-user-role') as 'admin' | 'member' | 'eltern' | 'springerin' | null;
+    const name = headersList.get('x-user-name') || '';
+    const email = headersList.get('x-user-email') || '';
+
+    if (!userId || !role) redirect('/login');
+    if (role !== 'admin') redirect('/dashboard');
 
     return (
-        <UploadClient user={{ name: payload.name, email: payload.email, role: payload.role }} />
+        <UploadClient user={{ name, email, role }} />
     );
 }

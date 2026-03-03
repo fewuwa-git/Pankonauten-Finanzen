@@ -1,16 +1,17 @@
-import { cookies } from 'next/headers';
+import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { verifyToken } from '@/lib/auth';
 import AdminClient from '@/components/AdminClient';
 
 export default async function AdminPage() {
-    const cookieStore = await cookies();
-    const token = cookieStore.get('token')?.value;
-    if (!token) redirect('/login');
-    const payload = await verifyToken(token);
-    if (!payload) redirect('/login');
+    const headersList = await headers();
+    const userId = headersList.get('x-user-id');
+    const role = headersList.get('x-user-role') as 'admin' | 'member' | 'eltern' | 'springerin' | null;
+    const name = headersList.get('x-user-name') || '';
+    const email = headersList.get('x-user-email') || '';
+
+    if (!userId || !role) redirect('/login');
 
     return (
-        <AdminClient currentUser={{ name: payload.name, email: payload.email, role: payload.role }} />
+        <AdminClient currentUser={{ name, email, role }} />
     );
 }
