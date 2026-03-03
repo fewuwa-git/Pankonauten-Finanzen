@@ -233,13 +233,13 @@ export async function getTransactionsByCounterparty(name: string): Promise<Trans
         return [];
     }
 
-    // Filter in JavaScript for reliable Unicode handling (ß, ö, ü, etc.)
-    const nameLower = name.toLowerCase();
+    // Normalize whitespace and filter in JS for reliable Unicode handling (ß, ö, ü, etc.)
+    const nameLower = name.trim().replace(/\s+/g, ' ').toLowerCase();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return (data || [])
         .filter((t: any) =>
-            (t.counterparty ?? '').toLowerCase().includes(nameLower) ||
-            (t.description ?? '').toLowerCase().includes(nameLower)
+            (t.counterparty ?? '').trim().replace(/\s+/g, ' ').toLowerCase().includes(nameLower) ||
+            (t.description ?? '').trim().replace(/\s+/g, ' ').toLowerCase().includes(nameLower)
         )
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .map((t: any) => ({
