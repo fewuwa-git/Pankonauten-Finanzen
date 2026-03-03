@@ -17,7 +17,7 @@ export default async function BelegNeuPage() {
     if (!userId || !role) redirect('/login');
     if (role !== 'eltern' && role !== 'member' && role !== 'admin') redirect('/dashboard');
 
-    const isAdmin = role === 'admin' || role === 'member';
+    const isAdmin = role === 'admin';
     const selectableUsers = isAdmin
         ? (await getUsers())
             .filter(u => ['eltern', 'member', 'admin'].includes(u.role))

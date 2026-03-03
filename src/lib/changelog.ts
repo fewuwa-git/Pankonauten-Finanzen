@@ -22,7 +22,7 @@ export const CHANGELOG: ChangelogEntry[] = [
             'Beleg bearbeiten: Entwürfe können nachträglich bearbeitet werden; nach dem Einreichen ist der Beleg gesperrt',
             'Beleg einreichen: Entwürfe können mit einem Klick eingereicht werden – Admins können eingereichte Belege genehmigen oder ablehnen',
             'Beleg löschen: Entwürfe können gelöscht werden; nach dem Einreichen ist das Löschen nicht mehr möglich',
-            'Admin-Funktion: Beim Erstellen eines Belegs können Admins und Vorstandsmitglieder den Beleg einer anderen Person (Eltern / Vorstand) zuweisen',
+            'Admin-Funktion: Beim Erstellen eines Belegs kann der Admin den Beleg einer anderen Person (Eltern / Vorstand) zuweisen',
             'Beleg-PDF: Layout nach Avery Zweckform 1205 – zweispaltiger Kopfbereich (Adresse + Beträge), EUR in Worten, Verwendungszweck, Zu Gunsten/Lasten, Ort/Datum und Unterschrift; zusätzliche Beschreibung erscheint im Feld Buchungsvermerke',
             'Eltern-Accounts können sich einloggen und sehen ihre eigenen Buchungen sowie ihr Benutzerprofil',
             'Neue Seite „Meine Buchungen": Eltern sehen ausschließlich ihre eigenen Buchungen; Admins können per Dropdown zwischen allen Eltern-Accounts wechseln',
