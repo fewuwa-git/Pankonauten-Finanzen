@@ -2,8 +2,10 @@
 
 import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import { Beleg, User } from '@/lib/data';
 import { generateBelegPDF } from '@/lib/belegPdf';
+import BelegStatusButton from '@/components/BelegStatusButton';
 
 const STATUS_BADGE: Record<string, { bg: string; color: string }> = {
     entwurf:     { bg: 'var(--orange-bg)', color: 'var(--orange)' },
@@ -16,6 +18,8 @@ interface BelegeTableProps {
     belege: Beleg[];
     allUsers: User[];
     isAdmin: boolean;
+    role: string;
+    currentUserId: string;
     selectedUserId?: string;
     selectedStatus?: string;
     statusLabels: Record<string, string>;
@@ -44,7 +48,7 @@ function PDFButton({ beleg }: { beleg: Beleg }) {
 }
 
 export default function BelegeTable({
-    belege, allUsers, isAdmin, selectedUserId, selectedStatus, statusLabels,
+    belege, allUsers, isAdmin, role, currentUserId, selectedUserId, selectedStatus, statusLabels,
 }: BelegeTableProps) {
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -94,7 +98,7 @@ export default function BelegeTable({
                                     <th>Datum</th>
                                     <th style={{ textAlign: 'right' }}>Betrag €</th>
                                     <th>Status</th>
-                                    <th style={{ width: '80px' }}></th>
+                                    <th style={{ width: '220px' }}></th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -107,6 +111,10 @@ export default function BelegeTable({
                                     </tr>
                                 ) : belege.map(b => {
                                     const badge = STATUS_BADGE[b.status] || STATUS_BADGE.entwurf;
+                                    const isEntwurf = b.status === 'entwurf';
+                                    const isEingereicht = b.status === 'eingereicht';
+                                    const canEdit = isEntwurf && (isAdmin || b.user_id === currentUserId);
+                                    const canSubmit = isEntwurf && (isAdmin || b.user_id === currentUserId);
                                     return (
                                         <tr key={b.id}>
                                             {isAdmin && (
@@ -130,7 +138,25 @@ export default function BelegeTable({
                                                 </span>
                                             </td>
                                             <td style={{ textAlign: 'right' }}>
-                                                <PDFButton beleg={b} />
+                                                <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+                                                    <PDFButton beleg={b} />
+                                                    {canEdit && (
+                                                        <Link href={`/eltern/belege/${b.id}/bearbeiten`}
+                                                            className="btn btn-sm btn-secondary"
+                                                            style={{ padding: '4px 10px' }}>
+                                                            Bearbeiten
+                                                        </Link>
+                                                    )}
+                                                    {canSubmit && (
+                                                        <BelegStatusButton id={b.id} label={b.titel} targetStatus="eingereicht" />
+                                                    )}
+                                                    {isAdmin && isEingereicht && (
+                                                        <BelegStatusButton id={b.id} label={b.titel} targetStatus="genehmigt" />
+                                                    )}
+                                                    {isAdmin && isEingereicht && (
+                                                        <BelegStatusButton id={b.id} label={b.titel} targetStatus="abgelehnt" />
+                                                    )}
+                                                </div>
                                             </td>
                                         </tr>
                                     );

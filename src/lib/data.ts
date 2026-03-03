@@ -505,6 +505,16 @@ export async function getNextBelegnummer(): Promise<string> {
     return `BEL-${year}-${String(max + 1).padStart(3, '0')}`;
 }
 
+export async function getBelegById(id: string): Promise<Beleg | null> {
+    const { data, error } = await supabase
+        .from('pankonauten_belege')
+        .select('*, pankonauten_users(id, name, email, strasse, ort, unterschrift)')
+        .eq('id', id)
+        .single();
+    if (error || !data) return null;
+    return { ...data, netto: Number(data.netto), betrag: Number(data.betrag) };
+}
+
 export async function getBelege(userId?: string): Promise<Beleg[]> {
     let query = supabase
         .from('pankonauten_belege')

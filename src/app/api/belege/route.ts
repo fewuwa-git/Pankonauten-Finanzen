@@ -8,7 +8,7 @@ export async function GET(req: NextRequest) {
     if (!payload) return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
 
     const isAdmin = payload.role === 'admin' || payload.role === 'member';
-    const userId = isAdmin ? undefined : payload.sub;
+    const userId = isAdmin ? undefined : payload.userId;
     const belege = await getBelege(userId);
     return NextResponse.json(belege);
 }
@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const belegnummer = await getNextBelegnummer();
     const beleg = await saveBeleg({
-        user_id: body.user_id ?? payload.sub,
+        user_id: body.user_id ?? payload.userId,
         titel: body.titel,
         beschreibung: body.beschreibung,
         netto: Number(body.netto),

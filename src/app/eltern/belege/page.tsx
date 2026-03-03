@@ -41,6 +41,8 @@ async function BelegeSection({
             belege={belege}
             allUsers={allUsers}
             isAdmin={isAdmin}
+            role={role}
+            currentUserId={userId}
             selectedUserId={selectedUserId}
             selectedStatus={selectedStatus}
             statusLabels={STATUS_LABELS}

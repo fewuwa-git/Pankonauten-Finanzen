@@ -33,210 +33,223 @@ export function euroInWorte(betrag: number): string {
     wort += dreisteller(euro % 1000);
     if (wort === '') wort = 'null';
 
-    const euroWort = wort + (euro === 1 ? ' Euro' : ' Euro');
+    const euroWort = wort + ' Euro';
     if (cent === 0) return euroWort;
     return `${euroWort} und ${hundert(cent)} Cent`;
 }
 
 // ─── PDF generieren ───────────────────────────────────────────────────────────
 export async function generateBelegPDF(beleg: Beleg): Promise<string> {
+    // A5: 148 x 210 mm
     const doc = new jsPDF({ format: 'a5', orientation: 'portrait' });
-    const W = doc.internal.pageSize.getWidth();
-    const margin = 14;
-    const col = W - margin * 2;
+    const W = doc.internal.pageSize.getWidth();   // 148
+    // const H = doc.internal.pageSize.getHeight();  // 210
+    const M = 10; // margin
+    const col = W - M * 2; // 128
 
-    const NAVY: [number, number, number] = [26, 46, 69];
-    const MUTED: [number, number, number] = [107, 114, 128];
-    const BORDER: [number, number, number] = [200, 203, 207];
-    const YELLOW: [number, number, number] = [254, 203, 47];
+    // Avery Zweckform blue palette
+    const BLUE: [number, number, number]       = [58, 107, 172];
+    const BLUE_LIGHT: [number, number, number] = [197, 215, 240];
+    const BLUE_MID: [number, number, number]   = [156, 190, 230];
+
+    const setBlue = () => { doc.setTextColor(BLUE[0], BLUE[1], BLUE[2]); doc.setDrawColor(BLUE[0], BLUE[1], BLUE[2]); };
+    const line = (x1: number, y1: number, x2: number, y2: number) => { doc.setLineWidth(0.3); doc.line(x1, y1, x2, y2); };
+
+    setBlue();
 
     const user = beleg.pankonauten_users;
     const brutto = beleg.betrag;
-    const netto = beleg.netto;
-    const mwstSatz = beleg.mwst_satz;
+    const netto  = beleg.netto;
+    const mwstSatz   = beleg.mwst_satz;
     const mwstBetrag = Math.round((brutto - netto) * 100) / 100;
-    const hatMwst = mwstSatz > 0;
+    const hatMwst    = mwstSatz > 0;
     const betragFuerWorte = hatMwst ? brutto : netto;
 
-    // ─── Akzentlinie oben ────────────────────────────────────────────────────
-    doc.setFillColor(YELLOW[0], YELLOW[1], YELLOW[2]);
-    doc.rect(0, 0, W, 4, 'F');
-
-    // ─── Titel ───────────────────────────────────────────────────────────────
-    let y = 14;
+    // ─── Titel oben rechts ───────────────────────────────────────────────────
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(18);
-    doc.setTextColor(NAVY[0], NAVY[1], NAVY[2]);
-    doc.text('Quittung', margin, y);
+    doc.setFontSize(13);
+    doc.text('Ausgabebeleg', W - M, 10, { align: 'right' });
 
-    // Belegnummer rechts
+    // ─── Oberer Bereich: Adresse links | Beträge rechts ─────────────────────
+    const topY   = 13;
+    const leftW  = col * 0.56;   // ~72 mm
+    const rightX = M + leftW;
+    const rightW = col - leftW;  // ~56 mm
+
+    // Rahmenlinien oben und unten des oberen Bereichs
+    line(M, topY, W - M, topY);
+
+    // Adresse (linke Spalte)
+    let addrY = topY + 5;
+    doc.setFontSize(9);
+    if (user?.name) {
+        doc.setFont('helvetica', 'bold');
+        doc.text(user.name, M + 2, addrY);
+        addrY += 5;
+    }
+    doc.setFont('helvetica', 'normal');
+    if (user?.strasse) { doc.text(user.strasse, M + 2, addrY); addrY += 4.5; }
+    if (user?.ort)     { doc.text(user.ort,     M + 2, addrY); addrY += 4.5; }
+    if (!user?.strasse && !user?.ort) addrY += 4;
+
+    // Beträge (rechte Spalte) – Netto, MwSt, Gesamt
+    const amtRowH = 9;
+    let ry = topY;
+
+    // Netto-Zeile
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8.5);
+    doc.text('Netto EUR', rightX + 2, ry + 5.5);
+    doc.setFont('helvetica', 'bold');
+    doc.text(netto.toLocaleString('de-DE', { minimumFractionDigits: 2 }), W - M - 2, ry + 5.5, { align: 'right' });
+    ry += amtRowH;
+    line(rightX, ry, W - M, ry);
+
+    // MwSt-Zeile
+    doc.setFont('helvetica', 'normal');
+    if (hatMwst) {
+        doc.text(`+ ${mwstSatz}% MwSt. EUR`, rightX + 2, ry + 5.5);
+        doc.setFont('helvetica', 'bold');
+        doc.text(mwstBetrag.toLocaleString('de-DE', { minimumFractionDigits: 2 }), W - M - 2, ry + 5.5, { align: 'right' });
+    } else {
+        doc.text('+ –  % MwSt./EUR', rightX + 2, ry + 5.5);
+    }
+    ry += amtRowH;
+    line(rightX, ry, W - M, ry);
+
+    // Gesamt-Zeile (blauer Hintergrund)
+    doc.setFillColor(BLUE_MID[0], BLUE_MID[1], BLUE_MID[2]);
+    doc.rect(rightX, ry, rightW, amtRowH, 'F');
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(9);
+    doc.text('Gesamt EUR', rightX + 2, ry + 5.5);
+    doc.text(brutto.toLocaleString('de-DE', { minimumFractionDigits: 2 }), W - M - 2, ry + 5.5, { align: 'right' });
+    ry += amtRowH;
+
+    // Trennlinie zwischen linker und rechter Spalte
+    line(rightX, topY, rightX, ry);
+
+    // Untere Linie des oberen Bereichs
+    const topEndY = Math.max(addrY + 4, ry);
+    line(M, topEndY, W - M, topEndY);
+
+    // ─── Nr.-Zeile ───────────────────────────────────────────────────────────
+    const nrH  = 8;
+    const nrY  = topEndY;
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9);
+    doc.text('Nr.', M + 2, nrY + 5.5);
+    doc.setFont('helvetica', 'bold');
+    doc.text(beleg.belegnummer || '–', M + 14, nrY + 5.5);
+    line(M, nrY + nrH, W - M, nrY + nrH);
+
+    // ─── EUR in Worten (hellblauer Hintergrund) ──────────────────────────────
+    const wortenY  = nrY + nrH;
+    const wortenH  = 14;
+    doc.setFillColor(BLUE_LIGHT[0], BLUE_LIGHT[1], BLUE_LIGHT[2]);
+    doc.rect(M, wortenY, col, wortenH, 'F');
+
+    // "EUR\nin Worten" links
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(8);
-    doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
-    doc.text(`Nr. ${beleg.belegnummer || '–'}`, W - margin, y, { align: 'right' });
+    doc.text('EUR', M + 2, wortenY + 4.5);
+    doc.text('in Worten', M + 2, wortenY + 8.5);
 
-    y += 3;
-    doc.setDrawColor(BORDER[0], BORDER[1], BORDER[2]);
-    doc.setLineWidth(0.3);
-    doc.line(margin, y, W - margin, y);
+    // "Cent wie oben" rechts
+    doc.setFontSize(7);
+    doc.text('Cent wie oben', W - M - 2, wortenY + wortenH / 2 + 2, { align: 'right' });
 
-    // ─── Empfangen von ───────────────────────────────────────────────────────
-    y += 6;
-    doc.setFontSize(7.5);
-    doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
-    doc.setFont('helvetica', 'normal');
-    doc.text('EMPFANGEN VON', margin, y);
-
-    y += 4;
-    doc.setFontSize(10);
-    doc.setTextColor(NAVY[0], NAVY[1], NAVY[2]);
-    doc.setFont('helvetica', 'bold');
-    doc.text(user?.name || '–', margin, y);
-    y += 5;
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(9);
-    if (user?.strasse) { doc.text(user.strasse, margin, y); y += 4.5; }
-    if (user?.ort)     { doc.text(user.ort, margin, y);     y += 4.5; }
-
-    // ─── Betrag in Zahlen ────────────────────────────────────────────────────
-    y += 3;
-    doc.setDrawColor(BORDER[0], BORDER[1], BORDER[2]);
-    doc.setFillColor(245, 246, 248);
-    doc.roundedRect(margin, y, col, hatMwst ? 26 : 16, 2, 2, 'FD');
-
-    doc.setFontSize(7.5);
-    doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
-    doc.text('BETRAG', margin + 4, y + 5);
-
-    doc.setFontSize(10);
-    doc.setTextColor(NAVY[0], NAVY[1], NAVY[2]);
-    doc.setFont('helvetica', 'normal');
-    doc.text('Netto:', margin + 4, y + 11);
-    doc.setFont('helvetica', 'bold');
-    doc.text(`${netto.toLocaleString('de-DE', { minimumFractionDigits: 2 })} €`, W - margin - 4, y + 11, { align: 'right' });
-
-    if (hatMwst) {
-        doc.setFont('helvetica', 'normal');
-        doc.text(`zzgl. ${mwstSatz}% MwSt.:`, margin + 4, y + 17);
-        doc.setFont('helvetica', 'bold');
-        doc.text(`${mwstBetrag.toLocaleString('de-DE', { minimumFractionDigits: 2 })} €`, W - margin - 4, y + 17, { align: 'right' });
-
-        doc.setDrawColor(BORDER[0], BORDER[1], BORDER[2]);
-        doc.line(margin + 4, y + 19, W - margin - 4, y + 19);
-
-        doc.setFontSize(11);
-        doc.setFont('helvetica', 'bold');
-        doc.setTextColor(NAVY[0], NAVY[1], NAVY[2]);
-        doc.text('Brutto:', margin + 4, y + 25);
-        doc.text(`${brutto.toLocaleString('de-DE', { minimumFractionDigits: 2 })} €`, W - margin - 4, y + 25, { align: 'right' });
-
-        y += 26;
-    } else {
-        y += 16;
-    }
-
-    // ─── Betrag in Worten ────────────────────────────────────────────────────
-    y += 5;
-    doc.setFontSize(7.5);
-    doc.setFont('helvetica', 'normal');
-    doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
-    doc.text('BETRAG IN WORTEN', margin, y);
-    y += 4;
-    doc.setFontSize(9.5);
-    doc.setFont('helvetica', 'italic');
-    doc.setTextColor(NAVY[0], NAVY[1], NAVY[2]);
+    // Betrag in Worten – eine Zeile
     const worte = euroInWorte(betragFuerWorte);
-    const worteLines = doc.splitTextToSize(worte.charAt(0).toUpperCase() + worte.slice(1), col);
-    doc.text(worteLines, margin, y);
-    y += worteLines.length * 5;
+    const worteText = worte.charAt(0).toUpperCase() + worte.slice(1);
+    doc.setFont('helvetica', 'italic');
+    doc.setFontSize(9);
+    doc.text(worteText, M + 22, wortenY + wortenH / 2 + 2);
+
+    line(M, wortenY + wortenH, W - M, wortenY + wortenH);
 
     // ─── Für ─────────────────────────────────────────────────────────────────
-    y += 3;
-    doc.setFontSize(7.5);
-    doc.setFont('helvetica', 'normal');
-    doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
-    doc.text('FÜR', margin, y);
-    y += 4;
-    doc.setFontSize(9.5);
-    doc.setFont('helvetica', 'normal');
-    doc.setTextColor(NAVY[0], NAVY[1], NAVY[2]);
-    const fuerLines = doc.splitTextToSize(beleg.titel + (beleg.beschreibung ? '\n' + beleg.beschreibung : ''), col);
-    doc.text(fuerLines, margin, y);
-    y += fuerLines.length * 5;
-
-    // ─── Zu Gunsten / Lasten ─────────────────────────────────────────────────
-    y += 3;
-    doc.setFontSize(7.5);
-    doc.setFont('helvetica', 'normal');
-    doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
-    doc.text('ZU GUNSTEN / LASTEN VON', margin, y);
-    y += 4;
-    doc.setFontSize(9.5);
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(NAVY[0], NAVY[1], NAVY[2]);
-    doc.text('Pankonauten e.V.', margin, y);
-    y += 4.5;
+    const fuerY = wortenY + wortenH;
+    const fuerH = 20;
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(9);
-    doc.text('Ravenéstraße 10, 13347 Berlin', margin, y);
-    y += 6;
+    doc.text('für', M + 2, fuerY + 5);
 
-    // ─── Trennlinie ──────────────────────────────────────────────────────────
-    doc.setDrawColor(BORDER[0], BORDER[1], BORDER[2]);
-    doc.setLineWidth(0.3);
-    doc.line(margin, y, W - margin, y);
-    y += 6;
-
-    // ─── Ort / Datum + Unterschrift (nebeneinander) ───────────────────────────
-    const halfCol = (col - 10) / 2;
-
-    doc.setFontSize(7.5);
+    const fuerLines = doc.splitTextToSize(beleg.titel, col - 4);
     doc.setFont('helvetica', 'normal');
-    doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
-    doc.text('ORT / DATUM', margin, y);
-    doc.text('UNTERSCHRIFT', margin + halfCol + 10, y);
+    doc.text(fuerLines, M + 2, fuerY + 11);
 
-    y += 4;
-    doc.setFontSize(9.5);
+    const fuerEndY = Math.max(fuerY + fuerH, fuerY + 11 + fuerLines.length * 4.5 + 4);
+    line(M, fuerEndY, W - M, fuerEndY);
+
+    // ─── Zu Gunsten / Lasten ─────────────────────────────────────────────────
+    const zuY = fuerEndY;
     doc.setFont('helvetica', 'normal');
-    doc.setTextColor(NAVY[0], NAVY[1], NAVY[2]);
+    doc.setFontSize(9);
+    doc.text('zu Gunsten/Lasten', M + 2, zuY + 5.5);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Pankonauten e.V., Ravenéstraße 10, 13347 Berlin', M + 2, zuY + 10.5);
+    doc.setFont('helvetica', 'normal');
+    doc.text('dankend erhalten.', W - M - 2, zuY + 10.5, { align: 'right' });
+    const zuEndY = zuY + 16;
+    line(M, zuEndY, W - M, zuEndY);
+
+    // ─── Ort / Datum ─────────────────────────────────────────────────────────
+    const ortY = zuEndY;
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9);
+    doc.text('Ort/Datum', M + 2, ortY + 5.5);
     const datumFormatiert = new Date(beleg.datum).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
-    doc.text(`Berlin, ${datumFormatiert}`, margin, y);
+    doc.setFont('helvetica', 'bold');
+    doc.text(`Berlin, ${datumFormatiert}`, M + 30, ortY + 5.5);
+    const ortEndY = ortY + 12;
+    line(M, ortEndY, W - M, ortEndY);
 
-    // Unterschrift
+    // ─── Buchungsvermerke | Stempel / Unterschrift ───────────────────────────
+    const botY  = ortEndY;
+    const botH  = 32;
+    const sigX  = M + col / 2;
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8.5);
+    doc.text('Buchungsvermerke', M + 2, botY + 5.5);
+    if (beleg.beschreibung) {
+        doc.setFontSize(8);
+        doc.text(beleg.beschreibung, M + 2, botY + 11);
+    }
+    doc.setFontSize(8.5);
+    doc.text('Stempel/Unterschrift des Empfängers', sigX + 2, botY + 5.5);
+
+    // Vertikale Trennlinie zwischen den zwei unteren Bereichen
+    line(sigX, botY, sigX, botY + botH);
+
+    // Unterschrift-Bild
     if (user?.unterschrift) {
         try {
             const img = new Image();
             img.src = user.unterschrift;
             await new Promise((resolve, reject) => { img.onload = resolve; img.onerror = reject; });
-            const maxH = 18;
-            const maxW = halfCol;
+            const maxH  = 18;
+            const maxW  = (W - M) - (sigX + 2);
             const ratio = img.width / img.height;
             let dW = maxH * ratio;
             let dH = maxH;
             if (dW > maxW) { dW = maxW; dH = dW / ratio; }
-            doc.addImage(img, 'PNG', margin + halfCol + 10, y - 4, dW, dH);
-        } catch { /* leer lassen */ }
+            doc.addImage(img, 'PNG', sigX + 2, botY + 8, dW, dH);
+        } catch { /* leer */ }
     }
 
-    // Linien unter Ort/Datum und Unterschrift
-    const lineY = y + 16;
-    doc.setDrawColor(NAVY[0], NAVY[1], NAVY[2]);
-    doc.setLineWidth(0.4);
-    doc.line(margin, lineY, margin + halfCol, lineY);
-    doc.line(margin + halfCol + 10, lineY, W - margin, lineY);
-
-    // Name unter Unterschrift-Linie
-    doc.setFontSize(7.5);
-    doc.setFont('helvetica', 'normal');
-    doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
-    doc.text(user?.name || '', margin + halfCol + 10, lineY + 4);
-
-    // ─── Footer ──────────────────────────────────────────────────────────────
-    const fY = doc.internal.pageSize.getHeight() - 6;
+    // Unterschrift-Linie
+    const sigLineY = botY + botH - 6;
+    line(sigX + 2, sigLineY, W - M - 2, sigLineY);
     doc.setFontSize(7);
-    doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
-    doc.text('Pankonauten e.V. · Ravenéstr. 10 · 13347 Berlin', W / 2, fY, { align: 'center' });
+    doc.text(user?.name || '', sigX + 2, sigLineY + 4);
+
+    // Rahmen unten
+    line(M, botY + botH, W - M, botY + botH);
+    // Linke und rechte Rahmenlinie
+    line(M,     topY, M,     botY + botH);
+    line(W - M, topY, W - M, botY + botH);
 
     return URL.createObjectURL(doc.output('blob'));
 }

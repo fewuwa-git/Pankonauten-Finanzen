@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { Beleg } from '@/lib/data';
 
 interface UserProfile {
     name: string;
@@ -10,14 +11,16 @@ interface UserProfile {
     unterschrift?: string;
 }
 
-export default function BelegForm({ userId }: { userId: string }) {
+export default function BelegForm({ userId, beleg }: { userId: string; beleg?: Beleg }) {
     const router = useRouter();
+    const isEdit = !!beleg;
+
     const [profile, setProfile] = useState<UserProfile | null>(null);
-    const [titel, setTitel] = useState('');
-    const [beschreibung, setBeschreibung] = useState('');
-    const [netto, setNetto] = useState('');
-    const [mwstSatz, setMwstSatz] = useState<0 | 19>(0);
-    const [datum, setDatum] = useState(new Date().toISOString().split('T')[0]);
+    const [titel, setTitel] = useState(beleg?.titel || '');
+    const [beschreibung, setBeschreibung] = useState(beleg?.beschreibung || '');
+    const [netto, setNetto] = useState(beleg?.netto != null ? String(beleg.netto) : '');
+    const [mwstSatz, setMwstSatz] = useState<0 | 19>((beleg?.mwst_satz as 0 | 19) ?? 0);
+    const [datum, setDatum] = useState(beleg?.datum || new Date().toISOString().split('T')[0]);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState('');
 
@@ -38,8 +41,10 @@ export default function BelegForm({ userId }: { userId: string }) {
         setSaving(true);
         setError('');
         try {
-            const res = await fetch('/api/belege', {
-                method: 'POST',
+            const url = isEdit ? `/api/belege/${beleg!.id}` : '/api/belege';
+            const method = isEdit ? 'PATCH' : 'POST';
+            const res = await fetch(url, {
+                method,
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     titel,
@@ -48,7 +53,7 @@ export default function BelegForm({ userId }: { userId: string }) {
                     mwst_satz: mwstSatz,
                     betrag: brutto,
                     datum,
-                    status: 'entwurf',
+                    ...(isEdit ? {} : { status: 'entwurf' }),
                 }),
             });
             if (!res.ok) { setError('Fehler beim Speichern.'); return; }
