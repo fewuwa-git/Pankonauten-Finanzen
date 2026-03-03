@@ -15,7 +15,6 @@ export const CHANGELOG: ChangelogEntry[] = [
         ],
     },
     {
-    {
         date: '03.03.2026',
         changes: [
             'Eltern-Accounts können sich jetzt einloggen und sehen ihre Buchungen sowie ihr Benutzerprofil',
