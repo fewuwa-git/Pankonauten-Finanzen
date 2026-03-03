@@ -299,18 +299,18 @@ export const generateAbrechnungPDF = async (
         } catch (e) {
             console.error('Could not load signature for PDF', e);
         }
+
+        // Linie unter Unterschrift
+        doc.setDrawColor(COLORS.navy[0], COLORS.navy[1], COLORS.navy[2]);
+        doc.setLineWidth(0.4);
+        doc.line(sigX, lineY, sigX + sigWidth, lineY);
+
+        // Name unter Linie
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(COLORS.textMuted[0], COLORS.textMuted[1], COLORS.textMuted[2]);
+        doc.text(user.name, sigX, lineY + 5);
     }
-
-    // Linie unter Unterschrift
-    doc.setDrawColor(COLORS.navy[0], COLORS.navy[1], COLORS.navy[2]);
-    doc.setLineWidth(0.4);
-    doc.line(sigX, lineY, sigX + sigWidth, lineY);
-
-    // Name unter Linie
-    doc.setFontSize(9);
-    doc.setFont('helvetica', 'normal');
-    doc.setTextColor(COLORS.textMuted[0], COLORS.textMuted[1], COLORS.textMuted[2]);
-    doc.text(user.name, sigX, lineY + 5);
 
     const pdfBlob = doc.output('blob');
     return URL.createObjectURL(pdfBlob);
