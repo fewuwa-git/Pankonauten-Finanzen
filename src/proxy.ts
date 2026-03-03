@@ -48,7 +48,14 @@ export async function proxy(req: NextRequest) {
         role: payload.role,
     });
 
-    const response = NextResponse.next();
+    // Payload als Request-Header weitergeben → Pages müssen Token nicht nochmal verifizieren
+    const requestHeaders = new Headers(req.headers);
+    requestHeaders.set('x-user-id', payload.userId);
+    requestHeaders.set('x-user-role', payload.role);
+    requestHeaders.set('x-user-name', payload.name);
+    requestHeaders.set('x-user-email', payload.email);
+
+    const response = NextResponse.next({ request: { headers: requestHeaders } });
     response.cookies.set('token', newToken, COOKIE_OPTIONS);
     return response;
 }

@@ -48,10 +48,7 @@ export default function LoginPage() {
                     </div>
                 </div>
 
-                <h1 className="login-title">Willkommen zurück</h1>
-                <p className="login-subtitle">Bitte melde dich an, um fortzufahren</p>
-
-                <form onSubmit={handleSubmit}>
+<form onSubmit={handleSubmit}>
                     <div className="form-group">
                         <label className="form-label">E-Mail-Adresse</label>
                         <input
@@ -73,6 +70,7 @@ export default function LoginPage() {
                             placeholder="••••••••"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
+                            onClick={() => setPassword('')}
                             required
                         />
                     </div>

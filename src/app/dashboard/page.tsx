@@ -1,27 +1,44 @@
-import { cookies } from 'next/headers';
+import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { verifyToken } from '@/lib/auth';
+import { Suspense } from 'react';
 import { getTransactions } from '@/lib/data';
 import Sidebar from '@/components/Sidebar';
 import DashboardClient from '@/components/DashboardClient';
 
-export default async function DashboardPage() {
-    const cookieStore = await cookies();
-    const token = cookieStore.get('token')?.value;
-    if (!token) redirect('/login');
+async function TransactionsSection() {
+    const transactions = await getTransactions();
+    return <DashboardClient transactions={transactions} />;
+}
 
-    const payload = await verifyToken(token);
-    if (!payload) redirect('/login');
-    if (payload.role === 'springerin') redirect('/springerin/abrechnung');
-    if (payload.role !== 'admin' && payload.role !== 'member') {
+function TransactionsSkeleton() {
+    return (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
+                {[1, 2, 3].map(i => (
+                    <div key={i} style={{ height: '100px', borderRadius: '12px', background: 'var(--bg-secondary)', animation: 'pulse 1.5s ease-in-out infinite' }} />
+                ))}
+            </div>
+            <div style={{ height: '320px', borderRadius: '12px', background: 'var(--bg-secondary)', animation: 'pulse 1.5s ease-in-out infinite' }} />
+        </div>
+    );
+}
+
+export default async function DashboardPage() {
+    const headersList = await headers();
+    const userId = headersList.get('x-user-id');
+    const role = headersList.get('x-user-role') as 'admin' | 'member' | 'eltern' | 'springerin' | null;
+    const name = headersList.get('x-user-name') || '';
+    const email = headersList.get('x-user-email') || '';
+
+    if (!userId || !role) redirect('/login');
+    if (role === 'springerin') redirect('/springerin/abrechnung');
+    if (role !== 'admin' && role !== 'member') {
         return <div style={{ padding: '2rem' }}>Zugriff verweigert. Diese Seite ist nur für Vorstandsmitglieder zugänglich.</div>;
     }
 
-    const transactions = await getTransactions();
-
     return (
         <div className="app-layout">
-            <Sidebar user={{ name: payload.name, email: payload.email, role: payload.role }} />
+            <Sidebar user={{ name, email, role }} />
             <main className="main-content">
                 <div className="page-header">
                     <div className="page-header-left">
@@ -30,12 +47,14 @@ export default async function DashboardPage() {
                     </div>
                     <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                         <span style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
-                            Willkommen, {payload.name.split(' ')[0]} 👋
+                            Willkommen, {name.split(' ')[0]} 👋
                         </span>
                     </div>
                 </div>
                 <div className="page-body">
-                    <DashboardClient transactions={transactions} />
+                    <Suspense fallback={<TransactionsSkeleton />}>
+                        <TransactionsSection />
+                    </Suspense>
                 </div>
             </main>
         </div>
