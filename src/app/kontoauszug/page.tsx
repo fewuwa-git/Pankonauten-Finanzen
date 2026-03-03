@@ -5,7 +5,7 @@ import { getTransactions } from '@/lib/data';
 import Sidebar from '@/components/Sidebar';
 import KontoauszugClient from '@/components/KontoauszugClient';
 
-async function KontoauszugSection({ role }: { role: string }) {
+async function KontoauszugSection({ role }: { role: 'admin' | 'member' }) {
     const transactions = await getTransactions();
     return <KontoauszugClient transactions={transactions} userRole={role} />;
 }
