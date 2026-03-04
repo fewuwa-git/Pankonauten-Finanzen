@@ -7,6 +7,9 @@ export const CHANGELOG: ChangelogEntry[] = [
     {
         date: '04.03.2026',
         changes: [
+            '— Abrechnung —',
+            'Formular „Neuen Tag erfassen": Die Felder Von und Bis werden jetzt nebeneinander angezeigt – der Bereich ist kompakter und übersichtlicher.',
+
             '— Benutzerverwaltung —',
             'Neuer Einladungs-Workflow: Admins können Benutzer jetzt per E-Mail einladen – kein Passwort mehr manuell vergeben. Der neue Benutzer erhält eine Einladungsmail und setzt sein Passwort selbst.',
             'Einladungslink wird nach dem Anlegen eines Benutzers auch direkt im Admin-Bereich angezeigt und kann per Klick kopiert werden.',

@@ -561,58 +561,56 @@ export default function AbrechnungForm({
                                             required
                                         />
                                     </div>
-                                    <div className="time-inputs">
-                                        <div className="form-group" style={{ marginBottom: 0 }}>
-                                            <label className="form-label">Von</label>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                                <select
-                                                    className="form-select"
-                                                    value={von.split(':')[0] || ''}
-                                                    onChange={e => setVon(`${e.target.value}:${von.split(':')[1] || '00'}`)}
-                                                    required
-                                                    style={{ padding: '10px 8px' }}
-                                                >
-                                                    <option value="">Std</option>
-                                                    {HOURS.map(h => <option key={h} value={h}>{h}</option>)}
-                                                </select>
-                                                <span style={{ fontWeight: 'bold' }}>:</span>
-                                                <select
-                                                    className="form-select"
-                                                    value={von.split(':')[1] || ''}
-                                                    onChange={e => setVon(`${von.split(':')[0] || '07'}:${e.target.value}`)}
-                                                    required
-                                                    style={{ padding: '10px 8px' }}
-                                                >
-                                                    <option value="">Min</option>
-                                                    {MINUTES.map(m => <option key={m} value={m}>{m}</option>)}
-                                                </select>
-                                            </div>
+                                    <div className="form-group" style={{ marginBottom: 0 }}>
+                                        <label className="form-label">Von</label>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                            <select
+                                                className="form-select"
+                                                value={von.split(':')[0] || ''}
+                                                onChange={e => setVon(`${e.target.value}:${von.split(':')[1] || '00'}`)}
+                                                required
+                                                style={{ padding: '10px 8px' }}
+                                            >
+                                                <option value="">Std</option>
+                                                {HOURS.map(h => <option key={h} value={h}>{h}</option>)}
+                                            </select>
+                                            <span style={{ fontWeight: 'bold' }}>:</span>
+                                            <select
+                                                className="form-select"
+                                                value={von.split(':')[1] || ''}
+                                                onChange={e => setVon(`${von.split(':')[0] || '07'}:${e.target.value}`)}
+                                                required
+                                                style={{ padding: '10px 8px' }}
+                                            >
+                                                <option value="">Min</option>
+                                                {MINUTES.map(m => <option key={m} value={m}>{m}</option>)}
+                                            </select>
                                         </div>
-                                        <div className="form-group" style={{ marginBottom: 0 }}>
-                                            <label className="form-label">Bis</label>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                                <select
-                                                    className="form-select"
-                                                    value={bis.split(':')[0] || ''}
-                                                    onChange={e => setBis(`${e.target.value}:${bis.split(':')[1] || '00'}`)}
-                                                    required
-                                                    style={{ padding: '10px 8px' }}
-                                                >
-                                                    <option value="">Std</option>
-                                                    {HOURS.map(h => <option key={h} value={h}>{h}</option>)}
-                                                </select>
-                                                <span style={{ fontWeight: 'bold' }}>:</span>
-                                                <select
-                                                    className="form-select"
-                                                    value={bis.split(':')[1] || ''}
-                                                    onChange={e => setBis(`${bis.split(':')[0] || '07'}:${e.target.value}`)}
-                                                    required
-                                                    style={{ padding: '10px 8px' }}
-                                                >
-                                                    <option value="">Min</option>
-                                                    {MINUTES.map(m => <option key={m} value={m}>{m}</option>)}
-                                                </select>
-                                            </div>
+                                    </div>
+                                    <div className="form-group" style={{ marginBottom: 0 }}>
+                                        <label className="form-label">Bis</label>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                            <select
+                                                className="form-select"
+                                                value={bis.split(':')[0] || ''}
+                                                onChange={e => setBis(`${e.target.value}:${bis.split(':')[1] || '00'}`)}
+                                                required
+                                                style={{ padding: '10px 8px' }}
+                                            >
+                                                <option value="">Std</option>
+                                                {HOURS.map(h => <option key={h} value={h}>{h}</option>)}
+                                            </select>
+                                            <span style={{ fontWeight: 'bold' }}>:</span>
+                                            <select
+                                                className="form-select"
+                                                value={bis.split(':')[1] || ''}
+                                                onChange={e => setBis(`${bis.split(':')[0] || '07'}:${e.target.value}`)}
+                                                required
+                                                style={{ padding: '10px 8px' }}
+                                            >
+                                                <option value="">Min</option>
+                                                {MINUTES.map(m => <option key={m} value={m}>{m}</option>)}
+                                            </select>
                                         </div>
                                     </div>
                                     <div style={{ minWidth: '160px' }}>
