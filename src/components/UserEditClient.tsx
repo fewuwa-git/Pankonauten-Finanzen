@@ -41,8 +41,27 @@ export default function UserEditClient({ user, currentUserRole }: Props) {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const [showSignaturePad, setShowSignaturePad] = useState(false);
+    const [signatureSaving, setSignatureSaving] = useState(false);
+    const [signatureSaved, setSignatureSaved] = useState(false);
 
     const isAdmin = currentUserRole === 'admin';
+
+    const saveSignature = async (dataUrl: string) => {
+        setSignatureSaving(true);
+        setSignatureSaved(false);
+        try {
+            await fetch(`/api/users/${user.id}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ unterschrift: dataUrl }),
+            });
+            setForm(f => ({ ...f, unterschrift: dataUrl }));
+            setSignatureSaved(true);
+            setTimeout(() => setSignatureSaved(false), 2000);
+        } finally {
+            setSignatureSaving(false);
+        }
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -227,16 +246,18 @@ export default function UserEditClient({ user, currentUserRole }: Props) {
                                     {form.unterschrift ? 'Unterschrift ändern' : 'Unterschrift erstellen'}
                                 </button>
                                 {form.unterschrift && (
-                                    <button type="button" className="btn btn-secondary btn-sm" onClick={() => setForm({ ...form, unterschrift: '' })} style={{ color: 'var(--red)' }}>
+                                    <button type="button" className="btn btn-secondary btn-sm" onClick={() => saveSignature('')} disabled={signatureSaving} style={{ color: 'var(--red)' }}>
                                         Löschen
                                     </button>
                                 )}
+                                {signatureSaving && <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Speichern…</span>}
+                                {signatureSaved && <span style={{ fontSize: '12px', color: 'var(--success, green)' }}>✓ Gespeichert</span>}
                             </div>
                         ) : (
                             <SignaturePad
                                 existing={form.unterschrift || null}
                                 onSave={(dataUrl) => {
-                                    setForm({ ...form, unterschrift: dataUrl });
+                                    saveSignature(dataUrl);
                                     setShowSignaturePad(false);
                                 }}
                                 onCancel={() => setShowSignaturePad(false)}
