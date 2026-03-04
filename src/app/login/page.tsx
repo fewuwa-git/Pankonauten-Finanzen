@@ -12,11 +12,32 @@ function LoginForm() {
     const [loading, setLoading] = useState(false);
     const [successMsg, setSuccessMsg] = useState('');
 
+    // Passwort vergessen
+    const [showReset, setShowReset] = useState(false);
+    const [resetEmail, setResetEmail] = useState('');
+    const [resetLoading, setResetLoading] = useState(false);
+    const [resetDone, setResetDone] = useState(false);
+
     useEffect(() => {
         if (searchParams.get('invited') === '1') {
             setSuccessMsg('Account aktiviert! Du kannst dich jetzt einloggen.');
         }
     }, [searchParams]);
+
+    const handleReset = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setResetLoading(true);
+        try {
+            await fetch('/api/password-reset', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: resetEmail }),
+            });
+            setResetDone(true);
+        } finally {
+            setResetLoading(false);
+        }
+    };
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
@@ -58,7 +79,53 @@ function LoginForm() {
                     </div>
                 </div>
 
-<form onSubmit={handleSubmit}>
+                {showReset ? (
+                    resetDone ? (
+                        <>
+                            <div style={{ backgroundColor: 'rgba(34, 197, 94, 0.1)', color: '#15803d', padding: '12px', borderRadius: '8px', marginBottom: '16px', fontSize: '14px', border: '1px solid rgba(34, 197, 94, 0.2)' }}>
+                                ✓ Falls die E-Mail-Adresse bekannt ist, wurde eine E-Mail verschickt.
+                            </div>
+                            <button className="btn btn-secondary full-width" style={{ justifyContent: 'center' }} onClick={() => { setShowReset(false); setResetDone(false); setResetEmail(''); }}>
+                                Zurück zum Login
+                            </button>
+                        </>
+                    ) : (
+                        <form onSubmit={handleReset}>
+                            <p style={{ fontSize: '14px', color: 'var(--text-muted)', marginBottom: '16px' }}>
+                                Gib deine E-Mail-Adresse ein. Du erhältst einen Link zum Zurücksetzen deines Passworts.
+                            </p>
+                            <div className="form-group">
+                                <label className="form-label">E-Mail-Adresse</label>
+                                <input
+                                    type="email"
+                                    className="form-input"
+                                    placeholder="deine@email.de"
+                                    value={resetEmail}
+                                    onChange={(e) => setResetEmail(e.target.value)}
+                                    required
+                                    autoFocus
+                                />
+                            </div>
+                            <button
+                                type="submit"
+                                className="btn btn-primary full-width mt-4"
+                                style={{ justifyContent: 'center', padding: '12px', fontSize: '15px' }}
+                                disabled={resetLoading}
+                            >
+                                {resetLoading ? 'Senden...' : 'Link anfordern →'}
+                            </button>
+                            <button
+                                type="button"
+                                className="btn btn-secondary full-width"
+                                style={{ justifyContent: 'center', marginTop: '8px' }}
+                                onClick={() => setShowReset(false)}
+                            >
+                                Abbrechen
+                            </button>
+                        </form>
+                    )
+                ) : (
+                <form onSubmit={handleSubmit}>
                     <div className="form-group">
                         <label className="form-label">E-Mail-Adresse</label>
                         <input
@@ -104,7 +171,24 @@ function LoginForm() {
                     >
                         {loading ? 'Anmelden...' : 'Anmelden →'}
                     </button>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '16px' }}>
+                        <button
+                            type="button"
+                            onClick={() => setShowReset(true)}
+                            style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: '13px', cursor: 'pointer', padding: 0 }}
+                        >
+                            Passwort vergessen?
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => router.push('/registrieren')}
+                            style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: '13px', cursor: 'pointer', padding: 0 }}
+                        >
+                            Registrieren
+                        </button>
+                    </div>
                 </form>
+                )}
 
             </div>
         </div>

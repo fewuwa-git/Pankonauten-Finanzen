@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getUserById, deleteUser, getUsers, saveUser, getUserByEmail } from '@/lib/data';
 import { verifyToken } from '@/lib/auth';
 import bcrypt from 'bcryptjs';
+import { sendApprovalEmail } from '@/lib/email';
 
 export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     const token = req.cookies.get('token')?.value;
@@ -42,6 +43,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     }
 
     // Admin kann Name, Rolle, Status ändern
+    const wasPending = user.status === 'pending';
     if (isAdmin) {
         if (body.name !== undefined) user.name = body.name;
         if (body.role !== undefined) user.role = body.role;
@@ -78,6 +80,17 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     }
 
     await saveUser(user);
+
+    // Bestätigungs-E-Mail bei Freischaltung eines pending-Accounts
+    if (wasPending && user.status === 'active') {
+        const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://finanzen.pankonauten.de';
+        try {
+            await sendApprovalEmail(user.email, user.name, `${baseUrl}/login`);
+        } catch (emailErr) {
+            console.error('Approval email failed:', emailErr);
+        }
+    }
+
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password: _p, ...userWithoutPassword } = user;
     return NextResponse.json(userWithoutPassword);

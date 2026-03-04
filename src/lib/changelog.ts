@@ -7,8 +7,12 @@ export const CHANGELOG: ChangelogEntry[] = [
     {
         date: '04.03.2026',
         changes: [
-            '— Benutzerverwaltung —',
-            'Benutzer bearbeiten öffnet jetzt eine eigene Seite statt eines Modals – mehr Platz, bessere Übersicht, besonders für Springerinnen mit vielen Feldern.',
+            '— Registrierung & Zugangsverwaltung —',
+            'Neue Registrierungsseite: Benutzer können sich selbst registrieren. Der Account wird erst nach manueller Freischaltung durch einen Admin aktiviert.',
+            'Admins sehen ausstehende Registrierungen in der Benutzerverwaltung und können Rolle zuweisen und freischalten – oder ablehnen.',
+            'Nach der Freischaltung erhält der Benutzer automatisch eine Bestätigungs-E-Mail mit Login-Link.',
+            'Neue Funktion „Passwort vergessen": Benutzer können sich einen Reset-Link per E-Mail zuschicken lassen.',
+            'Benutzer bearbeiten öffnet jetzt eine eigene Seite statt eines Modals.',
         ],
     },
     {

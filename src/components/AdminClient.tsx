@@ -89,6 +89,31 @@ export default function AdminClient({ currentUser }: AdminClientProps) {
         setTimeout(() => setInviteCopied(false), 2000);
     };
 
+    // ─── Approve pending user ─────────────────────────────────────────────────
+
+    const [approveRole, setApproveRole] = useState<Record<string, string>>({});
+
+    const handleApprove = async (id: string, name: string) => {
+        const role = approveRole[id] || 'member';
+        if (!confirm(`Benutzer „${name}" als ${role} freischalten?`)) return;
+        const res = await fetch(`/api/users/${id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: 'active', role }),
+        });
+        if (res.ok) fetchUsers();
+    };
+
+    const handleReject = async (id: string, name: string) => {
+        if (!confirm(`Anfrage von „${name}" ablehnen und Account löschen?`)) return;
+        const res = await fetch(`/api/users/${id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: 'inactive' }),
+        });
+        if (res.ok) fetchUsers();
+    };
+
     // ─── Delete ───────────────────────────────────────────────────────────────
 
     const handleToggleStatus = async (id: string, name: string, currentStatus: string | undefined) => {
@@ -131,6 +156,48 @@ export default function AdminClient({ currentUser }: AdminClientProps) {
                         </button>
                     )}
                 </div>
+
+                {currentUser.role === 'admin' && (() => {
+                    const pending = users.filter(u => u.status === 'pending');
+                    if (pending.length === 0) return null;
+                    return (
+                        <div className="card mb-6" style={{ borderLeft: '4px solid #f59e0b' }}>
+                            <div className="card-header" style={{ paddingBottom: '12px' }}>
+                                <div className="card-title" style={{ marginBottom: 0 }}>⏳ Ausstehende Registrierungen ({pending.length})</div>
+                            </div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                {pending.map(u => (
+                                    <div key={u.id} style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap', padding: '12px', background: 'var(--bg)', borderRadius: '8px', border: '1px solid var(--border)' }}>
+                                        <div style={{ flex: 1, minWidth: '200px' }}>
+                                            <div style={{ fontWeight: 600, fontSize: '14px' }}>{u.name}</div>
+                                            <div style={{ fontSize: '13px', color: 'var(--text-muted)' }}>{u.email}</div>
+                                            <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Registriert: {formatDate(u.created_at)}</div>
+                                        </div>
+                                        <select
+                                            className="form-select"
+                                            style={{ padding: '6px 10px', width: '180px', margin: 0 }}
+                                            value={approveRole[u.id] || 'member'}
+                                            onChange={(e) => setApproveRole({ ...approveRole, [u.id]: e.target.value })}
+                                        >
+                                            <option value="member">Vorstandsmitglied</option>
+                                            <option value="admin">Finanzvorstand</option>
+                                            <option value="eltern">Eltern</option>
+                                            <option value="springerin">Springerin</option>
+                                        </select>
+                                        <div style={{ display: 'flex', gap: '6px' }}>
+                                            <button className="btn btn-primary btn-sm" onClick={() => handleApprove(u.id, u.name)}>
+                                                Freischalten
+                                            </button>
+                                            <button className="btn btn-danger btn-sm" onClick={() => handleReject(u.id, u.name)}>
+                                                Ablehnen
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    );
+                })()}
 
                 {currentUser.role === 'admin' && <div className="card mb-6">
                     <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px', alignItems: 'center', paddingBottom: '16px' }}>
