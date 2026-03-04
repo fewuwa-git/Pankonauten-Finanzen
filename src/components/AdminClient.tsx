@@ -272,7 +272,7 @@ export default function AdminClient({ currentUser }: AdminClientProps) {
                             });
 
                         const sections = ROLE_SECTIONS
-                            .map(s => ({ ...s, users: visibleUsers.filter(u => u.role === s.role) }))
+                            .map(s => ({ ...s, users: visibleUsers.filter(u => u.role === s.role).sort((a, b) => a.name.localeCompare(b.name, 'de')) }))
                             .filter(s => s.users.length > 0);
 
                         if (sections.length === 0) {
