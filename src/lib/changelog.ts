@@ -34,6 +34,13 @@ export const CHANGELOG: ChangelogEntry[] = [
 
             '— Belege —',
             'Beleg-PDF: Seitentitel aller Seiten angepasst – jede Seite zeigt jetzt einen passenden Namen im Browser-Tab',
+
+            '— Benutzerprofil —',
+            'Unterschrift wird jetzt sofort gespeichert, ohne auf „Änderungen speichern" zu klicken – außerdem kann die Unterschrift nun gelöscht werden.',
+            'Admins können den Stundensatz einer Abrechnung auch dann neu berechnen, wenn diese bereits als „Bezahlt" markiert ist.',
+
+            '— Sicherheit —',
+            'Umfassendes Sicherheits-Update: Alle API-Routen sind jetzt geschützt, Tokens werden sicherer generiert, und zahlreiche weitere Sicherheitslücken wurden geschlossen.',
         ],
     },
     {
