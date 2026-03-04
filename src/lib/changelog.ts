@@ -7,6 +7,13 @@ export const CHANGELOG: ChangelogEntry[] = [
     {
         date: '04.03.2026',
         changes: [
+            '— Benutzerverwaltung —',
+            'Benutzer bearbeiten öffnet jetzt eine eigene Seite statt eines Modals – mehr Platz, bessere Übersicht, besonders für Springerinnen mit vielen Feldern.',
+        ],
+    },
+    {
+        date: '04.03.2026',
+        changes: [
             '— Abrechnung —',
             'Formular „Neuen Tag erfassen": Die Felder Von und Bis werden jetzt nebeneinander angezeigt – der Bereich ist kompakter und übersichtlicher.',
 

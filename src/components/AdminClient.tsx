@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Sidebar from '@/components/Sidebar';
-import SignaturePad from '@/components/SignaturePad';
 
 interface User {
     id: string;
@@ -32,9 +32,9 @@ interface AdminClientProps {
 }
 
 const emptyCreateForm = { name: '', email: '', role: 'member' };
-const emptyEditForm = { name: '', email: '', password: '', role: 'member', strasse: '', ort: '', iban: '', steuerid: '', handynummer: '', stundensatz: 0, unterschrift: '' };
 
 export default function AdminClient({ currentUser }: AdminClientProps) {
+    const router = useRouter();
     const [users, setUsers] = useState<User[]>([]);
 
     // Create modal
@@ -44,13 +44,6 @@ export default function AdminClient({ currentUser }: AdminClientProps) {
     const [createLoading, setCreateLoading] = useState(false);
     const [inviteLink, setInviteLink] = useState('');
     const [inviteCopied, setInviteCopied] = useState(false);
-
-    // Edit modal
-    const [editUser, setEditUser] = useState<User | null>(null);
-    const [editForm, setEditForm] = useState(emptyEditForm);
-    const [editError, setEditError] = useState('');
-    const [editLoading, setEditLoading] = useState(false);
-    const [showSignaturePad, setShowSignaturePad] = useState(false);
 
     // Filter and Search
     const [searchQuery, setSearchQuery] = useState('');
@@ -94,67 +87,6 @@ export default function AdminClient({ currentUser }: AdminClientProps) {
         await navigator.clipboard.writeText(inviteLink);
         setInviteCopied(true);
         setTimeout(() => setInviteCopied(false), 2000);
-    };
-
-    // ─── Edit ─────────────────────────────────────────────────────────────────
-
-    const openEdit = (u: User) => {
-        setEditUser(u);
-        setEditForm({
-            name: u.name,
-            email: u.email,
-            password: '',
-            role: u.role,
-            strasse: u.strasse || '',
-            ort: u.ort || '',
-            iban: u.iban || '',
-            steuerid: u.steuerid || '',
-            handynummer: u.handynummer || '',
-            stundensatz: u.stundensatz || 0,
-            unterschrift: u.unterschrift || '',
-        });
-        setShowSignaturePad(false);
-        setEditError('');
-    };
-
-    const handleEdit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!editUser) return;
-        setEditError('');
-        setEditLoading(true);
-        try {
-            const body: Record<string, any> = {
-                name: editForm.name,
-                email: editForm.email,
-                role: editForm.role,
-            };
-            if (editForm.password) body.password = editForm.password;
-            if (['springerin', 'eltern', 'member'].includes(editForm.role)) {
-                body.strasse = editForm.strasse;
-                body.ort = editForm.ort;
-                body.iban = editForm.iban;
-                body.unterschrift = editForm.unterschrift;
-            }
-            if (editForm.role === 'springerin') {
-                body.steuerid = editForm.steuerid;
-                body.handynummer = editForm.handynummer;
-                body.stundensatz = Number(editForm.stundensatz);
-            }
-
-            const res = await fetch(`/api/users/${editUser.id}`, {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(body),
-            });
-            const data = await res.json();
-            if (!res.ok) { setEditError(data.error); return; }
-            setEditUser(null);
-            fetchUsers();
-        } catch {
-            setEditError('Server-Fehler');
-        } finally {
-            setEditLoading(false);
-        }
     };
 
     // ─── Delete ───────────────────────────────────────────────────────────────
@@ -318,7 +250,7 @@ export default function AdminClient({ currentUser }: AdminClientProps) {
                                                     {canEdit && (
                                                         <button
                                                             className="btn btn-secondary btn-sm"
-                                                            onClick={() => openEdit(u)}
+                                                            onClick={() => router.push(`/user/${u.id}/edit`)}
                                                         >
                                                             Bearbeiten
                                                         </button>
@@ -423,115 +355,6 @@ export default function AdminClient({ currentUser }: AdminClientProps) {
                 </div>
             )}
 
-            {/* ─── Edit Modal ───────────────────────────────────────────────────── */}
-            {editUser && (
-                <div className="modal-overlay">
-                    <div className="modal">
-                        <h2 className="modal-title">Benutzer bearbeiten</h2>
-                        <form onSubmit={handleEdit}>
-                            <div className="form-group">
-                                <label className="form-label">Name</label>
-                                <input className="form-input" type="text"
-                                    value={editForm.name} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                                    required disabled={currentUser.role !== 'admin' && editForm.role !== 'springerin'} />
-                            </div>
-                            <div className="form-group">
-                                <label className="form-label">E-Mail</label>
-                                <input className="form-input" type="email"
-                                    value={editForm.email} onChange={(e) => setEditForm({ ...editForm, email: e.target.value })} required />
-                            </div>
-                            <div className="form-group">
-                                <label className="form-label">Neues Passwort <span style={{ fontWeight: 'normal', color: 'var(--text-muted)' }}>(leer lassen = unverändert)</span></label>
-                                <input className="form-input" type="password" placeholder="Neues Passwort"
-                                    value={editForm.password} onChange={(e) => setEditForm({ ...editForm, password: e.target.value })} minLength={6} />
-                            </div>
-                            <div className="form-group">
-                                <label className="form-label">Rolle</label>
-                                <select className="form-select" value={editForm.role}
-                                    disabled={currentUser.role !== 'admin'}
-                                    onChange={(e) => setEditForm({ ...editForm, role: e.target.value })}>
-                                    <option value="member">Vorstandsmitglied</option>
-                                    <option value="admin">Finanzvorstand</option>
-                                    <option value="eltern">Eltern</option>
-                                    <option value="springerin">Springerin</option>
-                                </select>
-                            </div>
-
-                            {['springerin', 'eltern', 'member'].includes(editForm.role) && (
-                                <>
-                                    <div className="form-group">
-                                        <label className="form-label">Straße + Hausnummer</label>
-                                        <input className="form-input" type="text"
-                                            value={editForm.strasse} onChange={(e) => setEditForm({ ...editForm, strasse: e.target.value })} />
-                                    </div>
-                                    <div className="form-group">
-                                        <label className="form-label">PLZ + Ort</label>
-                                        <input className="form-input" type="text"
-                                            value={editForm.ort} onChange={(e) => setEditForm({ ...editForm, ort: e.target.value })} />
-                                    </div>
-                                    <div className="form-group">
-                                        <label className="form-label">IBAN</label>
-                                        <input className="form-input" type="text"
-                                            value={editForm.iban} onChange={(e) => setEditForm({ ...editForm, iban: e.target.value })} />
-                                    </div>
-                                    <div className="form-group">
-                                        <label className="form-label">Unterschrift</label>
-                                        {!showSignaturePad ? (
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-                                                {editForm.unterschrift ? (
-                                                    <img src={editForm.unterschrift} alt="Unterschrift" style={{ maxHeight: '60px', border: '1px solid var(--border)', borderRadius: '6px', padding: '4px', background: '#fff' }} />
-                                                ) : (
-                                                    <span style={{ fontSize: '13px', color: 'var(--text-muted)' }}>Noch keine Unterschrift hinterlegt</span>
-                                                )}
-                                                <button type="button" className="btn btn-secondary btn-sm" onClick={() => setShowSignaturePad(true)}>
-                                                    {editForm.unterschrift ? 'Unterschrift ändern' : 'Unterschrift erstellen'}
-                                                </button>
-                                            </div>
-                                        ) : (
-                                            <SignaturePad
-                                                existing={editForm.unterschrift || null}
-                                                onSave={(dataUrl) => {
-                                                    setEditForm({ ...editForm, unterschrift: dataUrl });
-                                                    setShowSignaturePad(false);
-                                                }}
-                                                onCancel={() => setShowSignaturePad(false)}
-                                            />
-                                        )}
-                                    </div>
-                                </>
-                            )}
-
-                            {editForm.role === 'springerin' && (
-                                <>
-                                    <div className="form-group">
-                                        <label className="form-label">Steuer-ID</label>
-                                        <input className="form-input" type="text"
-                                            value={editForm.steuerid} onChange={(e) => setEditForm({ ...editForm, steuerid: e.target.value })} />
-                                    </div>
-                                    <div className="form-group">
-                                        <label className="form-label">Handynummer</label>
-                                        <input className="form-input" type="text"
-                                            value={editForm.handynummer} onChange={(e) => setEditForm({ ...editForm, handynummer: e.target.value })} />
-                                    </div>
-                                    <div className="form-group">
-                                        <label className="form-label">Stundensatz (€)</label>
-                                        <input className="form-input" type="number" step="0.01" min="0" placeholder="0.00"
-                                            value={editForm.stundensatz || ''} onChange={(e) => setEditForm({ ...editForm, stundensatz: parseFloat(e.target.value) || 0 })} />
-                                    </div>
-                                </>
-                            )}
-
-                            {editError && <div className="error-msg">⚠️ {editError}</div>}
-                            <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', marginTop: '20px' }}>
-                                <button type="button" className="btn btn-secondary" onClick={() => setEditUser(null)}>Abbrechen</button>
-                                <button type="submit" className="btn btn-primary" disabled={editLoading}>
-                                    {editLoading ? 'Speichern...' : 'Änderungen speichern'}
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            )}
         </div>
     );
 }
