@@ -461,7 +461,7 @@ export async function getAllAbrechnungen(userId?: string): Promise<any[]> {
 
 export async function recalculateAbrechnungRates(userId: string, jahr: number, monat: number): Promise<void> {
     const user = await getUserById(userId);
-    if (!user || user.stundensatz === undefined) {
+    if (!user || user.stundensatz == null || user.stundensatz === 0) {
         throw new Error('Kein Stundensatz im Profil hinterlegt.');
     }
 
