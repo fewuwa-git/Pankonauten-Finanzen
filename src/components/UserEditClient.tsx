@@ -226,6 +226,11 @@ export default function UserEditClient({ user, currentUserRole }: Props) {
                                 <button type="button" className="btn btn-secondary btn-sm" onClick={() => setShowSignaturePad(true)}>
                                     {form.unterschrift ? 'Unterschrift ändern' : 'Unterschrift erstellen'}
                                 </button>
+                                {form.unterschrift && (
+                                    <button type="button" className="btn btn-secondary btn-sm" onClick={() => setForm({ ...form, unterschrift: '' })} style={{ color: 'var(--red)' }}>
+                                        Löschen
+                                    </button>
+                                )}
                             </div>
                         ) : (
                             <SignaturePad
