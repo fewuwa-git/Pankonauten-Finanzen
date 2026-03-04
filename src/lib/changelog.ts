@@ -7,6 +7,16 @@ export const CHANGELOG: ChangelogEntry[] = [
     {
         date: '04.03.2026',
         changes: [
+            '— Benutzerverwaltung —',
+            'Neuer Einladungs-Workflow: Admins können Benutzer jetzt per E-Mail einladen – kein Passwort mehr manuell vergeben. Der neue Benutzer erhält eine Einladungsmail und setzt sein Passwort selbst.',
+            'Einladungslink wird nach dem Anlegen eines Benutzers auch direkt im Admin-Bereich angezeigt und kann per Klick kopiert werden.',
+            'Eingeladene (noch nicht aktivierte) Benutzer werden in der Benutzerliste mit dem Hinweis „Eingeladen" gekennzeichnet.',
+            'Login-Sperre für nicht aktivierte Accounts: Wer die Einladung noch nicht angenommen hat, sieht beim Login einen Hinweis, die E-Mails zu prüfen.',
+        ],
+    },
+    {
+        date: '04.03.2026',
+        changes: [
             '— Benutzerprofil & Berechtigungen —',
             'Eltern- und Vorstandsmitglieder können jetzt auch ihre IBAN im Profil hinterlegen',
 

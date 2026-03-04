@@ -31,7 +31,7 @@ interface AdminClientProps {
     currentUser: CurrentUser;
 }
 
-const emptyCreateForm = { name: '', email: '', password: '', role: 'member' };
+const emptyCreateForm = { name: '', email: '', role: 'member' };
 const emptyEditForm = { name: '', email: '', password: '', role: 'member', strasse: '', ort: '', iban: '', steuerid: '', handynummer: '', stundensatz: 0, unterschrift: '' };
 
 export default function AdminClient({ currentUser }: AdminClientProps) {
@@ -42,6 +42,8 @@ export default function AdminClient({ currentUser }: AdminClientProps) {
     const [createForm, setCreateForm] = useState(emptyCreateForm);
     const [createError, setCreateError] = useState('');
     const [createLoading, setCreateLoading] = useState(false);
+    const [inviteLink, setInviteLink] = useState('');
+    const [inviteCopied, setInviteCopied] = useState(false);
 
     // Edit modal
     const [editUser, setEditUser] = useState<User | null>(null);
@@ -77,12 +79,21 @@ export default function AdminClient({ currentUser }: AdminClientProps) {
             if (!res.ok) { setCreateError(data.error); return; }
             setShowCreateModal(false);
             setCreateForm(emptyCreateForm);
+            setInviteLink(data.inviteUrl || '');
+            setInviteCopied(false);
             fetchUsers();
         } catch {
             setCreateError('Server-Fehler');
         } finally {
             setCreateLoading(false);
         }
+    };
+
+    const handleCopyInviteLink = async () => {
+        if (!inviteLink) return;
+        await navigator.clipboard.writeText(inviteLink);
+        setInviteCopied(true);
+        setTimeout(() => setInviteCopied(false), 2000);
     };
 
     // ─── Edit ─────────────────────────────────────────────────────────────────
@@ -291,6 +302,11 @@ export default function AdminClient({ currentUser }: AdminClientProps) {
                                                 <div className="user-item-info">
                                                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                                         <div className="user-item-name">{u.name}</div>
+                                                        {u.status === 'invited' && (
+                                                            <span style={{ fontSize: '11px', fontWeight: 600, color: '#b45309', background: '#fef3c7', borderRadius: '20px', padding: '1px 8px', border: '1px solid #fcd34d' }}>
+                                                                Eingeladen
+                                                            </span>
+                                                        )}
                                                     </div>
                                                     <div className="user-item-email">{u.email}</div>
                                                 </div>
@@ -346,11 +362,6 @@ export default function AdminClient({ currentUser }: AdminClientProps) {
                                     value={createForm.email} onChange={(e) => setCreateForm({ ...createForm, email: e.target.value })} required />
                             </div>
                             <div className="form-group">
-                                <label className="form-label">Passwort</label>
-                                <input className="form-input" type="password" placeholder="Mindestens 6 Zeichen"
-                                    value={createForm.password} onChange={(e) => setCreateForm({ ...createForm, password: e.target.value })} required minLength={6} />
-                            </div>
-                            <div className="form-group">
                                 <label className="form-label">Rolle</label>
                                 <select className="form-select" value={createForm.role}
                                     onChange={(e) => setCreateForm({ ...createForm, role: e.target.value })}>
@@ -368,6 +379,46 @@ export default function AdminClient({ currentUser }: AdminClientProps) {
                                 </button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            )}
+
+            {/* ─── Invite Link Modal ────────────────────────────────────────────── */}
+            {inviteLink && (
+                <div className="modal-overlay">
+                    <div className="modal">
+                        <h2 className="modal-title">Benutzer angelegt</h2>
+                        <p style={{ fontSize: '14px', color: 'var(--text-muted)', marginBottom: '16px' }}>
+                            Eine Einladungs-E-Mail wurde verschickt. Du kannst den Link auch manuell weitergeben:
+                        </p>
+                        <div style={{
+                            background: 'var(--bg)',
+                            border: '1px solid var(--border)',
+                            borderRadius: '8px',
+                            padding: '12px',
+                            fontSize: '13px',
+                            wordBreak: 'break-all',
+                            marginBottom: '16px',
+                            color: 'var(--navy)',
+                        }}>
+                            {inviteLink}
+                        </div>
+                        <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+                            <button
+                                type="button"
+                                className="btn btn-secondary"
+                                onClick={handleCopyInviteLink}
+                            >
+                                {inviteCopied ? '✓ Kopiert!' : 'Link kopieren'}
+                            </button>
+                            <button
+                                type="button"
+                                className="btn btn-primary"
+                                onClick={() => setInviteLink('')}
+                            >
+                                Schließen
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}

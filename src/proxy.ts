@@ -15,7 +15,12 @@ export async function proxy(req: NextRequest) {
     const { pathname } = req.nextUrl;
 
     // Öffentliche Routen – kein Auth nötig
-    if (pathname.startsWith('/login') || pathname.startsWith('/api/auth')) {
+    if (
+        pathname.startsWith('/login') ||
+        pathname.startsWith('/api/auth') ||
+        pathname.startsWith('/einladen') ||
+        pathname.startsWith('/api/invite')
+    ) {
         return NextResponse.next();
     }
 

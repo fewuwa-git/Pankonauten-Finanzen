@@ -1,14 +1,22 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 export default function LoginPage() {
     const router = useRouter();
+    const searchParams = useSearchParams();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const [successMsg, setSuccessMsg] = useState('');
+
+    useEffect(() => {
+        if (searchParams.get('invited') === '1') {
+            setSuccessMsg('Account aktiviert! Du kannst dich jetzt einloggen.');
+        }
+    }, [searchParams]);
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
@@ -77,6 +85,11 @@ export default function LoginPage() {
                         />
                     </div>
 
+                    {successMsg && (
+                        <div style={{ backgroundColor: 'rgba(34, 197, 94, 0.1)', color: '#15803d', padding: '12px', borderRadius: '8px', marginBottom: '16px', fontSize: '14px', border: '1px solid rgba(34, 197, 94, 0.2)' }}>
+                            ✓ {successMsg}
+                        </div>
+                    )}
                     {error && (
                         <div className="error-msg" style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', padding: '12px', borderRadius: '8px', marginBottom: '16px', fontSize: '14px', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
                             <span style={{ marginRight: '8px' }}>⚠️</span> {error}

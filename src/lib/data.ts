@@ -22,6 +22,8 @@ export interface User {
     unterschrift?: string;
     created_at: string;
     last_login_at?: string | null;
+    invite_token?: string | null;
+    invite_expires_at?: string | null;
 }
 
 export interface Transaction {
@@ -125,6 +127,8 @@ export async function saveUser(user: User): Promise<void> {
                 unterschrift: user.unterschrift,
                 created_at: user.created_at,
                 ...(user.last_login_at !== undefined && { last_login_at: user.last_login_at }),
+                ...(user.invite_token !== undefined && { invite_token: user.invite_token }),
+                ...(user.invite_expires_at !== undefined && { invite_expires_at: user.invite_expires_at }),
             },
             { onConflict: 'id' }
         );
