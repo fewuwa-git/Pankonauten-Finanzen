@@ -24,7 +24,7 @@ export async function GET(request: Request) {
     const { data, error } = await query;
 
     if (error) {
-        return NextResponse.json({ error: error.message }, { status: 500 });
+        return NextResponse.json({ error: 'Server-Fehler' }, { status: 500 });
     }
 
     return NextResponse.json(data);
@@ -40,9 +40,9 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { jahr, monat, content, author_name } = body;
+    const { jahr, monat, content } = body;
 
-    if (!jahr || !monat || content === undefined || !author_name) {
+    if (!jahr || !monat || content === undefined) {
         return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
@@ -52,14 +52,14 @@ export async function POST(request: Request) {
             jahr,
             monat,
             content,
-            author_name,
+            author_name: payload.name,
             updated_at: new Date().toISOString()
         }, { onConflict: 'jahr,monat' })
         .select()
         .single();
 
     if (error) {
-        return NextResponse.json({ error: error.message }, { status: 500 });
+        return NextResponse.json({ error: 'Server-Fehler' }, { status: 500 });
     }
 
     return NextResponse.json(data);

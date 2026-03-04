@@ -406,6 +406,16 @@ export async function saveAbrechnungTag(tag: Partial<AbrechnungTag>): Promise<Ab
     return data;
 }
 
+export async function getAbrechnungTagOwner(tagId: string): Promise<string | null> {
+    const { data } = await supabase
+        .from('pankonauten_abrechnung_tage')
+        .select('pankonauten_abrechnungen(user_id)')
+        .eq('id', tagId)
+        .single();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return (data as any)?.pankonauten_abrechnungen?.user_id ?? null;
+}
+
 export async function deleteAbrechnungTag(tagId: string): Promise<void> {
     const { error } = await supabase
         .from('pankonauten_abrechnung_tage')

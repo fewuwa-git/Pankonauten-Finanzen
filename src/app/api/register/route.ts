@@ -10,8 +10,8 @@ export async function POST(req: NextRequest) {
         if (!name || !email || !password) {
             return NextResponse.json({ error: 'Name, E-Mail und Passwort erforderlich' }, { status: 400 });
         }
-        if (password.length < 6) {
-            return NextResponse.json({ error: 'Passwort muss mindestens 6 Zeichen haben' }, { status: 400 });
+        if (password.length < 8) {
+            return NextResponse.json({ error: 'Passwort muss mindestens 8 Zeichen haben' }, { status: 400 });
         }
 
         const existing = await getUserByEmail(email);

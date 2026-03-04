@@ -8,7 +8,6 @@ export default function PasswordResetPage({ params }: { params: Promise<{ token:
     const router = useRouter();
 
     const [status, setStatus] = useState<'loading' | 'valid' | 'invalid' | 'expired' | 'done'>('loading');
-    const [email, setEmail] = useState('');
     const [errorMsg, setErrorMsg] = useState('');
     const [password, setPassword] = useState('');
     const [password2, setPassword2] = useState('');
@@ -27,7 +26,6 @@ export default function PasswordResetPage({ params }: { params: Promise<{ token:
                         setStatus('invalid');
                     }
                 } else {
-                    setEmail(data.email);
                     setStatus('valid');
                 }
             })
@@ -98,7 +96,7 @@ export default function PasswordResetPage({ params }: { params: Promise<{ token:
                 {status === 'valid' && (
                     <form onSubmit={handleSubmit}>
                         <p style={{ fontSize: '14px', color: 'var(--text-muted)', marginBottom: '20px' }}>
-                            Neues Passwort für <strong>{email}</strong>
+                            Bitte gib dein neues Passwort ein.
                         </p>
                         <div className="form-group">
                             <label className="form-label">Neues Passwort</label>

@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const belegnummer = await getNextBelegnummer();
     const beleg = await saveBeleg({
-        user_id: body.user_id ?? payload.userId,
+        user_id: payload.userId,
         titel: body.titel,
         beschreibung: body.beschreibung,
         netto: Number(body.netto),
@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
         betrag: Number(body.betrag),
         belegnummer,
         datum: body.datum,
-        status: body.status ?? 'entwurf',
+        status: 'entwurf',
     });
     return NextResponse.json(beleg);
 }

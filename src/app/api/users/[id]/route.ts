@@ -63,7 +63,14 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
         if (body.name !== undefined) user.name = body.name;
         if (body.steuerid !== undefined) user.steuerid = body.steuerid;
         if (body.handynummer !== undefined) user.handynummer = body.handynummer;
-        if (body.stundensatz !== undefined) user.stundensatz = body.stundensatz;
+    }
+    // Stundensatz nur für Admins änderbar
+    if (isAdmin && body.stundensatz !== undefined) {
+        const rate = Number(body.stundensatz);
+        if (isNaN(rate) || rate < 0 || rate > 500) {
+            return NextResponse.json({ error: 'Ungültiger Stundensatz' }, { status: 400 });
+        }
+        user.stundensatz = rate;
     }
 
     // Alle (die Berechtigung haben = isSelf oder isAdmin) dürfen Email und Passwort ändern

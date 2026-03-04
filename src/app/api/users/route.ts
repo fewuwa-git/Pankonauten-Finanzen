@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import { getUsers, saveUser, getUserByEmail } from '@/lib/data';
 import { v4 as uuidv4 } from 'uuid';
+import { randomBytes } from 'crypto';
 import { verifyToken } from '@/lib/auth';
 
 export async function GET(req: NextRequest) {
@@ -41,7 +42,7 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'E-Mail bereits vergeben' }, { status: 409 });
         }
 
-        const inviteToken = uuidv4();
+        const inviteToken = randomBytes(32).toString('hex');
         const inviteExpiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
         const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://finanzen.pankonauten.de';
         const inviteUrl = `${baseUrl}/einladen/${inviteToken}`;

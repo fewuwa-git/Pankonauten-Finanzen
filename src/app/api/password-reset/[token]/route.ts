@@ -26,7 +26,7 @@ export async function GET(
         return NextResponse.json({ valid: false, error: 'Der Link ist abgelaufen. Bitte fordere einen neuen an.' }, { status: 410 });
     }
 
-    return NextResponse.json({ valid: true, email: user.email });
+    return NextResponse.json({ valid: true });
 }
 
 export async function POST(
@@ -36,8 +36,8 @@ export async function POST(
     const { token } = await params;
     const { password } = await req.json();
 
-    if (!password || password.length < 6) {
-        return NextResponse.json({ error: 'Passwort muss mindestens 6 Zeichen haben' }, { status: 400 });
+    if (!password || password.length < 8) {
+        return NextResponse.json({ error: 'Passwort muss mindestens 8 Zeichen haben' }, { status: 400 });
     }
 
     const { data: user, error } = await supabase

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { v4 as uuidv4 } from 'uuid';
+import { randomBytes } from 'crypto';
 import { getUserByEmail, saveUser } from '@/lib/data';
 import { sendPasswordResetEmail } from '@/lib/email';
 
@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ success: true });
         }
 
-        const resetToken = uuidv4();
+        const resetToken = randomBytes(32).toString('hex');
         const resetExpiresAt = new Date(Date.now() + 60 * 60 * 1000).toISOString(); // 1 Stunde
 
         await saveUser({

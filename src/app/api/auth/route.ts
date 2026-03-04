@@ -30,6 +30,13 @@ export async function POST(req: NextRequest) {
             );
         }
 
+        if (user.status === 'inactive') {
+            return NextResponse.json(
+                { error: 'Dein Account wurde deaktiviert. Bitte wende dich an einen Administrator.' },
+                { status: 403 }
+            );
+        }
+
         const valid = await bcrypt.compare(password, user.password);
         if (!valid) {
             return NextResponse.json({ error: 'Ungültige Anmeldedaten' }, { status: 401 });
@@ -62,22 +69,13 @@ export async function POST(req: NextRequest) {
         return response;
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
-        console.error('Login error detail:', {
-            message: error.message,
-            code: error.code,
-            errno: error.errno,
-            stack: error.stack
-        });
+        console.error('Login error:', error.code || error.message);
 
-        // Specific error for database connection issues
         if (error.code === 'ECONNREFUSED' || error.code === 'ETIMEDOUT') {
-            return NextResponse.json(
-                { error: 'Datenbank-Verbindung fehlgeschlagen. Bitte prüfe den SSH-Tunnel.' },
-                { status: 503 }
-            );
+            return NextResponse.json({ error: 'Dienst vorübergehend nicht verfügbar.' }, { status: 503 });
         }
 
-        return NextResponse.json({ error: 'Server-Fehler: ' + (error.message || 'Unbekannt') }, { status: 500 });
+        return NextResponse.json({ error: 'Anmeldung fehlgeschlagen.' }, { status: 500 });
     }
 }
 

@@ -36,8 +36,8 @@ export async function POST(
     const { token } = await params;
     const { password } = await req.json();
 
-    if (!password || password.length < 6) {
-        return NextResponse.json({ error: 'Passwort muss mindestens 6 Zeichen haben' }, { status: 400 });
+    if (!password || password.length < 8) {
+        return NextResponse.json({ error: 'Passwort muss mindestens 8 Zeichen haben' }, { status: 400 });
     }
 
     const { data: user, error } = await supabase

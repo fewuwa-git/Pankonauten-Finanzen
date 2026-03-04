@@ -40,6 +40,9 @@ data/database.sqlite
 data/users.json
 data/transactions.json
 
+# claude code (contains memory files with sensitive info)
+.claude/
+
 # vercel
 .vercel
 

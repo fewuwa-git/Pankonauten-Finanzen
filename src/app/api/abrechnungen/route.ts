@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyToken } from '@/lib/auth';
-import { getAbrechnung, saveAbrechnung, saveAbrechnungTag, deleteAbrechnungTag, deleteAbrechnung, updateAbrechnungStatus, getUserById } from '@/lib/data';
+import { getAbrechnung, saveAbrechnung, saveAbrechnungTag, deleteAbrechnungTag, deleteAbrechnung, updateAbrechnungStatus, getUserById, getAbrechnungTagOwner } from '@/lib/data';
 import { sendAbrechnungBezahltEmail } from '@/lib/email';
 
 export async function GET(request: NextRequest) {
@@ -24,8 +24,8 @@ export async function GET(request: NextRequest) {
     try {
         const data = await getAbrechnung(targetUserId, jahr, monat);
         return NextResponse.json(data);
-    } catch (error: any) {
-        return NextResponse.json({ error: error.message }, { status: 500 });
+    } catch {
+        return NextResponse.json({ error: 'Server-Fehler' }, { status: 500 });
     }
 }
 
@@ -124,8 +124,8 @@ export async function POST(request: NextRequest) {
 
         return NextResponse.json({ error: 'Unknown action' }, { status: 400 });
 
-    } catch (error: any) {
-        return NextResponse.json({ error: error.message }, { status: 500 });
+    } catch {
+        return NextResponse.json({ error: 'Server-Fehler' }, { status: 500 });
     }
 }
 
@@ -148,6 +148,12 @@ export async function DELETE(request: NextRequest) {
 
     try {
         if (tagId) {
+            if (payload.role !== 'admin') {
+                const ownerUserId = await getAbrechnungTagOwner(tagId);
+                if (ownerUserId !== payload.userId) {
+                    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+                }
+            }
             await deleteAbrechnungTag(tagId);
         } else if (id) {
             // Only admin can delete whole abrechnung
@@ -157,7 +163,7 @@ export async function DELETE(request: NextRequest) {
             await deleteAbrechnung(id);
         }
         return NextResponse.json({ success: true });
-    } catch (error: any) {
-        return NextResponse.json({ error: error.message }, { status: 500 });
+    } catch {
+        return NextResponse.json({ error: 'Server-Fehler' }, { status: 500 });
     }
 }
