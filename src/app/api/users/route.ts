@@ -14,13 +14,13 @@ export async function GET(req: NextRequest) {
 
     if (payload.role === 'admin') {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const users = (await getUsers()).map(({ password: _p, invite_token: _t, invite_expires_at: _e, ...u }) => u);
+        const users = (await getUsers()).map(({ password: _p, invite_token: _t, invite_expires_at: _e, unterschrift: _u, ...u }) => u);
         return NextResponse.json(users);
     } else {
         const user = await getUserByEmail(payload.email);
         if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { password: _p, invite_token: _t, invite_expires_at: _e, ...u } = user;
+        const { password: _p, invite_token: _t, invite_expires_at: _e, unterschrift: _u, ...u } = user;
         return NextResponse.json([u]);
     }
 }
