@@ -23,11 +23,11 @@ const CONFIG: Record<TargetStatus, {
         confirmClass: 'btn-primary',
     },
     bezahlt: {
-        label: '💶 Als bezahlt markieren',
+        label: '✅ Bezahlt',
         btnClass: 'btn btn-sm btn-success',
         title: 'Beleg als bezahlt markieren',
         message: (l) => `Möchtest du den Beleg „${l}" als bezahlt markieren?`,
-        confirmLabel: '💶 Ja, als bezahlt markieren',
+        confirmLabel: '✅ Ja, als bezahlt markieren',
         confirmClass: 'btn-success',
     },
     abgelehnt: {
