@@ -8,6 +8,7 @@ export const CHANGELOG: ChangelogEntry[] = [
         date: '04.03.2026',
         changes: [
             '— Abrechnungen —',
+            'Beim Erfassen eines neuen Tages ist das Datumsfeld jetzt vorausgefüllt – mit dem heutigen Tag (im aktuellen Monat) oder dem 1. des gewählten Monats. Nur noch den Tag anpassen.',
             'Beim Markieren einer Abrechnung als „Bezahlt" kann nun gewählt werden, ob eine Benachrichtigungs-E-Mail an die Springerin gesendet werden soll (Checkbox im Bestätigungsdialog, standardmäßig aktiviert).',
             'Springerinnen erhalten automatisch eine E-Mail, wenn ihre Abrechnung als „Bezahlt" markiert wird – mit Betrag, IBAN und einer persönlichen Dankesnachricht.',
 

@@ -106,8 +106,20 @@ export default function AbrechnungForm({
     const [error, setError] = useState('');
     const [pdfUrl, setPdfUrl] = useState<string | null>(null);
 
+    const defaultDatumForMonth = (month: string) => {
+        if (!month) return '';
+        const [jahr, monat] = month.split('-').map(Number);
+        const today = new Date();
+        if (today.getFullYear() === jahr && today.getMonth() + 1 === monat) {
+            const d = String(today.getDate()).padStart(2, '0');
+            const m = String(monat).padStart(2, '0');
+            return `${jahr}-${m}-${d}`;
+        }
+        return `${jahr}-${String(monat).padStart(2, '0')}-01`;
+    };
+
     // Form states
-    const [datum, setDatum] = useState('');
+    const [datum, setDatum] = useState(() => defaultDatumForMonth(selectedMonth));
     const [von, setVon] = useState('');
     const [bis, setBis] = useState('');
 
@@ -138,6 +150,7 @@ export default function AbrechnungForm({
             return;
         }
 
+        setDatum(defaultDatumForMonth(selectedMonth));
         const [jahrStr, monatStr] = selectedMonth.split('-');
         fetchData(selectedSpringer.id, parseInt(jahrStr), parseInt(monatStr));
     }, [selectedMonth, selectedSpringer.id]);
@@ -242,7 +255,7 @@ export default function AbrechnungForm({
             if (data.abrechnung) setAbrechnung(data.abrechnung);
 
             // Reset form fields
-            setDatum('');
+            setDatum(defaultDatumForMonth(selectedMonth));
             setVon('');
             setBis('');
         } catch (err: any) {
