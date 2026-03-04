@@ -33,3 +33,14 @@ export async function sendApprovalEmail(to: string, name: string, loginUrl: stri
 export async function sendPasswordResetEmail(to: string, name: string, resetUrl: string): Promise<void> {
     await sendEmail('password_reset', to, { name, url: resetUrl });
 }
+
+export async function sendAbrechnungBezahltEmail(
+    to: string,
+    name: string,
+    monat: string,
+    jahr: string,
+    betrag: string,
+    iban: string,
+): Promise<void> {
+    await sendEmail('abrechnung_bezahlt', to, { name, monat, jahr, betrag, iban });
+}

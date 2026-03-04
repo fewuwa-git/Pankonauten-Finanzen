@@ -7,6 +7,9 @@ export const CHANGELOG: ChangelogEntry[] = [
     {
         date: '04.03.2026',
         changes: [
+            '— Abrechnungen —',
+            'Springerinnen erhalten automatisch eine E-Mail, wenn ihre Abrechnung als „Bezahlt" markiert wird – mit Betrag, IBAN und einer persönlichen Dankesnachricht.',
+
             '— Verwaltung —',
             'Neuer Bereich „E-Mails": Admins können die Texte aller automatisch versendeten E-Mails (Einladung, Freischaltung, Passwort-Reset) direkt im Portal bearbeiten – inkl. Betreff, Inhalt und Live-Vorschau.',
 

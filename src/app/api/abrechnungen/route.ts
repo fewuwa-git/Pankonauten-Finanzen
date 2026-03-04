@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyToken } from '@/lib/auth';
-import { getAbrechnung, saveAbrechnung, saveAbrechnungTag, deleteAbrechnungTag, deleteAbrechnung, updateAbrechnungStatus } from '@/lib/data';
+import { getAbrechnung, saveAbrechnung, saveAbrechnungTag, deleteAbrechnungTag, deleteAbrechnung, updateAbrechnungStatus, getUserById } from '@/lib/data';
+import { sendAbrechnungBezahltEmail } from '@/lib/email';
 
 export async function GET(request: NextRequest) {
     const token = request.cookies.get('token')?.value;
@@ -84,6 +85,28 @@ export async function POST(request: NextRequest) {
             }
 
             const updated = await updateAbrechnungStatus(id, status);
+
+            if (status === 'bezahlt') {
+                try {
+                    const { tage } = await getAbrechnung(updated.user_id, updated.jahr, updated.monat);
+                    const user = await getUserById(updated.user_id);
+                    if (user && user.email) {
+                        const gesamtbetrag = tage.reduce((sum, t) => sum + (t.betrag || 0), 0);
+                        const monatsnamen = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
+                        await sendAbrechnungBezahltEmail(
+                            user.email,
+                            user.name,
+                            monatsnamen[updated.monat - 1] || String(updated.monat),
+                            String(updated.jahr),
+                            gesamtbetrag.toFixed(2).replace('.', ','),
+                            user.iban || 'hinterlegtes Konto',
+                        );
+                    }
+                } catch (mailErr) {
+                    console.error('Bezahlt-Mail konnte nicht gesendet werden:', mailErr);
+                }
+            }
+
             return NextResponse.json({ abrechnung: updated });
         }
 
