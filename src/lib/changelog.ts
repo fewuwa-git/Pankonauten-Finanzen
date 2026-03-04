@@ -5,6 +5,16 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
     {
+        date: '05.03.2026',
+        changes: [
+            '— Abrechnungen —',
+            'Beim Markieren einer Abrechnung als „Bezahlt" kann nun gewählt werden, ob eine Benachrichtigungs-E-Mail an die Springerin gesendet werden soll (Checkbox im Bestätigungsdialog, standardmäßig aktiviert).',
+
+            '— Benutzerverwaltung —',
+            'Beim Anlegen eines neuen Benutzers wird die Einladungs-E-Mail nicht mehr automatisch versendet. Stattdessen erscheint ein Dialog mit dem Einladungslink und der Option, die E-Mail auf Wunsch manuell zu senden.',
+        ],
+    },
+    {
         date: '04.03.2026',
         changes: [
             '— Abrechnungen —',

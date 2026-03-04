@@ -3,7 +3,6 @@ import bcrypt from 'bcryptjs';
 import { getUsers, saveUser, getUserByEmail } from '@/lib/data';
 import { v4 as uuidv4 } from 'uuid';
 import { verifyToken } from '@/lib/auth';
-import { sendInviteEmail } from '@/lib/email';
 
 export async function GET(req: NextRequest) {
     const token = req.cookies.get('token')?.value;
@@ -62,13 +61,6 @@ export async function POST(req: NextRequest) {
             created_at: new Date().toISOString(),
         };
         await saveUser(newUser);
-
-        // Send invite email – non-blocking failure
-        try {
-            await sendInviteEmail(email, name, inviteUrl);
-        } catch (emailErr) {
-            console.error('Invite email failed:', emailErr);
-        }
 
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { password: _p, invite_token: _t, invite_expires_at: _e, ...userWithoutSecrets } = newUser;

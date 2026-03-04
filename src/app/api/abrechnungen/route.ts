@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
         }
 
         if (action === 'update_status') {
-            const { id, status } = body;
+            const { id, status, sendEmail } = body;
             if (!id || !status) {
                 return NextResponse.json({ error: 'Missing id or status' }, { status: 400 });
             }
@@ -86,7 +86,7 @@ export async function POST(request: NextRequest) {
 
             const updated = await updateAbrechnungStatus(id, status);
 
-            if (status === 'bezahlt') {
+            if (status === 'bezahlt' && sendEmail !== false) {
                 try {
                     const { tage } = await getAbrechnung(updated.user_id, updated.jahr, updated.monat);
                     const user = await getUserById(updated.user_id);

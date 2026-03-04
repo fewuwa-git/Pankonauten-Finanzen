@@ -44,6 +44,9 @@ export default function AdminClient({ currentUser }: AdminClientProps) {
     const [createLoading, setCreateLoading] = useState(false);
     const [inviteLink, setInviteLink] = useState('');
     const [inviteCopied, setInviteCopied] = useState(false);
+    const [inviteUserId, setInviteUserId] = useState('');
+    const [inviteSending, setInviteSending] = useState(false);
+    const [inviteSent, setInviteSent] = useState(false);
 
     // Filter and Search
     const [searchQuery, setSearchQuery] = useState('');
@@ -73,7 +76,9 @@ export default function AdminClient({ currentUser }: AdminClientProps) {
             setShowCreateModal(false);
             setCreateForm(emptyCreateForm);
             setInviteLink(data.inviteUrl || '');
+            setInviteUserId(data.id || '');
             setInviteCopied(false);
+            setInviteSent(false);
             fetchUsers();
         } catch {
             setCreateError('Server-Fehler');
@@ -87,6 +92,17 @@ export default function AdminClient({ currentUser }: AdminClientProps) {
         await navigator.clipboard.writeText(inviteLink);
         setInviteCopied(true);
         setTimeout(() => setInviteCopied(false), 2000);
+    };
+
+    const handleSendInvite = async () => {
+        if (!inviteUserId) return;
+        setInviteSending(true);
+        try {
+            await fetch(`/api/users/${inviteUserId}/send-invite`, { method: 'POST' });
+            setInviteSent(true);
+        } finally {
+            setInviteSending(false);
+        }
     };
 
     // ─── Approve pending user ─────────────────────────────────────────────────
@@ -390,7 +406,7 @@ export default function AdminClient({ currentUser }: AdminClientProps) {
                     <div className="modal">
                         <h2 className="modal-title">Benutzer angelegt</h2>
                         <p style={{ fontSize: '14px', color: 'var(--text-muted)', marginBottom: '16px' }}>
-                            Eine Einladungs-E-Mail wurde verschickt. Du kannst den Link auch manuell weitergeben:
+                            Möchtest du eine Einladungs-E-Mail senden? Du kannst den Link auch manuell weitergeben.
                         </p>
                         <div style={{
                             background: 'var(--bg)',
@@ -404,6 +420,11 @@ export default function AdminClient({ currentUser }: AdminClientProps) {
                         }}>
                             {inviteLink}
                         </div>
+                        {inviteSent && (
+                            <p style={{ fontSize: '13px', color: 'var(--success, green)', marginBottom: '12px' }}>
+                                Einladungs-E-Mail wurde gesendet.
+                            </p>
+                        )}
                         <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
                             <button
                                 type="button"
@@ -411,6 +432,14 @@ export default function AdminClient({ currentUser }: AdminClientProps) {
                                 onClick={handleCopyInviteLink}
                             >
                                 {inviteCopied ? '✓ Kopiert!' : 'Link kopieren'}
+                            </button>
+                            <button
+                                type="button"
+                                className="btn btn-secondary"
+                                onClick={handleSendInvite}
+                                disabled={inviteSending || inviteSent}
+                            >
+                                {inviteSending ? 'Sende...' : inviteSent ? '✓ E-Mail gesendet' : 'E-Mail senden'}
                             </button>
                             <button
                                 type="button"
