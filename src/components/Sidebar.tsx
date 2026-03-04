@@ -34,9 +34,14 @@ const NAV_ITEMS: NavGroup[] = [
         ],
     },
     {
+        section: 'UPLOAD',
+        items: [
+            { href: '/upload', icon: '⬆️', label: 'Neuer Upload', roles: ['admin'] },
+        ],
+    },
+    {
         section: 'VERWALTUNG',
         items: [
-            { href: '/upload', icon: '⬆️', label: 'Upload', roles: ['admin'] },
             { href: '/user', icon: '👥', label: 'Benutzer', roles: ['admin', 'springerin', 'eltern', 'member'] },
             { href: '/verwaltung/kategorien', icon: '🏷️', label: 'Kategorien', roles: ['admin'] },
         ],
