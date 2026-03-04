@@ -44,6 +44,7 @@ const NAV_ITEMS: NavGroup[] = [
         items: [
             { href: '/user', icon: '👥', label: 'Benutzer', roles: ['admin', 'springerin', 'eltern', 'member'] },
             { href: '/verwaltung/kategorien', icon: '🏷️', label: 'Kategorien', roles: ['admin'] },
+            { href: '/verwaltung/emails', icon: '✉️', label: 'E-Mails', roles: ['admin'] },
         ],
     },
 ];

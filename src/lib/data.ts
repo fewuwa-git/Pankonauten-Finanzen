@@ -585,3 +585,40 @@ export async function saveSpringerinNote(note: Omit<SpringerinNote, 'id' | 'crea
     }
     return data;
 }
+
+// ─── Email Templates ──────────────────────────────────────────────────────────
+
+export interface EmailTemplate {
+    id: string;
+    name: string;
+    subject: string;
+    body: string;
+    updated_at?: string;
+}
+
+export async function getEmailTemplates(): Promise<EmailTemplate[]> {
+    const { data, error } = await supabase
+        .from('pankonauten_email_templates')
+        .select('*')
+        .order('id');
+    if (error) { console.error('Error fetching email templates:', error); return []; }
+    return data || [];
+}
+
+export async function getEmailTemplate(id: string): Promise<EmailTemplate | null> {
+    const { data, error } = await supabase
+        .from('pankonauten_email_templates')
+        .select('*')
+        .eq('id', id)
+        .single();
+    if (error) { console.error('Error fetching email template:', error); return null; }
+    return data;
+}
+
+export async function saveEmailTemplate(id: string, subject: string, body: string): Promise<void> {
+    const { error } = await supabase
+        .from('pankonauten_email_templates')
+        .update({ subject, body, updated_at: new Date().toISOString() })
+        .eq('id', id);
+    if (error) throw new Error('Failed to save email template: ' + error.message);
+}
