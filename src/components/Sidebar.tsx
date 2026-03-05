@@ -160,24 +160,26 @@ export default function Sidebar({ user }: SidebarProps) {
                         Abmelden
                     </button>
                     {(user.role === 'admin' || user.role === 'member') && (
-                        <a
-                            href="/changelog"
-                            className={`sidebar-link ${pathname === '/changelog' ? 'active' : ''}`}
-                            style={{ fontSize: '11px', opacity: 0.4, marginTop: '2px' }}
-                        >
-                            <span style={{ fontSize: '12px' }}>📋</span>
-                            Changelog
-                        </a>
-                    )}
-                    {user.role === 'admin' && (
-                        <a
-                            href="/logfiles"
-                            className={`sidebar-link ${pathname === '/logfiles' ? 'active' : ''}`}
-                            style={{ fontSize: '11px', opacity: 0.4, marginTop: '2px' }}
-                        >
-                            <span style={{ fontSize: '12px' }}>🗒️</span>
-                            Logfiles
-                        </a>
+                        <div style={{ display: 'flex', gap: '4px', marginTop: '2px' }}>
+                            <a
+                                href="/changelog"
+                                className={`sidebar-link ${pathname === '/changelog' ? 'active' : ''}`}
+                                style={{ fontSize: '11px', opacity: 0.4, flex: 1 }}
+                            >
+                                <span style={{ fontSize: '12px' }}>📋</span>
+                                Changelog
+                            </a>
+                            {user.role === 'admin' && (
+                                <a
+                                    href="/logfiles"
+                                    className={`sidebar-link ${pathname === '/logfiles' ? 'active' : ''}`}
+                                    style={{ fontSize: '11px', opacity: 0.4, flex: 1 }}
+                                >
+                                    <span style={{ fontSize: '12px' }}>🗒️</span>
+                                    Logfiles
+                                </a>
+                            )}
+                        </div>
                     )}
                 </div>
             </aside>
