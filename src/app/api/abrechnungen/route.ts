@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { verifyToken } from '@/lib/auth';
 import { getAbrechnung, saveAbrechnung, saveAbrechnungTag, deleteAbrechnungTag, deleteAbrechnung, updateAbrechnungStatus, getUserById, getAbrechnungTagOwner } from '@/lib/data';
 import { sendAbrechnungBezahltEmail } from '@/lib/email';
+import { logAudit } from '@/lib/audit';
 
 export async function GET(request: NextRequest) {
     const token = request.cookies.get('token')?.value;
@@ -51,6 +52,7 @@ export async function POST(request: NextRequest) {
             // Ensure the main Abrechnung exists
             let { abrechnung } = await getAbrechnung(targetUserId, jahr, monat);
 
+            const isNew = !abrechnung;
             if (!abrechnung) {
                 abrechnung = await saveAbrechnung({
                     user_id: targetUserId,
@@ -58,6 +60,9 @@ export async function POST(request: NextRequest) {
                     monat,
                     status: 'entwurf',
                 });
+                if (isNew) {
+                    await logAudit(payload.userId, payload.name, 'abrechnung_erstellt', { monat, jahr });
+                }
             }
 
             // Save the tag
@@ -85,6 +90,16 @@ export async function POST(request: NextRequest) {
             }
 
             const updated = await updateAbrechnungStatus(id, status);
+
+            if (status === 'eingereicht') {
+                await logAudit(payload.userId, payload.name, 'abrechnung_eingereicht', {
+                    monat: updated.monat, jahr: updated.jahr,
+                });
+            } else if (status === 'bezahlt') {
+                await logAudit(payload.userId, payload.name, 'abrechnung_bezahlt', {
+                    monat: updated.monat, jahr: updated.jahr, user_name: (await getUserById(updated.user_id))?.name,
+                });
+            }
 
             if (status === 'bezahlt' && sendEmail !== false) {
                 try {

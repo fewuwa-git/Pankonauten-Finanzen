@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyToken } from '@/lib/auth';
 import { getBelege, saveBeleg, getNextBelegnummer } from '@/lib/data';
+import { logAudit } from '@/lib/audit';
 
 export async function GET(req: NextRequest) {
     const token = req.cookies.get('token')?.value;
@@ -30,6 +31,11 @@ export async function POST(req: NextRequest) {
         belegnummer,
         datum: body.datum,
         status: 'entwurf',
+    });
+    await logAudit(payload.userId, payload.name, 'beleg_erstellt', {
+        titel: body.titel,
+        betrag: Number(body.betrag),
+        belegnummer,
     });
     return NextResponse.json(beleg);
 }

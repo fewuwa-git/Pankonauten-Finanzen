@@ -4,6 +4,7 @@ import { addTransactions } from '@/lib/data';
 import { Transaction } from '@/lib/data';
 import { v4 as uuidv4 } from 'uuid';
 import { verifyToken } from '@/lib/auth';
+import { logAudit } from '@/lib/audit';
 
 export async function POST(req: NextRequest) {
     try {
@@ -31,6 +32,8 @@ export async function POST(req: NextRequest) {
         }));
 
         const uniqueImportedCount = await addTransactions(mapped);
+
+        await logAudit(payload.userId, payload.name, 'csv_import', { count: uniqueImportedCount });
 
         // Revalidate the pages so the new data shows up immediately
         revalidatePath('/dashboard');

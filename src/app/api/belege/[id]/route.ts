@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyToken } from '@/lib/auth';
 import { saveBeleg, deleteBeleg, getBelegById } from '@/lib/data';
+import { logAudit } from '@/lib/audit';
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     const token = req.cookies.get('token')?.value;
@@ -20,6 +21,18 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
     try {
         const beleg = await saveBeleg({ ...existing, ...body });
+        if (body.status === 'eingereicht' || body.status === 'bezahlt' || body.status === 'abgelehnt') {
+            const actionMap: Record<string, 'beleg_eingereicht' | 'beleg_bezahlt' | 'beleg_abgelehnt'> = {
+                eingereicht: 'beleg_eingereicht',
+                bezahlt: 'beleg_bezahlt',
+                abgelehnt: 'beleg_abgelehnt',
+            };
+            await logAudit(payload.userId, payload.name, actionMap[body.status], {
+                titel: existing.titel,
+                betrag: existing.betrag,
+                belegnummer: existing.belegnummer,
+            });
+        }
         return NextResponse.json(beleg);
     } catch {
         return NextResponse.json({ error: 'Fehler beim Speichern' }, { status: 500 });

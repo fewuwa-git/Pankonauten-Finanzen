@@ -47,6 +47,7 @@ const NAV_ITEMS: NavGroup[] = [
             { href: '/verwaltung/kategorien', icon: '🏷️', label: 'Kategorien', roles: ['admin'] },
             { href: '/verwaltung/emails', icon: '✉️', label: 'E-Mails', roles: ['admin'] },
             { href: '/verwaltung/zugriffsrechte', icon: '🔐', label: 'Zugriffsrechte', roles: ['admin'] },
+            { href: '/logfiles', icon: '📋', label: 'Logfiles', roles: ['admin'] },
         ],
     },
 ];

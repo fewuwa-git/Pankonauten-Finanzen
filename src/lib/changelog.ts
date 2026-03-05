@@ -14,6 +14,8 @@ export const CHANGELOG: ChangelogEntry[] = [
             'Seiten mit eingeschränktem Zugriff zeigen jetzt eine strukturierte Hinweisseite mit Navigation statt einer leeren Fehlermeldung.',
             '— CSV-Import —',
             'Beim Hochladen einer CSV-Datei erscheint jetzt eine Spaltenzuordnung: Man kann auswählen, welche Spalte der CSV welchem Feld entspricht (Datum, Beschreibung, Gegenüber, Betrag). Die Zuordnung wird automatisch erkannt und für den nächsten Import gespeichert.',
+            '— Logfiles —',
+            'Neue Seite „Logfiles" (nur für Admins): Protokolliert alle relevanten Aktionen – Belege erstellen, einreichen und bezahlen, Abrechnungen erstellen, einreichen und bezahlen, sowie CSV-Importe.',
         ],
     },
     {
