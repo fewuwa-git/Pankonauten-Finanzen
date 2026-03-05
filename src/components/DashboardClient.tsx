@@ -118,10 +118,12 @@ function aggregateByGranularity(
     end: Date,
     granularity: Granularity
 ): { key: string; label: string; balance: number; income: number; expense: number }[] {
-    const filtered = transactions.filter((t) => {
-        const d = new Date(t.date);
-        return d >= start && d <= end;
-    });
+    const filtered = transactions
+        .filter((t) => {
+            const d = new Date(t.date);
+            return d >= start && d <= end;
+        })
+        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
     const map = new Map<string, { income: number; expense: number; balance: number; lastBalance: number }>();
 
@@ -147,7 +149,7 @@ function aggregateByGranularity(
         .sort(([a], [b]) => a.localeCompare(b))
         .map(([key, val]) => ({
             key,
-            label: formatDate(key.replace('-W', '-01'), granularity),
+            label: formatDate(key, granularity),
             balance: val.lastBalance,
             income: val.income,
             expense: val.expense,
