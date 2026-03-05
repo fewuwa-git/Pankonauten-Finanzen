@@ -5,6 +5,8 @@ import { useFilterState, PeriodKey } from '@/hooks/useFilterState';
 import {
     LineChart,
     Line,
+    BarChart,
+    Bar,
     XAxis,
     YAxis,
     CartesianGrid,
@@ -12,6 +14,8 @@ import {
     ResponsiveContainer,
     Legend,
 } from 'recharts';
+
+type ChartType = 'line' | 'waterfall';
 
 interface Transaction {
     id: string;
@@ -185,6 +189,36 @@ function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
     );
 }
 
+interface WaterfallTooltipProps {
+    active?: boolean;
+    payload?: Array<{ payload: { change: number; balance: number } }>;
+    label?: string;
+}
+
+function WaterfallTooltip({ active, payload, label }: WaterfallTooltipProps) {
+    if (!active || !payload || payload.length === 0) return null;
+    const d = payload[0]?.payload;
+    const isPositive = d.change >= 0;
+    return (
+        <div style={{
+            background: 'white',
+            border: '1px solid var(--border)',
+            borderRadius: 'var(--radius-sm)',
+            padding: '12px 16px',
+            boxShadow: 'var(--shadow-md)',
+            fontSize: '13px',
+        }}>
+            <p style={{ fontWeight: 600, color: 'var(--text)', marginBottom: 6 }}>{label}</p>
+            <p style={{ color: isPositive ? '#22c55e' : '#ef4444', margin: '2px 0' }}>
+                Veränderung: {isPositive ? '+' : ''}{formatCurrency(d.change)}
+            </p>
+            <p style={{ color: 'var(--text-muted)', margin: '2px 0' }}>
+                Kontostand: {formatCurrency(d.balance)}
+            </p>
+        </div>
+    );
+}
+
 interface DashboardClientProps {
     transactions: Transaction[];
 }
@@ -193,6 +227,7 @@ export default function DashboardClient({ transactions }: DashboardClientProps) 
     const { period, setPeriod, customStart, setCustomStart, customEnd, setCustomEnd } = useFilterState('6m');
     const [granularity, setGranularity] = useState<Granularity>('month');
     const [compare, setCompare] = useState(false);
+    const [chartType, setChartType] = useState<ChartType>('line');
 
     const { start, end } = useMemo(() => getDateRange(period, customStart, customEnd), [period, customStart, customEnd]);
     const compareRange = useMemo(() => getCompareDateRange(period), [period]);
@@ -216,6 +251,28 @@ export default function DashboardClient({ transactions }: DashboardClientProps) 
             vergleich: compareData[i]?.balance,
         }));
     }, [currentData, compareData]);
+
+    // Waterfall chart data
+    const waterfallData = useMemo(() => {
+        if (currentData.length === 0) return [];
+        const txBeforePeriod = [...transactions]
+            .filter(t => new Date(t.date) < start)
+            .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+        const initialBalance = txBeforePeriod.length > 0 ? txBeforePeriod[0].balance : 0;
+        return currentData.map((d, i) => {
+            const prev = i === 0 ? initialBalance : currentData[i - 1].balance;
+            const curr = d.balance;
+            const change = curr - prev;
+            return {
+                label: d.label,
+                base: Math.min(prev, curr),
+                positive: change > 0 ? change : 0,
+                negative: change < 0 ? Math.abs(change) : 0,
+                change,
+                balance: curr,
+            };
+        });
+    }, [currentData, transactions, start]);
 
     // Stats for current period
     const stats = useMemo(() => {
@@ -351,49 +408,43 @@ export default function DashboardClient({ transactions }: DashboardClientProps) 
             <div className="card mb-6">
                 <div className="card-header">
                     <div className="card-title">📈 Kontostandsverlauf</div>
+                    <select
+                        value={chartType}
+                        onChange={(e) => setChartType(e.target.value as ChartType)}
+                        className="form-input"
+                        style={{ fontSize: '13px', padding: '4px 8px', width: 'auto' }}
+                    >
+                        <option value="line">Liniendiagramm</option>
+                        <option value="waterfall">Wasserfalldiagramm</option>
+                    </select>
                 </div>
 
                 <div className="card-body">
                     <div className="chart-container" style={{ height: 300 }}>
                         <ResponsiveContainer width="100%" height="100%">
-                            <LineChart data={chartData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
-                                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                                <XAxis
-                                    dataKey="label"
-                                    tick={{ fontSize: 12, fill: '#6b7280' }}
-                                    tickLine={false}
-                                    axisLine={{ stroke: '#e5e7eb' }}
-                                />
-                                <YAxis
-                                    tick={{ fontSize: 12, fill: '#6b7280' }}
-                                    tickLine={false}
-                                    axisLine={false}
-                                    tickFormatter={(v) => `€${(v / 1000).toFixed(0)}k`}
-                                />
-                                <Tooltip content={<CustomTooltip />} />
-                                {compare && <Legend />}
-                                <Line
-                                    type="monotone"
-                                    dataKey="kontostand"
-                                    name="Kontostand"
-                                    stroke="#1a2e45"
-                                    strokeWidth={2.5}
-                                    dot={false}
-                                    activeDot={{ r: 5, fill: '#1a2e45' }}
-                                />
-                                {compare && (
-                                    <Line
-                                        type="monotone"
-                                        dataKey="vergleich"
-                                        name="Vorperiode"
-                                        stroke="#fecb2f"
-                                        strokeWidth={2}
-                                        strokeDasharray="5 5"
-                                        dot={false}
-                                        activeDot={{ r: 4, fill: '#fecb2f' }}
-                                    />
-                                )}
-                            </LineChart>
+                            {chartType === 'line' ? (
+                                <LineChart data={chartData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
+                                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                                    <XAxis dataKey="label" tick={{ fontSize: 12, fill: '#6b7280' }} tickLine={false} axisLine={{ stroke: '#e5e7eb' }} />
+                                    <YAxis tick={{ fontSize: 12, fill: '#6b7280' }} tickLine={false} axisLine={false} tickFormatter={(v) => `€${(v / 1000).toFixed(0)}k`} />
+                                    <Tooltip content={<CustomTooltip />} />
+                                    {compare && <Legend />}
+                                    <Line type="monotone" dataKey="kontostand" name="Kontostand" stroke="#1a2e45" strokeWidth={2.5} dot={false} activeDot={{ r: 5, fill: '#1a2e45' }} />
+                                    {compare && (
+                                        <Line type="monotone" dataKey="vergleich" name="Vorperiode" stroke="#fecb2f" strokeWidth={2} strokeDasharray="5 5" dot={false} activeDot={{ r: 4, fill: '#fecb2f' }} />
+                                    )}
+                                </LineChart>
+                            ) : (
+                                <BarChart data={waterfallData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
+                                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                                    <XAxis dataKey="label" tick={{ fontSize: 12, fill: '#6b7280' }} tickLine={false} axisLine={{ stroke: '#e5e7eb' }} />
+                                    <YAxis tick={{ fontSize: 12, fill: '#6b7280' }} tickLine={false} axisLine={false} tickFormatter={(v) => `€${(v / 1000).toFixed(0)}k`} />
+                                    <Tooltip content={<WaterfallTooltip />} />
+                                    <Bar dataKey="base" stackId="wf" fill="transparent" />
+                                    <Bar dataKey="positive" stackId="wf" fill="#22c55e" radius={[3, 3, 0, 0]} name="Anstieg" />
+                                    <Bar dataKey="negative" stackId="wf" fill="#ef4444" radius={[3, 3, 0, 0]} name="Rückgang" />
+                                </BarChart>
+                            )}
                         </ResponsiveContainer>
                     </div>
                 </div>
