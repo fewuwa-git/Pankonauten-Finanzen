@@ -16,6 +16,7 @@ interface PreviewRow {
     description: string;
     counterparty: string;
     amount: number;
+    balance: number;
     category: string;
 }
 
@@ -24,6 +25,7 @@ interface CsvMapping {
     description: string;
     counterparty: string;
     amount: string;
+    balance: string;
 }
 
 const MAPPING_STORAGE_KEY = 'csvColumnMapping';
@@ -32,6 +34,7 @@ const DATE_ALIASES = ['Datum', 'Buchungstag', 'date', 'Date', 'Buchungsdatum', '
 const DESCRIPTION_ALIASES = ['Verwendungszweck', 'Buchungstext', 'description', 'Description', 'Zahlungsreferenz', 'Betreff'];
 const COUNTERPARTY_ALIASES = ['Name', 'Beguenstigter/Zahlungspflichtiger', 'counterparty', 'Auftraggeber', 'Payee', 'Empfänger', 'Zahlungsempfänger'];
 const AMOUNT_ALIASES = ['Betrag (EUR)', 'Betrag', 'amount', 'Amount', 'Umsatz', 'Betrag (€)'];
+const BALANCE_ALIASES = ['Saldo (EUR)', 'Saldo', 'balance', 'Balance', 'Kontostand', 'Saldo (€)'];
 
 function autoDetect(cols: string[], aliases: string[]): string {
     return cols.find(c => aliases.some(a => a.toLowerCase() === c.toLowerCase())) || '';
@@ -43,6 +46,7 @@ function autoDetectMapping(cols: string[]): CsvMapping {
         description: autoDetect(cols, DESCRIPTION_ALIASES),
         counterparty: autoDetect(cols, COUNTERPARTY_ALIASES),
         amount: autoDetect(cols, AMOUNT_ALIASES),
+        balance: autoDetect(cols, BALANCE_ALIASES),
     };
 }
 
@@ -64,11 +68,12 @@ interface UploadClientProps {
     user: User;
 }
 
-const MAPPING_LABELS: { key: keyof CsvMapping; label: string }[] = [
+const MAPPING_LABELS: { key: keyof CsvMapping; label: string; optional?: boolean }[] = [
     { key: 'date', label: 'Datum' },
     { key: 'description', label: 'Beschreibung' },
     { key: 'counterparty', label: 'Gegenüber' },
     { key: 'amount', label: 'Betrag' },
+    { key: 'balance', label: 'Saldo', optional: true },
 ];
 
 export default function UploadClient({ user }: UploadClientProps) {
@@ -89,7 +94,7 @@ export default function UploadClient({ user }: UploadClientProps) {
 
     const [rawRows, setRawRows] = useState<Record<string, string>[]>([]);
     const [columns, setColumns] = useState<string[]>([]);
-    const [mapping, setMapping] = useState<CsvMapping>({ date: '', description: '', counterparty: '', amount: '' });
+    const [mapping, setMapping] = useState<CsvMapping>({ date: '', description: '', counterparty: '', amount: '', balance: '' });
     const [mappingFromStorage, setMappingFromStorage] = useState(false);
 
     useEffect(() => {
@@ -140,8 +145,10 @@ export default function UploadClient({ user }: UploadClientProps) {
             const counterparty = anonymizeText(row[m.counterparty] || '');
             const amountStr = row[m.amount] || '0';
             const amount = parseFloat(amountStr.replace(/\./g, '').replace(',', '.').replace(/[^0-9.-]/g, '')) || 0;
+            const balanceStr = m.balance ? (row[m.balance] || '0') : '0';
+            const balance = parseFloat(balanceStr.replace(/\./g, '').replace(',', '.').replace(/[^0-9.-]/g, '')) || 0;
             const category = 'Nicht kategorisiert';
-            return { date, description, counterparty, amount, category };
+            return { date, description, counterparty, amount, balance, category };
         }).filter((r) => r.date && r.amount !== 0);
         setPreview(parsed);
         localStorage.setItem(MAPPING_STORAGE_KEY, JSON.stringify(m));
@@ -236,7 +243,7 @@ export default function UploadClient({ user }: UploadClientProps) {
             const amount = parseFloat(amountStr.replace(/\./g, '').replace(',', '.')) || 0;
             const category = 'Nicht kategorisiert';
 
-            return { date, description, counterparty, amount, category };
+            return { date, description, counterparty, amount, balance: 0, category };
         }).filter((r): r is PreviewRow => r !== null && r.date !== '' && r.amount !== 0);
 
         if (parsed.length === 0) {

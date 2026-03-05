@@ -231,10 +231,14 @@ export async function addTransactions(newTransactions: Transaction[]): Promise<n
     const all = [...existing, ...uniqueNewTransactions];
     all.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
-    let balance = 0;
-    for (const tx of all) {
-        balance += tx.amount;
-        tx.balance = Math.round(balance * 100) / 100;
+    // Only recalculate balance if new transactions don't provide one from CSV
+    const hasProvidedBalance = uniqueNewTransactions.some(tx => tx.balance !== 0);
+    if (!hasProvidedBalance) {
+        let balance = 0;
+        for (const tx of all) {
+            balance += tx.amount;
+            tx.balance = Math.round(balance * 100) / 100;
+        }
     }
 
     await saveTransactions(all);
