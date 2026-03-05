@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
+import ImpersonationBar from './ImpersonationBar';
 
 interface SidebarProps {
     user: { name: string; email: string; role: string };
@@ -50,15 +51,27 @@ const NAV_ITEMS: NavGroup[] = [
     },
 ];
 
+const COLLAPSIBLE_SECTIONS = ['VERWALTUNG'];
+
 export default function Sidebar({ user }: SidebarProps) {
     const pathname = usePathname();
     const router = useRouter();
     const [isOpen, setIsOpen] = useState(false);
+    const [collapsedSections, setCollapsedSections] = useState<Set<string>>(new Set(COLLAPSIBLE_SECTIONS));
 
     useEffect(() => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
         setIsOpen(false);
     }, [pathname]);
+
+    function toggleSection(section: string) {
+        setCollapsedSections(prev => {
+            const next = new Set(prev);
+            if (next.has(section)) next.delete(section);
+            else next.add(section);
+            return next;
+        });
+    }
 
     async function handleLogout() {
         await fetch('/api/auth', { method: 'DELETE' });
@@ -75,6 +88,7 @@ export default function Sidebar({ user }: SidebarProps) {
 
     return (
         <>
+            <ImpersonationBar />
             <div className={`sidebar-overlay ${isOpen ? 'open' : ''}`} onClick={() => setIsOpen(false)} />
 
             <div className="mobile-header">
@@ -101,10 +115,20 @@ export default function Sidebar({ user }: SidebarProps) {
 
                         if (visibleItems.length === 0) return null;
 
+                        const isCollapsible = user.role === 'admin' && COLLAPSIBLE_SECTIONS.includes(group.section);
+                        const isCollapsed = isCollapsible && collapsedSections.has(group.section);
+
                         return (
                             <div key={group.section}>
-                                <div className="sidebar-section-label">{group.section}</div>
-                                {visibleItems.map((item) => (
+                                <div
+                                    className="sidebar-section-label"
+                                    onClick={isCollapsible ? () => toggleSection(group.section) : undefined}
+                                    style={isCollapsible ? { cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', userSelect: 'none' } : undefined}
+                                >
+                                    {group.section}
+                                    {isCollapsible && <span style={{ fontSize: '10px', opacity: 0.6 }}>{isCollapsed ? '▶' : '▼'}</span>}
+                                </div>
+                                {!isCollapsed && visibleItems.map((item) => (
                                     <a
                                         key={item.href}
                                         href={item.href}

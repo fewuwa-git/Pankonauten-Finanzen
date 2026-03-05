@@ -33,7 +33,21 @@ export default async function KontoauszugPage() {
     if (!userId || !role) redirect('/login');
     if (role === 'springerin') redirect('/springerin/abrechnung');
     if (role !== 'admin' && role !== 'member') {
-        return <div style={{ padding: '2rem' }}>Zugriff verweigert. Diese Seite ist nur für Vorstandsmitglieder zugänglich.</div>;
+        return (
+            <div className="app-layout">
+                <Sidebar user={{ name, email, role }} />
+                <main className="main-content">
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
+                        <div className="card" style={{ textAlign: 'center', maxWidth: '400px', padding: '2.5rem' }}>
+                            <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>🔒</div>
+                            <h2 style={{ marginBottom: '0.5rem' }}>Kein Zugriff</h2>
+                            <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>Diese Seite ist nur für Vorstandsmitglieder zugänglich.</p>
+                            <a href="/eltern/buchungen" className="sidebar-link" style={{ justifyContent: 'center' }}>Zur Startseite</a>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        );
     }
 
     return (

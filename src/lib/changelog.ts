@@ -9,6 +9,9 @@ export const CHANGELOG: ChangelogEntry[] = [
         changes: [
             '— Verwaltung —',
             'Neue Seite „Zugriffsrechte": Admins sehen auf einen Blick, welche Rollen auf welche Seiten zugreifen dürfen.',
+            'Der Bereich „Verwaltung" in der Navigation lässt sich für Admins ein- und ausklappen.',
+            'Neue Funktion „Ansicht wechseln": Admins können die Oberfläche aus der Perspektive eines anderen Nutzers erleben – mit Suche und alphabetischer Sortierung.',
+            'Seiten mit eingeschränktem Zugriff zeigen jetzt eine strukturierte Hinweisseite mit Navigation statt einer leeren Fehlermeldung.',
         ],
     },
     {
