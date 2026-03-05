@@ -51,11 +51,13 @@ function formatCurrency(amount: number): string {
 }
 
 function formatDate(dateStr: string, granularity: Granularity): string {
+    if (granularity === 'week') {
+        const m = dateStr.match(/W(\d+)/);
+        return m ? `KW ${parseInt(m[1])}` : dateStr;
+    }
     const d = new Date(dateStr);
     if (granularity === 'month') {
         return d.toLocaleDateString('de-DE', { month: 'short', year: '2-digit' });
-    } else if (granularity === 'week') {
-        return `KW ${getWeek(d)}`;
     }
     return d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' });
 }
