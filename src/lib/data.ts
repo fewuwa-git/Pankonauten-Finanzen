@@ -157,16 +157,28 @@ export async function updateUserLastLogin(id: string, timestamp: string): Promis
 // ─── Transactions ─────────────────────────────────────────────────────────────
 
 export async function getTransactions(): Promise<Transaction[]> {
-    const { data, error } = await supabase
-        .from('pankonauten_transactions')
-        .select('*')
-        .order('date', { ascending: true })
-        .range(0, 99999);
+    const all: Transaction[] = [];
+    const batchSize = 1000;
+    let from = 0;
 
-    if (error) {
-        console.error("Database error in getTransactions:", error);
-        return [];
+    while (true) {
+        const { data, error } = await supabase
+            .from('pankonauten_transactions')
+            .select('*')
+            .order('date', { ascending: true })
+            .range(from, from + batchSize - 1);
+
+        if (error) {
+            console.error("Database error in getTransactions:", error);
+            return [];
+        }
+
+        all.push(...(data || []));
+        if (!data || data.length < batchSize) break;
+        from += batchSize;
     }
+
+    const data = all;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return (data || []).map((t: any) => ({
