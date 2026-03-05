@@ -469,9 +469,8 @@ export default function UploadClient({ user }: UploadClientProps) {
                                             <th>
                                                 <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
                                                     Datum
-                                                    <span
-                                                        title="Die Vorschau zeigt das Datum im Format JJJJ-MM-TT. Im Dashboard wird es als TT.MM.JJJJ angezeigt."
-                                                        style={{
+                                                    <span style={{ position: 'relative', display: 'inline-flex' }} className="date-info-icon">
+                                                        <span style={{
                                                             display: 'inline-flex',
                                                             alignItems: 'center',
                                                             justifyContent: 'center',
@@ -484,8 +483,26 @@ export default function UploadClient({ user }: UploadClientProps) {
                                                             fontWeight: 700,
                                                             cursor: 'default',
                                                             flexShrink: 0,
-                                                        }}
-                                                    >i</span>
+                                                        }}>i</span>
+                                                        <span style={{
+                                                            display: 'none',
+                                                            position: 'absolute',
+                                                            top: '18px',
+                                                            left: '0',
+                                                            background: 'var(--card)',
+                                                            border: '1px solid var(--border)',
+                                                            borderRadius: 'var(--radius-sm)',
+                                                            padding: '6px 10px',
+                                                            fontSize: '12px',
+                                                            color: 'var(--text)',
+                                                            whiteSpace: 'nowrap',
+                                                            zIndex: 50,
+                                                            boxShadow: 'var(--shadow)',
+                                                            fontWeight: 400,
+                                                        }} className="date-info-tooltip">
+                                                            Vorschau: JJJJ-MM-TT · Im Dashboard: TT.MM.JJJJ
+                                                        </span>
+                                                    </span>
                                                 </span>
                                             </th>
                                             <th>Beschreibung</th>
