@@ -375,13 +375,14 @@ export default function UploadClient({ user }: UploadClientProps) {
                             />
 
                             <div className="paste-zone mt-6">
-                                <div
-                                    className="paste-zone-header"
-                                    onClick={() => setPasteOpen(o => !o)}
-                                    style={{ cursor: 'pointer', userSelect: 'none' }}
-                                >
-                                    <h4>Oder Daten hier einfügen</h4>
-                                    <span className="text-muted" style={{ fontSize: '11px' }}>{pasteOpen ? '▲ schließen' : '▼ anzeigen'}</span>
+                                <div className="paste-zone-header">
+                                    <h4
+                                        onClick={() => setPasteOpen(o => !o)}
+                                        style={{ cursor: 'pointer', userSelect: 'none', display: 'flex', alignItems: 'center', gap: '6px' }}
+                                    >
+                                        Oder Daten hier einfügen
+                                        <span style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 400 }}>{pasteOpen ? '▲' : '▼ anzeigen'}</span>
+                                    </h4>
                                 </div>
                                 {pasteOpen && (
                                     <>
