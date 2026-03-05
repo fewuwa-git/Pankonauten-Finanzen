@@ -408,10 +408,10 @@ export default function DashboardClient({ transactions }: DashboardClientProps) 
                     <table className="data-table">
                         <thead>
                             <tr>
-                                <th>Datum</th>
+                                <th style={{ width: '1%', whiteSpace: 'nowrap' }}>Datum</th>
                                 <th>Beschreibung</th>
                                 <th>Gegenüber</th>
-                                <th>Kategorie</th>
+                                <th style={{ width: 100, maxWidth: 100 }}>Kategorie</th>
                                 <th style={{ textAlign: 'right' }}>Betrag</th>
                                 <th style={{ textAlign: 'right' }}>Saldo</th>
                             </tr>
@@ -422,24 +422,16 @@ export default function DashboardClient({ transactions }: DashboardClientProps) 
                                     <td style={{ whiteSpace: 'nowrap', color: 'var(--text-muted)', fontSize: '13px' }}>
                                         {new Date(tx.date).toLocaleDateString('de-DE')}
                                     </td>
-                                    <td style={{ maxWidth: 200 }}>
-                                        <div style={{ fontWeight: 500, fontSize: '13px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                    <td style={{ maxWidth: 500 }}>
+                                        <div title={tx.description} style={{ fontWeight: 500, fontSize: '13px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                                             {tx.description}
                                         </div>
                                     </td>
                                     <td style={{ fontSize: '13px', color: 'var(--text-muted)', maxWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                                         {tx.counterparty}
                                     </td>
-                                    <td style={{ fontSize: '13px' }}>
-                                        <span
-                                            className="category-badge"
-                                            style={{
-                                                background: `${CATEGORY_COLORS[tx.category] || '#6b7280'}18`,
-                                                color: CATEGORY_COLORS[tx.category] || '#6b7280',
-                                            }}
-                                        >
-                                            {tx.category}
-                                        </span>
+                                    <td style={{ fontSize: '13px', color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 100 }}>
+                                        {tx.category}
                                     </td>
                                     <td className={`tx-amount ${tx.amount >= 0 ? 'positive' : 'negative'}`} style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>
                                         {tx.amount >= 0 ? '+' : ''}{formatCurrency(tx.amount)}

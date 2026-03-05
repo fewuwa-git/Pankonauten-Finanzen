@@ -231,7 +231,7 @@ export default function KontoauszugClient({ transactions: initialTransactions, u
                     <table className="data-table">
                         <thead>
                             <tr>
-                                <th>Datum</th>
+                                <th style={{ width: '1%', whiteSpace: 'nowrap' }}>Datum</th>
                                 <th>Beschreibung</th>
                                 <th>Gegenüber</th>
                                 <th>Kategorie</th>
@@ -252,8 +252,8 @@ export default function KontoauszugClient({ transactions: initialTransactions, u
                                         <td style={{ whiteSpace: 'nowrap', color: 'var(--text-muted)', fontSize: '13px' }}>
                                             {new Date(tx.date).toLocaleDateString('de-DE')}
                                         </td>
-                                        <td style={{ maxWidth: 200 }}>
-                                            <div style={{ fontWeight: 500, fontSize: '13px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                        <td style={{ maxWidth: 500 }}>
+                                            <div title={tx.description} style={{ fontWeight: 500, fontSize: '13px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                                                 {tx.description}
                                             </div>
                                         </td>
