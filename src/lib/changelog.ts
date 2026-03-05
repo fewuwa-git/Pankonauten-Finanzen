@@ -12,6 +12,8 @@ export const CHANGELOG: ChangelogEntry[] = [
             'Der Bereich „Verwaltung" in der Navigation lässt sich für Admins ein- und ausklappen.',
             'Neue Funktion „Ansicht wechseln": Admins können die Oberfläche aus der Perspektive eines anderen Nutzers erleben – mit Suche und alphabetischer Sortierung.',
             'Seiten mit eingeschränktem Zugriff zeigen jetzt eine strukturierte Hinweisseite mit Navigation statt einer leeren Fehlermeldung.',
+            '— CSV-Import —',
+            'Beim Hochladen einer CSV-Datei erscheint jetzt eine Spaltenzuordnung: Man kann auswählen, welche Spalte der CSV welchem Feld entspricht (Datum, Beschreibung, Gegenüber, Betrag). Die Zuordnung wird automatisch erkannt und für den nächsten Import gespeichert.',
         ],
     },
     {

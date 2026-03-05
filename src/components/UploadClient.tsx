@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useRef, useEffect } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Papa from 'papaparse';
 import Sidebar from '@/components/Sidebar';
@@ -17,6 +17,46 @@ interface PreviewRow {
     counterparty: string;
     amount: number;
     category: string;
+}
+
+interface CsvMapping {
+    date: string;
+    description: string;
+    counterparty: string;
+    amount: string;
+}
+
+const MAPPING_STORAGE_KEY = 'csvColumnMapping';
+
+const DATE_ALIASES = ['Datum', 'Buchungstag', 'date', 'Date', 'Buchungsdatum', 'Valutadatum'];
+const DESCRIPTION_ALIASES = ['Verwendungszweck', 'Buchungstext', 'description', 'Description', 'Zahlungsreferenz', 'Betreff'];
+const COUNTERPARTY_ALIASES = ['Name', 'Beguenstigter/Zahlungspflichtiger', 'counterparty', 'Auftraggeber', 'Payee', 'Empfänger', 'Zahlungsempfänger'];
+const AMOUNT_ALIASES = ['Betrag (EUR)', 'Betrag', 'amount', 'Amount', 'Umsatz', 'Betrag (€)'];
+
+function autoDetect(cols: string[], aliases: string[]): string {
+    return cols.find(c => aliases.some(a => a.toLowerCase() === c.toLowerCase())) || '';
+}
+
+function autoDetectMapping(cols: string[]): CsvMapping {
+    return {
+        date: autoDetect(cols, DATE_ALIASES),
+        description: autoDetect(cols, DESCRIPTION_ALIASES),
+        counterparty: autoDetect(cols, COUNTERPARTY_ALIASES),
+        amount: autoDetect(cols, AMOUNT_ALIASES),
+    };
+}
+
+function parseDate(raw: string): string {
+    if (!raw) return '';
+    if (raw.includes('.')) {
+        const parts = raw.split('.');
+        if (parts.length === 3) {
+            let year = parts[2];
+            if (year.length === 2) year = '20' + year;
+            return `${year}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+        }
+    }
+    return raw;
 }
 
 const CATEGORY_KEYWORDS: Record<string, string[]> = {
@@ -46,6 +86,13 @@ interface UploadClientProps {
     user: User;
 }
 
+const MAPPING_LABELS: { key: keyof CsvMapping; label: string }[] = [
+    { key: 'date', label: 'Datum' },
+    { key: 'description', label: 'Beschreibung' },
+    { key: 'counterparty', label: 'Gegenüber' },
+    { key: 'amount', label: 'Betrag' },
+];
+
 export default function UploadClient({ user }: UploadClientProps) {
     const router = useRouter();
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -56,9 +103,15 @@ export default function UploadClient({ user }: UploadClientProps) {
     const [success, setSuccess] = useState('');
     const [error, setError] = useState('');
 
+    const [formatOpen, setFormatOpen] = useState(false);
     const [namesToAnonymize, setNamesToAnonymize] = useState<string[]>([]);
     const [newNameInput, setNewNameInput] = useState('');
     const [pasteArea, setPasteArea] = useState('');
+
+    const [rawRows, setRawRows] = useState<Record<string, string>[]>([]);
+    const [columns, setColumns] = useState<string[]>([]);
+    const [mapping, setMapping] = useState<CsvMapping>({ date: '', description: '', counterparty: '', amount: '' });
+    const [mappingFromStorage, setMappingFromStorage] = useState(false);
 
     useEffect(() => {
         const stored = localStorage.getItem('anonymizeNames');
@@ -101,43 +154,62 @@ export default function UploadClient({ user }: UploadClientProps) {
         return result;
     }, [namesToAnonymize]);
 
-
+    const applyMapping = useCallback((rows: Record<string, string>[], m: CsvMapping) => {
+        const parsed: PreviewRow[] = rows.map((row) => {
+            const date = parseDate(row[m.date] || '');
+            const description = anonymizeText(row[m.description] || '');
+            const counterparty = anonymizeText(row[m.counterparty] || '');
+            const amountStr = row[m.amount] || '0';
+            const amount = parseFloat(amountStr.replace(/\./g, '').replace(',', '.').replace(/[^0-9.-]/g, '')) || 0;
+            const category = guessCategory(description, counterparty);
+            return { date, description, counterparty, amount, category };
+        }).filter((r) => r.date && r.amount !== 0);
+        setPreview(parsed);
+        localStorage.setItem(MAPPING_STORAGE_KEY, JSON.stringify(m));
+    }, [anonymizeText]);
 
     const processCSV = useCallback((file: File) => {
         setFileName(file.name);
         setError('');
         setSuccess('');
+        setPreview([]);
+        setRawRows([]);
+        setColumns([]);
         Papa.parse(file, {
             header: true,
             skipEmptyLines: true,
+            encoding: 'ISO-8859-1',
             complete: (results) => {
                 const rows = results.data as Record<string, string>[];
-                const parsed: PreviewRow[] = rows.map((row) => {
-                    // Try common bank CSV column names
-                    let date = row['Buchungstag'] || row['date'] || row['Datum'] || row['Date'] || '';
-                    if (date.includes('.')) {
-                        const parts = date.split('.');
-                        if (parts.length === 3) {
-                            let dtYear = parts[2];
-                            if (dtYear.length === 2) dtYear = '20' + dtYear;
-                            date = `${dtYear}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
-                        }
-                    }
-                    let description = row['Buchungstext'] || row['description'] || row['Verwendungszweck'] || row['Description'] || '';
-                    let counterparty = row['Beguenstigter/Zahlungspflichtiger'] || row['counterparty'] || row['Auftraggeber'] || row['Payee'] || '';
+                const cols = (results.meta.fields || []).filter(Boolean);
+                setRawRows(rows);
+                setColumns(cols);
 
-                    description = anonymizeText(description);
-                    counterparty = anonymizeText(counterparty);
-                    const amountStr = row['Betrag'] || row['amount'] || row['Amount'] || row['Umsatz'] || '0';
-                    const amount = parseFloat(amountStr.replace(',', '.').replace(/[^0-9.-]/g, '')) || 0;
-                    const category = guessCategory(description, counterparty);
-                    return { date, description, counterparty, amount, category };
-                }).filter((r) => r.date && r.amount !== 0);
-                setPreview(parsed);
+                const saved = localStorage.getItem(MAPPING_STORAGE_KEY);
+                let detectedMapping: CsvMapping;
+                let fromStorage = false;
+                if (saved) {
+                    try {
+                        const parsed = JSON.parse(saved) as CsvMapping;
+                        const allValid = Object.values(parsed).every(v => !v || cols.includes(v));
+                        if (allValid) {
+                            detectedMapping = parsed;
+                            fromStorage = true;
+                        } else {
+                            detectedMapping = autoDetectMapping(cols);
+                        }
+                    } catch {
+                        detectedMapping = autoDetectMapping(cols);
+                    }
+                } else {
+                    detectedMapping = autoDetectMapping(cols);
+                }
+                setMapping(detectedMapping);
+                setMappingFromStorage(fromStorage);
             },
             error: () => setError('CSV-Datei konnte nicht gelesen werden.'),
         });
-    }, [anonymizeText]);
+    }, []);
 
     const handleDrop = useCallback((e: React.DragEvent) => {
         e.preventDefault();
@@ -237,6 +309,42 @@ export default function UploadClient({ user }: UploadClientProps) {
                     </div>
                 </div>
                 <div className="page-body">
+                    {/* CSV Format Hint */}
+                    <div className="card mb-6">
+                        <div
+                            className="card-header"
+                            onClick={() => setFormatOpen(o => !o)}
+                            style={{ cursor: 'pointer', userSelect: 'none' }}
+                        >
+                            <div className="card-title">ℹ️ CSV-Format</div>
+                            <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{formatOpen ? '▲ schließen' : '▼ anzeigen'}</span>
+                        </div>
+                        {formatOpen && (
+                            <div className="card-body">
+                                <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '12px' }}>
+                                    Unterstützte Spaltenbezeichnungen (kompatibel mit Sparkasse, ING, DKB, Commerzbank):
+                                </p>
+                                <code style={{
+                                    display: 'block',
+                                    background: 'var(--bg)',
+                                    padding: '12px 16px',
+                                    borderRadius: 'var(--radius-sm)',
+                                    fontSize: '12px',
+                                    color: 'var(--text)',
+                                    fontFamily: 'monospace',
+                                }}>
+                                    Buchungstag;Buchungstext;Beguenstigter/Zahlungspflichtiger;Betrag<br />
+                                    oder:<br />
+                                    date;description;counterparty;amount
+                                </code>
+                                <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginTop: '12px' }}>
+                                    Duplikate werden beim Import automatisch erkannt und ignoriert.
+                                    Du kannst also bedenkenlos Zeiträume hochladen, die sich überschneiden.
+                                </p>
+                            </div>
+                        )}
+                    </div>
+
                     {/* Drop Zone */}
                     <div className="card mb-6">
                         <div className="card-body">
@@ -245,11 +353,17 @@ export default function UploadClient({ user }: UploadClientProps) {
                                 onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
                                 onDragLeave={() => setDragging(false)}
                                 onDrop={handleDrop}
-                                onClick={() => fileInputRef.current?.click()}
                             >
                                 <div className="upload-zone-icon">📄</div>
                                 <h3>{fileName || 'CSV-Datei hier ablegen'}</h3>
-                                <p>{fileName ? 'Klicken zum Ändern' : 'oder klicken zum Auswählen · CSV-Format'}</p>
+                                <p style={{ marginBottom: '12px' }}>oder direkt auswählen:</p>
+                                <button
+                                    className="btn btn-primary btn-sm"
+                                    onClick={() => fileInputRef.current?.click()}
+                                    type="button"
+                                >
+                                    {fileName ? 'Andere Datei wählen' : 'Datei auswählen'}
+                                </button>
                             </div>
                             <input
                                 ref={fileInputRef}
@@ -291,34 +405,62 @@ export default function UploadClient({ user }: UploadClientProps) {
                         </div>
                     </div>
 
-                    {/* CSV Format Hint */}
-                    <div className="card mb-6">
-                        <div className="card-header">
-                            <div className="card-title">ℹ️ CSV-Format</div>
+                    {/* Column Mapping */}
+                    {columns.length > 0 && preview.length === 0 && (
+                        <div className="card mb-6">
+                            <div className="card-header">
+                                <div className="card-title">🗂️ Spaltenzuordnung</div>
+                                {mappingFromStorage && (
+                                    <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>gespeichertes Mapping geladen</span>
+                                )}
+                            </div>
+                            <div className="card-body">
+                                <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '16px' }}>
+                                    Welche Spalte der CSV enthält welche Information? Das Mapping wird für den nächsten Import gespeichert.
+                                </p>
+                                <div style={{ display: 'grid', gridTemplateColumns: '140px 1fr', gap: '10px 16px', alignItems: 'center', maxWidth: '480px', marginBottom: '20px' }}>
+                                    {MAPPING_LABELS.map(({ key, label }) => (
+                                        <React.Fragment key={key}>
+                                            <label style={{ fontSize: '13px', fontWeight: 500, color: 'var(--text)' }}>
+                                                {label}
+                                            </label>
+                                            <select
+                                                className="form-input"
+                                                style={{ fontSize: '13px', padding: '6px 10px' }}
+                                                value={mapping[key]}
+                                                onChange={(e) => setMapping(m => ({ ...m, [key]: e.target.value }))}
+                                            >
+                                                <option value="">— nicht zugeordnet —</option>
+                                                {columns.map(col => (
+                                                    <option key={col} value={col}>{col}</option>
+                                                ))}
+                                            </select>
+                                        </React.Fragment>
+                                    ))}
+                                </div>
+                                <div style={{ display: 'flex', gap: '8px' }}>
+                                    <button
+                                        className="btn btn-primary"
+                                        onClick={() => applyMapping(rawRows, mapping)}
+                                        disabled={!mapping.date || !mapping.amount}
+                                    >
+                                        Vorschau generieren
+                                    </button>
+                                    <button
+                                        className="btn btn-secondary btn-sm"
+                                        onClick={() => { setColumns([]); setRawRows([]); setFileName(''); }}
+                                    >
+                                        Abbrechen
+                                    </button>
+                                </div>
+                                {(!mapping.date || !mapping.amount) && (
+                                    <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '8px' }}>
+                                        Datum und Betrag müssen zugeordnet sein.
+                                    </p>
+                                )}
+                            </div>
                         </div>
-                        <div className="card-body">
-                            <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '12px' }}>
-                                Unterstützte Spaltenbezeichnungen (kompatibel mit Sparkasse, ING, DKB, Commerzbank):
-                            </p>
-                            <code style={{
-                                display: 'block',
-                                background: 'var(--bg)',
-                                padding: '12px 16px',
-                                borderRadius: 'var(--radius-sm)',
-                                fontSize: '12px',
-                                color: 'var(--text)',
-                                fontFamily: 'monospace',
-                            }}>
-                                Buchungstag;Buchungstext;Beguenstigter/Zahlungspflichtiger;Betrag<br />
-                                oder:<br />
-                                date;description;counterparty;amount
-                            </code>
-                            <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginTop: '12px' }}>
-                                💡 <strong>Hinweis:</strong> Duplikate werden beim Import automatisch erkannt und ignoriert.
-                                Du kannst also bedenkenlos Zeiträume hochladen, die sich überschneiden.
-                            </p>
-                        </div>
-                    </div>
+                    )}
 
                     {/* Preview */}
                     {preview.length > 0 && (
@@ -326,9 +468,14 @@ export default function UploadClient({ user }: UploadClientProps) {
                             <div className="card-header">
                                 <div className="card-title">👁️ Vorschau — {preview.length} Buchungen erkannt</div>
                                 <div style={{ display: 'flex', gap: '8px' }}>
-                                    <button className="btn btn-secondary btn-sm" onClick={() => { setPreview([]); setFileName(''); }}>
+                                    <button className="btn btn-secondary btn-sm" onClick={() => { setPreview([]); setColumns([]); setRawRows([]); setFileName(''); }}>
                                         Abbrechen
                                     </button>
+                                    {rawRows.length > 0 && (
+                                        <button className="btn btn-secondary btn-sm" onClick={() => setPreview([])}>
+                                            Mapping anpassen
+                                        </button>
+                                    )}
                                     <button
                                         className="btn btn-primary btn-sm"
                                         onClick={handleImport}
