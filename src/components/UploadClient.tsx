@@ -107,6 +107,7 @@ export default function UploadClient({ user }: UploadClientProps) {
     const [namesToAnonymize, setNamesToAnonymize] = useState<string[]>([]);
     const [newNameInput, setNewNameInput] = useState('');
     const [pasteArea, setPasteArea] = useState('');
+    const [pasteOpen, setPasteOpen] = useState(false);
 
     const [rawRows, setRawRows] = useState<Record<string, string>[]>([]);
     const [columns, setColumns] = useState<string[]>([]);
@@ -374,26 +375,34 @@ export default function UploadClient({ user }: UploadClientProps) {
                             />
 
                             <div className="paste-zone mt-6">
-                                <div className="paste-zone-header">
+                                <div
+                                    className="paste-zone-header"
+                                    onClick={() => setPasteOpen(o => !o)}
+                                    style={{ cursor: 'pointer', userSelect: 'none' }}
+                                >
                                     <h4>Oder Daten hier einfügen</h4>
-                                    <span className="text-muted" style={{ fontSize: '11px' }}>Kopiert aus Excel oder Online-Banking Tabelle (Tab-getrennt)</span>
+                                    <span className="text-muted" style={{ fontSize: '11px' }}>{pasteOpen ? '▲ schließen' : '▼ anzeigen'}</span>
                                 </div>
-                                <textarea
-                                    className="paste-area"
-                                    placeholder="Datum	Gegenüber	Beschreibung	...	Betrag"
-                                    value={pasteArea}
-                                    onChange={(e) => setPasteArea(e.target.value)}
-                                    rows={4}
-                                />
-                                <div className="flex justify-end mt-2">
-                                    <button
-                                        className="btn btn-secondary btn-sm"
-                                        onClick={handlePasteProcess}
-                                        disabled={!pasteArea.trim()}
-                                    >
-                                        Text verarbeiten
-                                    </button>
-                                </div>
+                                {pasteOpen && (
+                                    <>
+                                        <textarea
+                                            className="paste-area"
+                                            placeholder="Datum	Gegenüber	Beschreibung	...	Betrag"
+                                            value={pasteArea}
+                                            onChange={(e) => setPasteArea(e.target.value)}
+                                            rows={4}
+                                        />
+                                        <div className="flex justify-end mt-2">
+                                            <button
+                                                className="btn btn-secondary btn-sm"
+                                                onClick={handlePasteProcess}
+                                                disabled={!pasteArea.trim()}
+                                            >
+                                                Text verarbeiten
+                                            </button>
+                                        </div>
+                                    </>
+                                )}
                             </div>
 
                             {error && <div className="error-msg mt-4">⚠️ {error}</div>}
