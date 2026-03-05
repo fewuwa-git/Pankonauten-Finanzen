@@ -269,7 +269,7 @@ export default function UploadClient({ user }: UploadClientProps) {
 
             setPreview([]);
             setFileName('');
-            setTimeout(() => router.push('/dashboard'), 3500);
+            setTimeout(() => { window.location.href = '/dashboard'; }, 3500);
         } catch {
             setError('Import fehlgeschlagen. Bitte versuche es erneut.');
         } finally {
