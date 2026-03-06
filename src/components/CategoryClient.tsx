@@ -345,7 +345,7 @@ export default function CategoryClient({ transactions, categories }: CategoryCli
                                         tickFormatter={(v) => `${(v / 1000).toFixed(0)}k €`}
                                         width={55}
                                     />
-                                    <Tooltip content={<StackedTooltip />} cursor={{ fill: 'rgba(0,0,0,0.04)' }} />
+                                    <Tooltip content={<StackedTooltip />} cursor={{ fill: 'rgba(0,0,0,0.04)' }} wrapperStyle={{ zIndex: 50, background: 'white', borderRadius: 8 }} />
                                     <Legend
                                         wrapperStyle={{ fontSize: '12px', paddingTop: '12px' }}
                                         formatter={(value) => (
