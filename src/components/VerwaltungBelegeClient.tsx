@@ -77,10 +77,20 @@ export default function VerwaltungBelegeClient({ receipts: initialReceipts, unli
 
     async function handleSuggest(r: UnlinkedReceipt) {
         setSuggestingId(r.id);
-        const res = await fetch(`/api/receipts/${r.id}/suggest`, { method: 'POST' });
-        const data = await res.json();
-        if (data.suggestions) setSuggestionResults(prev => ({ ...prev, [r.id]: data }));
-        setSuggestingId(null);
+        try {
+            const res = await fetch(`/api/receipts/${r.id}/suggest`, { method: 'POST' });
+            const text = await res.text();
+            const data = text ? JSON.parse(text) : {};
+            if (data.suggestions) {
+                setSuggestionResults(prev => ({ ...prev, [r.id]: data }));
+            } else {
+                alert('KI-Analyse fehlgeschlagen: ' + (data.error ?? 'Unbekannter Fehler'));
+            }
+        } catch (e: any) {
+            alert('Fehler bei der KI-Analyse: ' + e.message);
+        } finally {
+            setSuggestingId(null);
+        }
     }
 
     async function handleLinkSuggestion(receiptId: string, tx: Suggestion['transaction']) {
