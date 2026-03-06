@@ -763,6 +763,7 @@ export async function getAllTransactionReceipts(): Promise<TransactionReceipt[]>
     const { data: receipts, error } = await supabase
         .from('pankonauten_transaction_receipts')
         .select('*')
+        .not('transaction_id', 'is', null)
         .order('uploaded_at', { ascending: false });
     if (error) { console.error('Error fetching all receipts:', error); return []; }
     if (!receipts || receipts.length === 0) return [];
