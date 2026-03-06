@@ -7,6 +7,7 @@ import {
     Line,
     BarChart,
     Bar,
+    ReferenceLine,
     XAxis,
     YAxis,
     CartesianGrid,
@@ -15,7 +16,7 @@ import {
     Legend,
 } from 'recharts';
 
-type ChartType = 'line' | 'waterfall';
+type ChartType = 'line' | 'waterfall' | 'columns';
 
 interface Transaction {
     id: string;
@@ -274,6 +275,15 @@ export default function DashboardClient({ transactions }: DashboardClientProps) 
         });
     }, [currentData, transactions, start]);
 
+    // Column chart data (income up, expense down)
+    const columnData = useMemo(() => {
+        return currentData.map((d) => ({
+            label: d.label,
+            einnahmen: d.income,
+            ausgaben: -d.expense,
+        }));
+    }, [currentData]);
+
     // Stats for current period
     const stats = useMemo(() => {
         const periodTx = transactions.filter((t) => {
@@ -416,6 +426,7 @@ export default function DashboardClient({ transactions }: DashboardClientProps) 
                     >
                         <option value="line">Liniendiagramm</option>
                         <option value="waterfall">Wasserfalldiagramm</option>
+                        <option value="columns">Säulendiagramm</option>
                     </select>
                 </div>
 
@@ -434,7 +445,7 @@ export default function DashboardClient({ transactions }: DashboardClientProps) 
                                         <Line type="monotone" dataKey="vergleich" name="Vorperiode" stroke="#fecb2f" strokeWidth={2} strokeDasharray="5 5" dot={false} activeDot={{ r: 4, fill: '#fecb2f' }} />
                                     )}
                                 </LineChart>
-                            ) : (
+                            ) : chartType === 'waterfall' ? (
                                 <BarChart data={waterfallData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
                                     <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                                     <XAxis dataKey="label" tick={{ fontSize: 12, fill: '#6b7280' }} tickLine={false} axisLine={{ stroke: '#e5e7eb' }} />
@@ -443,6 +454,17 @@ export default function DashboardClient({ transactions }: DashboardClientProps) 
                                     <Bar dataKey="base" stackId="wf" fill="transparent" />
                                     <Bar dataKey="positive" stackId="wf" fill="#22c55e" radius={[3, 3, 0, 0]} name="Anstieg" />
                                     <Bar dataKey="negative" stackId="wf" fill="#ef4444" radius={[3, 3, 0, 0]} name="Rückgang" />
+                                </BarChart>
+                            ) : (
+                                <BarChart data={columnData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
+                                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                                    <XAxis dataKey="label" tick={{ fontSize: 12, fill: '#6b7280' }} tickLine={false} axisLine={{ stroke: '#e5e7eb' }} />
+                                    <YAxis tick={{ fontSize: 12, fill: '#6b7280' }} tickLine={false} axisLine={false} tickFormatter={(v) => `€${(Math.abs(v) / 1000).toFixed(0)}k`} />
+                                    <Tooltip content={<CustomTooltip />} />
+                                    <Legend />
+                                    <ReferenceLine y={0} stroke="#e5e7eb" />
+                                    <Bar dataKey="einnahmen" name="Einnahmen" fill="#22c55e" radius={[3, 3, 0, 0]} />
+                                    <Bar dataKey="ausgaben" name="Ausgaben" fill="#ef4444" radius={[0, 0, 3, 3]} />
                                 </BarChart>
                             )}
                         </ResponsiveContainer>
