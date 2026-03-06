@@ -22,6 +22,18 @@ interface UnlinkedReceipt {
     uploaded_at: string;
 }
 
+interface Suggestion {
+    transaction_id: string;
+    confidence: number;
+    reason: string;
+    transaction: { id: string; date: string; description: string; counterparty: string; amount: number; category: string };
+}
+
+interface SuggestResult {
+    extracted: { vendor?: string; amount?: number; date?: string; description?: string };
+    suggestions: Suggestion[];
+}
+
 interface Props {
     receipts: TransactionReceipt[];
     unlinked: UnlinkedReceipt[];
@@ -35,6 +47,8 @@ export default function VerwaltungBelegeClient({ receipts: initialReceipts, unli
     const [loadingUrl, setLoadingUrl] = useState<string | null>(null);
     const [uploading, setUploading] = useState(false);
     const [linkModal, setLinkModal] = useState<{ id: string; fileName: string } | null>(null);
+    const [suggestingId, setSuggestingId] = useState<string | null>(null);
+    const [suggestionResults, setSuggestionResults] = useState<Record<string, SuggestResult>>({});
     const fileRef = useRef<HTMLInputElement>(null);
 
     const filtered = useMemo(() => {
@@ -61,6 +75,24 @@ export default function VerwaltungBelegeClient({ receipts: initialReceipts, unli
         if (fileRef.current) fileRef.current.value = '';
     }
 
+    async function handleSuggest(r: UnlinkedReceipt) {
+        setSuggestingId(r.id);
+        const res = await fetch(`/api/receipts/${r.id}/suggest`, { method: 'POST' });
+        const data = await res.json();
+        if (data.suggestions) setSuggestionResults(prev => ({ ...prev, [r.id]: data }));
+        setSuggestingId(null);
+    }
+
+    async function handleLinkSuggestion(receiptId: string, tx: Suggestion['transaction']) {
+        await fetch(`/api/receipts/${receiptId}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ transaction_id: tx.id }),
+        });
+        handleLinked(receiptId, tx);
+        setSuggestionResults(prev => { const next = { ...prev }; delete next[receiptId]; return next; });
+    }
+
     async function handleOpenLinked(r: TransactionReceipt) {
         setLoadingUrl(r.id);
         const res = await fetch(`/api/transactions/${r.transaction_id}/receipts`);
@@ -83,6 +115,7 @@ export default function VerwaltungBelegeClient({ receipts: initialReceipts, unli
         setDeletingId(r.id);
         await fetch(`/api/receipts/${r.id}`, { method: 'DELETE' });
         setUnlinked(prev => prev.filter(x => x.id !== r.id));
+        setSuggestionResults(prev => { const next = { ...prev }; delete next[r.id]; return next; });
         setDeletingId(null);
     }
 
@@ -165,53 +198,116 @@ export default function VerwaltungBelegeClient({ receipts: initialReceipts, unli
                             </thead>
                             <tbody>
                                 {unlinked.map(r => (
-                                    <tr key={r.id}>
-                                        <td style={{ fontSize: 13, whiteSpace: 'nowrap' }}>
-                                            <button
-                                                onClick={async () => {
-                                                    const res = await fetch(`/api/receipts/${r.id}`);
-                                                    const data = await res.json();
-                                                    if (data.url) window.open(data.url, '_blank');
-                                                }}
-                                                style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontSize: 13, color: 'inherit' }}
-                                                title="Öffnen"
-                                            >
-                                                <span>{r.file_name.toLowerCase().endsWith('.pdf') ? '📄' : '🖼️'}</span>
-                                                <span style={{ textDecoration: 'underline' }}>{r.file_name}</span>
-                                            </button>
-                                        </td>
-                                        <td>
-                                            <button
-                                                onClick={() => setLinkModal({ id: r.id, fileName: r.file_name })}
-                                                style={{
-                                                    display: 'flex', alignItems: 'center', gap: 6,
-                                                    padding: '5px 10px', borderRadius: 'var(--radius-sm)',
-                                                    border: '1px dashed var(--border)', background: 'var(--bg)',
-                                                    cursor: 'pointer', fontSize: 12, color: 'var(--text-muted)',
-                                                    whiteSpace: 'nowrap', minWidth: 360, justifyContent: 'flex-start',
-                                                }}
-                                            >
-                                                <span style={{ opacity: 0.5 }}>🔗</span>
-                                                <span>Buchung wählen…</span>
-                                            </button>
-                                        </td>
-                                        <td style={{ textAlign: 'right', fontSize: 13, color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
-                                            {formatSize(r.file_size)}
-                                        </td>
-                                        <td style={{ whiteSpace: 'nowrap', fontSize: 12, color: 'var(--text-muted)' }}>
-                                            {new Date(r.uploaded_at).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                                        </td>
-                                        <td>
-                                            <button
-                                                onClick={() => handleDeleteUnlinked(r)}
-                                                disabled={deletingId === r.id}
-                                                style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 14, color: 'var(--red)', padding: '2px 4px', opacity: deletingId === r.id ? 0.5 : 1 }}
-                                                title="Löschen"
-                                            >
-                                                🗑
-                                            </button>
-                                        </td>
-                                    </tr>
+                                    <>
+                                        <tr key={r.id}>
+                                            <td style={{ fontSize: 13, whiteSpace: 'nowrap' }}>
+                                                <button
+                                                    onClick={async () => {
+                                                        const res = await fetch(`/api/receipts/${r.id}`);
+                                                        const data = await res.json();
+                                                        if (data.url) window.open(data.url, '_blank');
+                                                    }}
+                                                    style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontSize: 13, color: 'inherit' }}
+                                                    title="Öffnen"
+                                                >
+                                                    <span>{r.file_name.toLowerCase().endsWith('.pdf') ? '📄' : '🖼️'}</span>
+                                                    <span style={{ textDecoration: 'underline' }}>{r.file_name}</span>
+                                                </button>
+                                            </td>
+                                            <td>
+                                                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                                                    <button
+                                                        onClick={() => setLinkModal({ id: r.id, fileName: r.file_name })}
+                                                        style={{
+                                                            display: 'flex', alignItems: 'center', gap: 6,
+                                                            padding: '5px 10px', borderRadius: 'var(--radius-sm)',
+                                                            border: '1px dashed var(--border)', background: 'var(--bg)',
+                                                            cursor: 'pointer', fontSize: 12, color: 'var(--text-muted)',
+                                                            whiteSpace: 'nowrap', minWidth: 360, justifyContent: 'flex-start',
+                                                        }}
+                                                    >
+                                                        <span style={{ opacity: 0.5 }}>🔗</span>
+                                                        <span>Buchung wählen…</span>
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleSuggest(r)}
+                                                        disabled={suggestingId === r.id}
+                                                        title="KI-Vorschlag generieren"
+                                                        style={{
+                                                            display: 'flex', alignItems: 'center', gap: 5,
+                                                            padding: '5px 10px', borderRadius: 'var(--radius-sm)',
+                                                            border: '1px solid var(--border)', background: 'var(--bg)',
+                                                            cursor: suggestingId === r.id ? 'default' : 'pointer',
+                                                            fontSize: 12, color: 'var(--text-muted)', whiteSpace: 'nowrap',
+                                                            opacity: suggestingId === r.id ? 0.6 : 1,
+                                                        }}
+                                                    >
+                                                        <span>{suggestingId === r.id ? '⏳' : '✨'}</span>
+                                                        <span>{suggestingId === r.id ? 'Analysiere…' : 'KI-Vorschlag'}</span>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                            <td style={{ textAlign: 'right', fontSize: 13, color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
+                                                {formatSize(r.file_size)}
+                                            </td>
+                                            <td style={{ whiteSpace: 'nowrap', fontSize: 12, color: 'var(--text-muted)' }}>
+                                                {new Date(r.uploaded_at).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                                            </td>
+                                            <td>
+                                                <button
+                                                    onClick={() => handleDeleteUnlinked(r)}
+                                                    disabled={deletingId === r.id}
+                                                    style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 14, color: 'var(--red)', padding: '2px 4px', opacity: deletingId === r.id ? 0.5 : 1 }}
+                                                    title="Löschen"
+                                                >
+                                                    🗑
+                                                </button>
+                                            </td>
+                                        </tr>
+
+                                        {/* KI-Vorschläge */}
+                                        {suggestionResults[r.id] && (
+                                            <tr key={`${r.id}-suggestions`}>
+                                                <td colSpan={5} style={{ padding: '0 16px 12px', background: 'var(--bg)' }}>
+                                                    <div style={{ borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', overflow: 'hidden' }}>
+                                                        {/* Extracted info */}
+                                                        <div style={{ padding: '10px 14px', background: 'var(--bg-secondary)', borderBottom: '1px solid var(--border)', display: 'flex', gap: 24, flexWrap: 'wrap', fontSize: 12 }}>
+                                                            <span style={{ color: 'var(--text-muted)' }}>✨ KI-Analyse:</span>
+                                                            {suggestionResults[r.id].extracted.vendor && <span><strong>Aussteller:</strong> {suggestionResults[r.id].extracted.vendor}</span>}
+                                                            {suggestionResults[r.id].extracted.amount != null && <span><strong>Betrag:</strong> {formatCurrency(suggestionResults[r.id].extracted.amount!)}</span>}
+                                                            {suggestionResults[r.id].extracted.date && <span><strong>Datum:</strong> {new Date(suggestionResults[r.id].extracted.date!).toLocaleDateString('de-DE')}</span>}
+                                                            {suggestionResults[r.id].extracted.description && <span><strong>Zweck:</strong> {suggestionResults[r.id].extracted.description}</span>}
+                                                            <button onClick={() => setSuggestionResults(prev => { const next = { ...prev }; delete next[r.id]; return next; })} style={{ marginLeft: 'auto', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', fontSize: 13 }}>✕</button>
+                                                        </div>
+                                                        {/* Suggestions */}
+                                                        {suggestionResults[r.id].suggestions.map((s, i) => (
+                                                            <div key={s.transaction_id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px', borderBottom: i < suggestionResults[r.id].suggestions.length - 1 ? '1px solid var(--border)' : 'none', fontSize: 13 }}>
+                                                                <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'var(--bg-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 12, flexShrink: 0, color: s.confidence > 0.8 ? 'var(--green)' : 'var(--text-muted)' }}>
+                                                                    {Math.round(s.confidence * 100)}%
+                                                                </div>
+                                                                <div style={{ flex: 1, minWidth: 0 }}>
+                                                                    <div style={{ fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                                        {new Date(s.transaction.date).toLocaleDateString('de-DE')} · {s.transaction.counterparty || s.transaction.description}
+                                                                        <span className={`tx-amount ${s.transaction.amount >= 0 ? 'positive' : 'negative'}`} style={{ marginLeft: 8 }}>
+                                                                            {(s.transaction.amount >= 0 ? '+' : '') + formatCurrency(s.transaction.amount)}
+                                                                        </span>
+                                                                    </div>
+                                                                    <div style={{ color: 'var(--text-muted)', fontSize: 12, marginTop: 2 }}>{s.reason}</div>
+                                                                </div>
+                                                                <button
+                                                                    onClick={() => handleLinkSuggestion(r.id, s.transaction)}
+                                                                    className="btn btn-primary"
+                                                                    style={{ fontSize: 12, padding: '5px 12px', whiteSpace: 'nowrap' }}
+                                                                >
+                                                                    Zuordnen
+                                                                </button>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        )}
+                                    </>
                                 ))}
                             </tbody>
                         </table>
