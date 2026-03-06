@@ -744,3 +744,46 @@ export async function getTransactionIdsWithReceipts(): Promise<string[]> {
     if (error) { console.error('Error fetching receipt ids:', error); return []; }
     return [...new Set((data || []).map((r: { transaction_id: string }) => r.transaction_id))];
 }
+
+export interface TransactionReceipt {
+    id: string;
+    transaction_id: string;
+    file_path: string;
+    file_name: string;
+    file_size: number | null;
+    uploaded_at: string;
+    transaction_date: string;
+    transaction_description: string;
+    transaction_counterparty: string;
+    transaction_amount: number;
+    transaction_category: string;
+}
+
+export async function getAllTransactionReceipts(): Promise<TransactionReceipt[]> {
+    const { data: receipts, error } = await supabase
+        .from('pankonauten_transaction_receipts')
+        .select('*')
+        .order('uploaded_at', { ascending: false });
+    if (error) { console.error('Error fetching all receipts:', error); return []; }
+    if (!receipts || receipts.length === 0) return [];
+
+    const txIds = [...new Set(receipts.map((r: any) => r.transaction_id))];
+    const { data: txs } = await supabase
+        .from('pankonauten_transactions')
+        .select('id, date, description, counterparty, amount, category')
+        .in('id', txIds);
+
+    const txMap = new Map((txs || []).map((t: any) => [t.id, t]));
+
+    return receipts.map((r: any) => {
+        const tx = txMap.get(r.transaction_id) as any;
+        return {
+            ...r,
+            transaction_date: tx?.date ?? '',
+            transaction_description: tx?.description ?? '',
+            transaction_counterparty: tx?.counterparty ?? '',
+            transaction_amount: tx ? Number(tx.amount) : 0,
+            transaction_category: tx?.category ?? '',
+        };
+    });
+}
