@@ -43,6 +43,12 @@ export default function ReceiptModal({ transactionId, transactionLabel, onReceip
 
     useEffect(() => { load(); }, [transactionId]);
 
+    useEffect(() => {
+        function handleKey(e: KeyboardEvent) { if (e.key === 'Escape') onClose(); }
+        document.addEventListener('keydown', handleKey);
+        return () => document.removeEventListener('keydown', handleKey);
+    }, [onClose]);
+
     async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
         const file = e.target.files?.[0];
         if (!file) return;
