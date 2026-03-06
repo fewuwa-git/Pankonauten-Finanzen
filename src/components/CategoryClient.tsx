@@ -206,9 +206,13 @@ export default function CategoryClient({ transactions }: CategoryClientProps) {
             const d = new Date(t.date);
             return d >= start && d <= end && t.amount < 0;
         });
-        // Keep ordering from EXPENSE_CATEGORIES
         const found = new Set(allFiltered.map((t) => t.category));
-        return EXPENSE_CATEGORIES.filter((c) => found.has(c));
+        // Show all found categories: EXPENSE_CATEGORIES first (stable color order), then any others
+        const ordered = EXPENSE_CATEGORIES.filter((c) => found.has(c));
+        for (const c of found) {
+            if (!ordered.includes(c)) ordered.push(c);
+        }
+        return ordered;
     }, [transactions, start, end]);
 
     // Table data
