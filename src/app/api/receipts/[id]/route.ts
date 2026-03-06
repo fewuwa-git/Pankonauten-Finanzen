@@ -3,6 +3,19 @@ import { supabase } from '@/lib/db';
 
 const BUCKET = 'transaction-receipts';
 
+// Get signed URL for a receipt
+export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+    const { id } = await params;
+    const { data } = await supabase
+        .from('pankonauten_transaction_receipts')
+        .select('file_path')
+        .eq('id', id)
+        .single();
+    if (!data) return NextResponse.json({ error: 'Nicht gefunden' }, { status: 404 });
+    const { data: urlData } = await supabase.storage.from(BUCKET).createSignedUrl(data.file_path, 3600);
+    return NextResponse.json({ url: urlData?.signedUrl ?? null });
+}
+
 // Link receipt to a transaction
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;

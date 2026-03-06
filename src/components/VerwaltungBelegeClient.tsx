@@ -167,10 +167,18 @@ export default function VerwaltungBelegeClient({ receipts: initialReceipts, unli
                                 {unlinked.map(r => (
                                     <tr key={r.id}>
                                         <td style={{ fontSize: 13, whiteSpace: 'nowrap' }}>
-                                            <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                            <button
+                                                onClick={async () => {
+                                                    const res = await fetch(`/api/receipts/${r.id}`);
+                                                    const data = await res.json();
+                                                    if (data.url) window.open(data.url, '_blank');
+                                                }}
+                                                style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontSize: 13, color: 'var(--primary)' }}
+                                                title="Öffnen"
+                                            >
                                                 <span>{r.file_name.toLowerCase().endsWith('.pdf') ? '📄' : '🖼️'}</span>
-                                                <span>{r.file_name}</span>
-                                            </span>
+                                                <span style={{ textDecoration: 'underline' }}>{r.file_name}</span>
+                                            </button>
                                         </td>
                                         <td>
                                             <button
