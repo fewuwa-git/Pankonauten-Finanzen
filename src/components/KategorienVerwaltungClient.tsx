@@ -360,6 +360,13 @@ export default function KategorienVerwaltungClient({ initialCategories }: Props)
                 }}>
                     Import-Regeln
                 </a>
+                <a href="/verwaltung/kategorien/regeln/log" style={{
+                    padding: '8px 20px', fontSize: 13, fontWeight: 500,
+                    color: 'var(--text-muted)', textDecoration: 'none',
+                    borderBottom: '2px solid transparent', marginBottom: -2,
+                }}>
+                    Regelprotokoll
+                </a>
             </div>
 
             {/* Notifications */}

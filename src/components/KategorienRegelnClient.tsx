@@ -42,24 +42,26 @@ const EMPTY_NEW: NewRuleState = {
 function TabNav() {
     return (
         <div style={{ display: 'flex', gap: 0, borderBottom: '2px solid var(--border)', marginBottom: 24 }}>
-            <a
-                href="/verwaltung/kategorien"
-                style={{
-                    padding: '8px 20px', fontSize: 13, fontWeight: 500,
-                    color: 'var(--text-muted)', textDecoration: 'none',
-                    borderBottom: '2px solid transparent', marginBottom: -2,
-                }}
-            >
+            <a href="/verwaltung/kategorien" style={{
+                padding: '8px 20px', fontSize: 13, fontWeight: 500,
+                color: 'var(--text-muted)', textDecoration: 'none',
+                borderBottom: '2px solid transparent', marginBottom: -2,
+            }}>
                 Kategorien
             </a>
-            <span
-                style={{
-                    padding: '8px 20px', fontSize: 13, fontWeight: 600,
-                    color: 'var(--primary)', borderBottom: '2px solid var(--primary)', marginBottom: -2,
-                }}
-            >
+            <span style={{
+                padding: '8px 20px', fontSize: 13, fontWeight: 600,
+                color: 'var(--primary)', borderBottom: '2px solid var(--primary)', marginBottom: -2,
+            }}>
                 Import-Regeln
             </span>
+            <a href="/verwaltung/kategorien/regeln/log" style={{
+                padding: '8px 20px', fontSize: 13, fontWeight: 500,
+                color: 'var(--text-muted)', textDecoration: 'none',
+                borderBottom: '2px solid transparent', marginBottom: -2,
+            }}>
+                Regelprotokoll
+            </a>
         </div>
     );
 }
