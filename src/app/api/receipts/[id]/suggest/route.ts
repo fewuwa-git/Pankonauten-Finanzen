@@ -35,15 +35,35 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ id
             generationConfig: { maxOutputTokens: maxTokens, temperature: 0.1 },
         });
 
-        const generateWithFallback = async (
-            contents: Parameters<ReturnType<typeof getModel>['generateContent']>[0],
-            maxTokens: number,
-        ) => {
+        // For extraction: use 2.5-flash (better at reading documents), fallback to 2.0-flash
+        const extractWithFallback = async (contents: Parameters<ReturnType<typeof getModel>['generateContent']>[0]) => {
             try {
-                return await getModel('gemini-2.5-flash', maxTokens).generateContent(contents);
+                return await getModel('gemini-2.5-flash', 256).generateContent(contents);
             } catch (err: any) {
                 if (err?.message?.includes('503') || err?.message?.includes('Service Unavailable') || err?.message?.includes('high demand')) {
-                    return await getModel('gemini-2.0-flash', maxTokens).generateContent(contents);
+                    return await getModel('gemini-2.0-flash', 256).generateContent(contents);
+                }
+                throw err;
+            }
+        };
+
+        // For matching: use 2.5-flash with thinking disabled so no tokens are wasted on reasoning
+        const matchModel = genAI.getGenerativeModel({
+            model: 'gemini-2.5-flash',
+            generationConfig: {
+                maxOutputTokens: 512,
+                temperature: 0.1,
+                // @ts-ignore – thinkingConfig is supported but not yet typed in the SDK
+                thinkingConfig: { thinkingBudget: 0 },
+            },
+        });
+        const matchWithModel = async (contents: Parameters<typeof matchModel.generateContent>[0]) => {
+            try {
+                return await matchModel.generateContent(contents);
+            } catch (err: any) {
+                if (err?.message?.includes('503') || err?.message?.includes('Service Unavailable') || err?.message?.includes('high demand')) {
+                    await new Promise(r => setTimeout(r, 3000));
+                    return await matchModel.generateContent(contents);
                 }
                 throw err;
             }
@@ -60,7 +80,7 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ id
         };
 
         // Step 1: Extract key facts from the receipt first
-        const extractResult = await generateWithFallback([
+        const extractResult = await extractWithFallback([
             { inlineData: { mimeType, data: base64 } },
             'Extrahiere aus diesem Beleg: Aussteller/Firma, Betrag (Zahl), Datum (YYYY-MM-DD), kurze Beschreibung. Antworte NUR mit JSON (kein Markdown): {"vendor":"...","amount":0.00,"date":"YYYY-MM-DD","description":"..."}. Falls ein Wert nicht erkennbar ist, setze null.',
         ], 256);
@@ -116,22 +136,25 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ id
         ).join('\n');
 
         // Step 3: Find best matches
-        const matchResult = await generateWithFallback([
+        const matchResult = await matchWithModel([
             { inlineData: { mimeType, data: base64 } },
             `Beleg-Info: Aussteller="${extracted.vendor ?? '?'}", Betrag=${extracted.amount ?? '?'}€, Datum=${extracted.date ?? '?'}
 
 Buchungen (Nr | Datum | Gegenüber | Beschreibung | Betrag):
 ${txList}
 
-Welche 3 Buchungen passen am besten zu diesem Beleg? Antworte NUR mit JSON (kein Markdown):
+Welche 3 Buchungen passen am besten zu diesem Beleg? Antworte NUR mit JSON (kein Markdown), reason max. 8 Wörter auf Deutsch:
 {"suggestions":[{"nr":1,"confidence":0.9,"reason":"..."}]}`,
-        ], 512);
+        ], 256);
+
+        const matchRaw = matchResult.response.text();
+        console.log('[suggest] match raw response:', matchRaw);
 
         let matchParsed: { suggestions: { nr: number; confidence: number; reason: string }[] };
         try {
-            matchParsed = JSON.parse(extractJSON(matchResult.response.text()));
+            matchParsed = JSON.parse(extractJSON(matchRaw));
         } catch {
-            return NextResponse.json({ error: 'KI-Antwort konnte nicht verarbeitet werden', raw: matchResult.response.text() }, { status: 500 });
+            return NextResponse.json({ error: 'KI-Antwort konnte nicht verarbeitet werden', raw: matchRaw }, { status: 500 });
         }
 
         const idxMap = new Map(indexedCandidates.map(({ idx, tx }) => [idx, tx]));

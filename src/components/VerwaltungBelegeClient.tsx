@@ -113,7 +113,7 @@ export default function VerwaltungBelegeClient({ receipts: initialReceipts, unli
                     ai_description: data.extracted?.description ?? null,
                 } : u));
             } else {
-                alert('KI-Analyse fehlgeschlagen: ' + (data.error ?? 'Unbekannter Fehler'));
+                alert('KI-Analyse fehlgeschlagen: ' + (data.error ?? 'Unbekannter Fehler') + (data.raw ? '\n\nRohantwort:\n' + data.raw.slice(0, 500) : ''));
             }
         } catch (e: any) {
             alert('Fehler bei der KI-Analyse: ' + e.message);
