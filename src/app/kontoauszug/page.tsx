@@ -2,15 +2,15 @@ import type { Metadata } from 'next';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { Suspense } from 'react';
-import { getTransactions } from '@/lib/data';
+import { getTransactions, getCategories } from '@/lib/data';
 import Sidebar from '@/components/Sidebar';
 
 export const metadata: Metadata = { title: 'Kontoauszug' };
 import KontoauszugClient from '@/components/KontoauszugClient';
 
 async function KontoauszugSection({ role }: { role: 'admin' | 'member' }) {
-    const transactions = await getTransactions();
-    return <KontoauszugClient transactions={transactions} userRole={role} />;
+    const [transactions, categories] = await Promise.all([getTransactions(), getCategories()]);
+    return <KontoauszugClient transactions={transactions} categories={categories} userRole={role} />;
 }
 
 function KontoauszugSkeleton() {

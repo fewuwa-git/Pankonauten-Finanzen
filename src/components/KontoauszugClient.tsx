@@ -3,6 +3,7 @@
 import { useMemo, useState, useCallback, useRef, useEffect } from 'react';
 import { useFilterState, PeriodKey } from '@/hooks/useFilterState';
 import { CATEGORY_COLORS, ALL_CATEGORIES } from '@/lib/constants';
+import type { Category } from '@/lib/data';
 
 interface Transaction {
     id: string;
@@ -51,11 +52,14 @@ function getDateRange(period: PeriodKey, customStart?: string, customEnd?: strin
 
 interface KontoauszugClientProps {
     transactions: Transaction[];
+    categories?: Category[];
     userRole?: 'admin' | 'member';
     elternView?: boolean;
 }
 
-export default function KontoauszugClient({ transactions: initialTransactions, userRole, elternView }: KontoauszugClientProps) {
+export default function KontoauszugClient({ transactions: initialTransactions, categories = [], userRole, elternView }: KontoauszugClientProps) {
+    const categoryColorMap: Record<string, string> = { ...CATEGORY_COLORS };
+    for (const cat of categories) categoryColorMap[cat.name] = cat.color;
     const { period, setPeriod, customStart, setCustomStart, customEnd, setCustomEnd } = useFilterState(elternView ? 'all' : '30d');
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('');
@@ -300,8 +304,8 @@ export default function KontoauszugClient({ transactions: initialTransactions, u
                                                     disabled={isLoading === tx.id}
                                                     onClick={() => setEditingId(editingId === tx.id ? null : tx.id)}
                                                     style={{
-                                                        background: `${CATEGORY_COLORS[tx.category] || '#6b7280'}18`,
-                                                        color: CATEGORY_COLORS[tx.category] || '#6b7280',
+                                                        background: `${categoryColorMap[tx.category] || '#6b7280'}18`,
+                                                        color: categoryColorMap[tx.category] || '#6b7280',
                                                         cursor: 'pointer',
                                                         border: 'none',
                                                         opacity: isLoading === tx.id ? 0.5 : 1,
@@ -314,8 +318,8 @@ export default function KontoauszugClient({ transactions: initialTransactions, u
                                                 <span
                                                     className="category-badge"
                                                     style={{
-                                                        background: `${CATEGORY_COLORS[tx.category] || '#6b7280'}18`,
-                                                        color: CATEGORY_COLORS[tx.category] || '#6b7280',
+                                                        background: `${categoryColorMap[tx.category] || '#6b7280'}18`,
+                                                        color: categoryColorMap[tx.category] || '#6b7280',
                                                     }}
                                                 >
                                                     {tx.category}
@@ -348,8 +352,8 @@ export default function KontoauszugClient({ transactions: initialTransactions, u
                                                                     width: '100%',
                                                                     textAlign: 'left',
                                                                     marginBottom: '4px',
-                                                                    background: tx.category === cat ? `${CATEGORY_COLORS[cat]}25` : 'transparent',
-                                                                    color: CATEGORY_COLORS[cat] || '#6b7280',
+                                                                    background: tx.category === cat ? `${categoryColorMap[cat]}25` : 'transparent',
+                                                                    color: categoryColorMap[cat] || '#6b7280',
                                                                     border: 'none',
                                                                     padding: '6px 10px',
                                                                     cursor: 'pointer',
