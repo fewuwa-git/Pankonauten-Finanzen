@@ -58,6 +58,7 @@ interface KontoauszugClientProps {
 export default function KontoauszugClient({ transactions: initialTransactions, userRole, elternView }: KontoauszugClientProps) {
     const { period, setPeriod, customStart, setCustomStart, customEnd, setCustomEnd } = useFilterState(elternView ? 'all' : '30d');
     const [searchTerm, setSearchTerm] = useState('');
+    const [selectedCategory, setSelectedCategory] = useState('');
     const [transactions, setTransactions] = useState(initialTransactions);
     const [editingId, setEditingId] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState<string | null>(null);
@@ -84,7 +85,7 @@ export default function KontoauszugClient({ transactions: initialTransactions, u
             .filter((t) => {
                 const d = new Date(t.date);
                 if (d < start || d > end) return false;
-
+                if (selectedCategory && t.category !== selectedCategory) return false;
                 if (searchTerm) {
                     const term = searchTerm.toLowerCase();
                     return (
@@ -97,7 +98,16 @@ export default function KontoauszugClient({ transactions: initialTransactions, u
             })
             // Sort by date descending (newest first)
             .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-    }, [transactions, start, end, searchTerm]);
+    }, [transactions, start, end, searchTerm, selectedCategory]);
+
+    // Categories present in the current period (for the dropdown)
+    const periodCategories = useMemo(() => {
+        const inPeriod = transactions.filter((t) => {
+            const d = new Date(t.date);
+            return d >= start && d <= end;
+        });
+        return Array.from(new Set(inPeriod.map((t) => t.category))).sort();
+    }, [transactions, start, end]);
 
     const handlePeriodChange = useCallback((p: PeriodKey) => {
         setPeriod(p);
@@ -231,12 +241,25 @@ export default function KontoauszugClient({ transactions: initialTransactions, u
                     <div style={{ flex: '1 1 200px', maxWidth: '300px' }}>
                         <input
                             type="text"
-                            placeholder="Suchen (Beschreibung, Gegenüber, Kategorie)..."
+                            placeholder="Suchen (Beschreibung, Gegenüber)..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             className="form-input"
                             style={{ padding: '8px 12px' }}
                         />
+                    </div>
+                    <div style={{ flex: '0 0 auto' }}>
+                        <select
+                            value={selectedCategory}
+                            onChange={(e) => setSelectedCategory(e.target.value)}
+                            className="form-input"
+                            style={{ padding: '8px 12px' }}
+                        >
+                            <option value="">Alle Kategorien</option>
+                            {periodCategories.map((cat) => (
+                                <option key={cat} value={cat}>{cat}</option>
+                            ))}
+                        </select>
                     </div>
                 </div>
                 <div style={{ overflowX: 'auto' }}>
