@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState, useMemo } from 'react';
+import React, { useRef, useState, useMemo } from 'react';
 import type { TransactionReceipt } from '@/lib/data';
 import LinkReceiptModal from './LinkReceiptModal';
 
@@ -198,8 +198,8 @@ export default function VerwaltungBelegeClient({ receipts: initialReceipts, unli
                             </thead>
                             <tbody>
                                 {unlinked.map(r => (
-                                    <>
-                                        <tr key={r.id}>
+                                    <React.Fragment key={r.id}>
+                                        <tr>
                                             <td style={{ fontSize: 13, whiteSpace: 'nowrap' }}>
                                                 <button
                                                     onClick={async () => {
@@ -307,7 +307,7 @@ export default function VerwaltungBelegeClient({ receipts: initialReceipts, unli
                                                 </td>
                                             </tr>
                                         )}
-                                    </>
+                                    </React.Fragment>
                                 ))}
                             </tbody>
                         </table>
