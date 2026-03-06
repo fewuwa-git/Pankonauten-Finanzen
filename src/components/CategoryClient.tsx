@@ -469,6 +469,7 @@ export default function CategoryClient({ transactions, categories }: CategoryCli
                             <tr>
                                 <th>Kategorie</th>
                                 <th style={{ textAlign: 'right' }}>Ausgaben</th>
+                                <th style={{ textAlign: 'right' }}>Ø pro Monat</th>
                                 <th style={{ textAlign: 'right' }}>Buchungen</th>
                                 <th style={{ textAlign: 'right' }}>Anteil</th>
                                 <th style={{ textAlign: 'right', minWidth: 120 }}>Visualisierung</th>
@@ -477,6 +478,8 @@ export default function CategoryClient({ transactions, categories }: CategoryCli
                         <tbody>
                             {tableData.map((row) => {
                                 const share = totalExpense > 0 ? (row.total / totalExpense) * 100 : 0;
+                                const distinctMonths = flowType === 'both' ? groupedData.length : chartData.length;
+                                const avgPerMonth = distinctMonths > 0 ? row.total / distinctMonths : 0;
                                 return (
                                     <tr key={row.name}>
                                         <td>
@@ -493,6 +496,9 @@ export default function CategoryClient({ transactions, categories }: CategoryCli
                                         </td>
                                         <td className="tx-amount negative" style={{ textAlign: 'right' }}>
                                             {formatCurrencyFull(row.total)}
+                                        </td>
+                                        <td style={{ textAlign: 'right', color: 'var(--text-muted)', fontSize: '13px' }}>
+                                            {formatCurrency(avgPerMonth)}
                                         </td>
                                         <td style={{ textAlign: 'right', color: 'var(--text-muted)', fontSize: '13px' }}>
                                             {row.count}
@@ -528,6 +534,12 @@ export default function CategoryClient({ transactions, categories }: CategoryCli
                                 <td style={{ fontWeight: 700, padding: '12px 16px', fontSize: '14px' }}>Gesamt</td>
                                 <td className="tx-amount negative" style={{ textAlign: 'right', fontWeight: 700, padding: '12px 16px' }}>
                                     {formatCurrencyFull(totalExpense)}
+                                </td>
+                                <td style={{ textAlign: 'right', padding: '12px 16px', fontWeight: 700 }}>
+                                    {(() => {
+                                        const distinctMonths = flowType === 'both' ? groupedData.length : chartData.length;
+                                        return formatCurrency(distinctMonths > 0 ? totalExpense / distinctMonths : 0);
+                                    })()}
                                 </td>
                                 <td style={{ textAlign: 'right', padding: '12px 16px' }}>
                                     {tableData.reduce((s, d) => s + d.count, 0)}
