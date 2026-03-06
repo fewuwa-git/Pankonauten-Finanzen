@@ -180,7 +180,7 @@ export default function VerwaltungBelegeClient({ receipts: initialReceipts, unli
                                                     padding: '5px 10px', borderRadius: 'var(--radius-sm)',
                                                     border: '1px dashed var(--border)', background: 'var(--bg)',
                                                     cursor: 'pointer', fontSize: 12, color: 'var(--text-muted)',
-                                                    whiteSpace: 'nowrap', minWidth: 180,
+                                                    whiteSpace: 'nowrap', minWidth: 360, justifyContent: 'flex-start',
                                                 }}
                                             >
                                                 <span style={{ opacity: 0.5 }}>🔗</span>
