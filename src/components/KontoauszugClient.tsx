@@ -52,13 +52,14 @@ function getDateRange(period: PeriodKey, customStart?: string, customEnd?: strin
 }
 
 interface KontoauszugClientProps {
+    initialTxIdsWithReceipts?: string[];
     transactions: Transaction[];
     categories?: Category[];
     userRole?: 'admin' | 'member';
     elternView?: boolean;
 }
 
-export default function KontoauszugClient({ transactions: initialTransactions, categories = [], userRole, elternView }: KontoauszugClientProps) {
+export default function KontoauszugClient({ transactions: initialTransactions, categories = [], userRole, elternView, initialTxIdsWithReceipts = [] }: KontoauszugClientProps) {
     const categoryColorMap: Record<string, string> = { ...CATEGORY_COLORS };
     for (const cat of categories) categoryColorMap[cat.name] = cat.color;
     const allCategoryNames = categories.length > 0
@@ -71,6 +72,7 @@ export default function KontoauszugClient({ transactions: initialTransactions, c
     const [editingId, setEditingId] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState<string | null>(null);
     const [receiptTx, setReceiptTx] = useState<{ id: string; label: string } | null>(null);
+    const [txsWithReceipts, setTxsWithReceipts] = useState<Set<string>>(new Set(initialTxIdsWithReceipts));
     const dropdownRef = useRef<HTMLDivElement>(null);
 
     // Close dropdown when clicking outside
@@ -386,9 +388,9 @@ export default function KontoauszugClient({ transactions: initialTransactions, c
                                         {!elternView && (
                                         <td style={{ textAlign: 'center', whiteSpace: 'nowrap' }}>
                                             <button
-                                                title="Belege"
+                                                title={txsWithReceipts.has(tx.id) ? 'Belege anzeigen' : 'Beleg hochladen'}
                                                 onClick={() => setReceiptTx({ id: tx.id, label: tx.description || tx.counterparty })}
-                                                style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 15, padding: '2px 4px', color: 'var(--text-muted)', lineHeight: 1 }}
+                                                style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 15, padding: '2px 4px', lineHeight: 1, color: txsWithReceipts.has(tx.id) ? 'var(--primary)' : 'var(--text-muted)', opacity: txsWithReceipts.has(tx.id) ? 1 : 0.35 }}
                                             >
                                                 📎
                                             </button>
@@ -406,6 +408,11 @@ export default function KontoauszugClient({ transactions: initialTransactions, c
                 <ReceiptModal
                     transactionId={receiptTx.id}
                     transactionLabel={receiptTx.label}
+                    onReceiptsChange={(txId, hasReceipts) => setTxsWithReceipts(prev => {
+                        const next = new Set(prev);
+                        if (hasReceipts) next.add(txId); else next.delete(txId);
+                        return next;
+                    })}
                     onClose={() => setReceiptTx(null)}
                 />
             )}

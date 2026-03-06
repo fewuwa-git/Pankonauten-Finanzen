@@ -12,10 +12,11 @@ interface Receipt {
 interface ReceiptModalProps {
     transactionId: string;
     transactionLabel: string;
+    onReceiptsChange?: (txId: string, hasReceipts: boolean) => void;
     onClose: () => void;
 }
 
-export default function ReceiptModal({ transactionId, transactionLabel, onClose }: ReceiptModalProps) {
+export default function ReceiptModal({ transactionId, transactionLabel, onReceiptsChange, onClose }: ReceiptModalProps) {
     const [receipts, setReceipts] = useState<Receipt[]>([]);
     const [loading, setLoading] = useState(true);
     const [uploading, setUploading] = useState(false);
@@ -26,7 +27,9 @@ export default function ReceiptModal({ transactionId, transactionLabel, onClose 
         setLoading(true);
         const res = await fetch(`/api/transactions/${transactionId}/receipts`);
         const data = await res.json();
-        setReceipts(Array.isArray(data) ? data : []);
+        const list = Array.isArray(data) ? data : [];
+        setReceipts(list);
+        onReceiptsChange?.(transactionId, list.length > 0);
         setLoading(false);
     }
 

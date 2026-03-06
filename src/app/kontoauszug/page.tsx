@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { Suspense } from 'react';
-import { getTransactions, getCategories } from '@/lib/data';
+import { getTransactions, getCategories, getTransactionIdsWithReceipts } from '@/lib/data';
 import Sidebar from '@/components/Sidebar';
 
 export const metadata: Metadata = { title: 'Kontoauszug' };
@@ -10,8 +10,8 @@ export const dynamic = 'force-dynamic';
 import KontoauszugClient from '@/components/KontoauszugClient';
 
 async function KontoauszugSection({ role }: { role: 'admin' | 'member' }) {
-    const [transactions, categories] = await Promise.all([getTransactions(), getCategories()]);
-    return <KontoauszugClient transactions={transactions} categories={categories} userRole={role} />;
+    const [transactions, categories, txIdsWithReceipts] = await Promise.all([getTransactions(), getCategories(), getTransactionIdsWithReceipts()]);
+    return <KontoauszugClient transactions={transactions} categories={categories} userRole={role} initialTxIdsWithReceipts={txIdsWithReceipts} />;
 }
 
 function KontoauszugSkeleton() {

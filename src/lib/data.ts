@@ -734,3 +734,13 @@ export async function applyRulesToTransactions(overwrite: boolean): Promise<{ up
 
     return { updated: updates.length, skipped };
 }
+
+// ─── Transaction Receipts ─────────────────────────────────────────────────────
+
+export async function getTransactionIdsWithReceipts(): Promise<string[]> {
+    const { data, error } = await supabase
+        .from('pankonauten_transaction_receipts')
+        .select('transaction_id');
+    if (error) { console.error('Error fetching receipt ids:', error); return []; }
+    return [...new Set((data || []).map((r: { transaction_id: string }) => r.transaction_id))];
+}
