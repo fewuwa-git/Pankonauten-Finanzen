@@ -461,7 +461,11 @@ export default function DashboardClient({ transactions }: DashboardClientProps) 
                                     <XAxis dataKey="label" tick={{ fontSize: 12, fill: '#6b7280' }} tickLine={false} axisLine={{ stroke: '#e5e7eb' }} />
                                     <YAxis tick={{ fontSize: 12, fill: '#6b7280' }} tickLine={false} axisLine={false} tickFormatter={(v) => `€${(Math.abs(v) / 1000).toFixed(0)}k`} />
                                     <Tooltip content={<CustomTooltip />} />
-                                    <Legend />
+                                    <Legend
+                                        formatter={(value) => (
+                                            <span style={{ fontSize: '12px', color: 'var(--text-muted)', fontFamily: 'inherit' }}>{value}</span>
+                                        )}
+                                    />
                                     <ReferenceLine y={0} stroke="#e5e7eb" />
                                     <Bar dataKey="einnahmen" name="Einnahmen" fill="#22c55e" radius={[3, 3, 0, 0]} />
                                     <Bar dataKey="ausgaben" name="Ausgaben" fill="#ef4444" radius={[0, 0, 3, 3]} />
