@@ -55,7 +55,8 @@ export default function ReceiptModal({ transactionId, transactionLabel, onReceip
         if (fileRef.current) fileRef.current.value = '';
     }
 
-    async function handleDelete(receiptId: string) {
+    async function handleDelete(receiptId: string, fileName: string) {
+        if (!confirm(`Beleg „${fileName}“ wirklich löschen?`)) return;
         setDeletingId(receiptId);
         await fetch(`/api/transactions/${transactionId}/receipts/${receiptId}`, { method: 'DELETE' });
         await load();
@@ -130,7 +131,7 @@ export default function ReceiptModal({ transactionId, transactionLabel, onReceip
                                         </a>
                                     )}
                                     <button
-                                        onClick={() => handleDelete(r.id)}
+                                        onClick={() => handleDelete(r.id, r.file_name)}
                                         disabled={deletingId === r.id}
                                         style={{
                                             background: 'none', border: 'none', cursor: 'pointer',
