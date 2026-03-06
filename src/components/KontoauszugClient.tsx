@@ -187,36 +187,36 @@ export default function KontoauszugClient({ transactions: initialTransactions, u
             </div>
 
             {/* Stats Grid */}
-            <div className="stats-grid mb-6">
-                <div className="stat-card">
+            <div className="stats-grid mb-6" style={{ gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
+                <div className="stat-card" style={{ padding: '12px 16px' }}>
                     <div className="stat-card-label">🧾 Anzahl Buchungen</div>
-                    <div className="stat-card-value">{stats.count}</div>
+                    <div className="stat-card-value" style={{ fontSize: 20 }}>{stats.count}</div>
                     <div className="stat-card-sub">Im gewählten Zeitraum</div>
                 </div>
-                <div className="stat-card">
+                <div className="stat-card" style={{ padding: '12px 16px' }}>
                     <div className="stat-card-label">
                         <span style={{ color: 'var(--green)' }}>↑</span> Einnahmen
                     </div>
-                    <div className="stat-card-value" style={{ color: 'var(--green)' }}>
+                    <div className="stat-card-value" style={{ color: 'var(--green)', fontSize: 20 }}>
                         {formatCurrency(stats.income)}
                     </div>
                     <div className="stat-card-sub">Im gewählten Zeitraum</div>
                 </div>
                 {!elternView && (
-                <div className="stat-card">
+                <div className="stat-card" style={{ padding: '12px 16px' }}>
                     <div className="stat-card-label">
                         <span style={{ color: 'var(--red)' }}>↓</span> Ausgaben
                     </div>
-                    <div className="stat-card-value" style={{ color: 'var(--red)' }}>
+                    <div className="stat-card-value" style={{ color: 'var(--red)', fontSize: 20 }}>
                         {formatCurrency(stats.expense)}
                     </div>
                     <div className="stat-card-sub">Im gewählten Zeitraum</div>
                 </div>
                 )}
                 {!elternView && (
-                <div className="stat-card">
+                <div className="stat-card" style={{ padding: '12px 16px' }}>
                     <div className="stat-card-label">📅 Ø pro Monat</div>
-                    <div className="stat-card-value" style={{ color: stats.avgPerMonth >= 0 ? 'var(--green)' : 'var(--red)' }}>
+                    <div className="stat-card-value" style={{ color: stats.avgPerMonth >= 0 ? 'var(--green)' : 'var(--red)', fontSize: 20 }}>
                         {(stats.avgPerMonth >= 0 ? '+' : '') + formatCurrency(stats.avgPerMonth)}
                     </div>
                     <div className="stat-card-sub">Netto über {stats.distinctMonths} {stats.distinctMonths === 1 ? 'Monat' : 'Monate'}</div>

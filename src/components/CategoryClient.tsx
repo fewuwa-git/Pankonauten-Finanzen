@@ -369,25 +369,25 @@ export default function CategoryClient({ transactions, categories }: CategoryCli
             </div>
 
             {/* Summary Stats */}
-            <div className="stats-grid mb-6">
-                <div className="stat-card">
+            <div className="stats-grid mb-6" style={{ gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
+                <div className="stat-card" style={{ padding: '12px 16px' }}>
                     <div className="stat-card-label" style={{ color: 'var(--red)' }}>↓ Gesamtausgaben</div>
-                    <div className="stat-card-value" style={{ color: 'var(--red)' }}>{formatCurrencyFull(totalExpense)}</div>
+                    <div className="stat-card-value" style={{ color: 'var(--red)', fontSize: 20 }}>{formatCurrencyFull(totalExpense)}</div>
                     <div className="stat-card-sub">Im gewählten Zeitraum</div>
                 </div>
-                <div className="stat-card">
+                <div className="stat-card" style={{ padding: '12px 16px' }}>
                     <div className="stat-card-label">📂 Kategorien</div>
-                    <div className="stat-card-value">{tableData.length}</div>
+                    <div className="stat-card-value" style={{ fontSize: 20 }}>{tableData.length}</div>
                     <div className="stat-card-sub">Mit Ausgaben im Zeitraum</div>
                 </div>
-                <div className="stat-card">
+                <div className="stat-card" style={{ padding: '12px 16px' }}>
                     <div className="stat-card-label">🧾 Buchungen</div>
-                    <div className="stat-card-value">{tableData.reduce((s, d) => s + d.count, 0)}</div>
+                    <div className="stat-card-value" style={{ fontSize: 20 }}>{tableData.reduce((s, d) => s + d.count, 0)}</div>
                     <div className="stat-card-sub">Ausgaben-Transaktionen</div>
                 </div>
-                <div className="stat-card">
+                <div className="stat-card" style={{ padding: '12px 16px' }}>
                     <div className="stat-card-label">📅 Ø pro Monat</div>
-                    <div className="stat-card-value">{formatCurrencyFull(chartData.length > 0 ? totalExpense / chartData.length : 0)}</div>
+                    <div className="stat-card-value" style={{ fontSize: 20 }}>{formatCurrencyFull(chartData.length > 0 ? totalExpense / chartData.length : 0)}</div>
                     <div className="stat-card-sub">Durchschnittliche Ausgaben</div>
                 </div>
             </div>
