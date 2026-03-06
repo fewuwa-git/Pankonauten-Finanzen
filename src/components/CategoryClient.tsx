@@ -209,12 +209,12 @@ function StackedTooltip({ active, payload, label }: StackedTooltipProps) {
                         <span style={{ width: 8, height: 8, borderRadius: '50%', background: p.fill, flexShrink: 0, display: 'inline-block' }} />
                         <span style={{ color: '#374151' }}>{p.name}</span>
                     </span>
-                    <span style={{ color: '#dc2626', fontWeight: 600 }}>{formatCurrency(p.value)}</span>
+                    <span style={{ color: '#111827', fontWeight: 600 }}>{formatCurrency(p.value)}</span>
                 </div>
             ))}
             <div style={{ borderTop: '1px solid #e5e7eb', marginTop: 8, paddingTop: 8, display: 'flex', justifyContent: 'space-between' }}>
                 <span style={{ fontWeight: 700, fontSize: '13px' }}>Gesamt</span>
-                <span style={{ fontWeight: 700, color: '#dc2626', fontSize: '13px' }}>{formatCurrency(total)}</span>
+                <span style={{ fontWeight: 700, color: '#111827', fontSize: '13px' }}>{formatCurrency(total)}</span>
             </div>
         </div>
     );

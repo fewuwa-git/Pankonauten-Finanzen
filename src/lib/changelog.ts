@@ -7,6 +7,8 @@ export const CHANGELOG: ChangelogEntry[] = [
     {
         date: '06.03.2026',
         changes: [
+            '— Kontoauszug —',
+            'Neue Funktion „Belege“: Zu jeder Buchung können jetzt Belege (PDF, JPG, PNG) hochgeladen werden. Das Büroklammer-Symbol 📎 in jeder Zeile öffnet ein Modal zum Hochladen, Anzeigen und Löschen von Belegen.',
             '— Kategorien —',
             'In der Detailübersicht nach Kategorie wird jetzt der Durchschnitt pro Monat je Kategorie angezeigt – sowohl in der Tabelle als neue Spalte als auch in der Fußzeile.',
             'Neue Seite „Import-Regeln": Automatische Kategorie-Zuweisung beim CSV-Import konfigurieren – über Stichwörter im Verwendungszweck oder Empfängernamen. Bedingungen: enthält, beginnt mit, exakt. Priorität steuerbar.',

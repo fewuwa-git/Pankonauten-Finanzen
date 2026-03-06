@@ -4,6 +4,7 @@ import { useMemo, useState, useCallback, useRef, useEffect } from 'react';
 import { useFilterState, PeriodKey } from '@/hooks/useFilterState';
 import { CATEGORY_COLORS, ALL_CATEGORIES } from '@/lib/constants';
 import type { Category } from '@/lib/data';
+import ReceiptModal from './ReceiptModal';
 
 interface Transaction {
     id: string;
@@ -69,6 +70,7 @@ export default function KontoauszugClient({ transactions: initialTransactions, c
     const [transactions, setTransactions] = useState(initialTransactions);
     const [editingId, setEditingId] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState<string | null>(null);
+    const [receiptTx, setReceiptTx] = useState<{ id: string; label: string } | null>(null);
     const dropdownRef = useRef<HTMLDivElement>(null);
 
     // Close dropdown when clicking outside
@@ -277,6 +279,7 @@ export default function KontoauszugClient({ transactions: initialTransactions, c
                                 <th>Kategorie</th>
                                 <th style={{ textAlign: 'right' }}>Betrag</th>
                                 {!elternView && <th style={{ textAlign: 'right' }}>Saldo</th>}
+                                {!elternView && <th style={{ width: '1%' }} />}
                             </tr>
                         </thead>
                         <tbody>
@@ -380,6 +383,17 @@ export default function KontoauszugClient({ transactions: initialTransactions, c
                                             {formatCurrency(tx.balance)}
                                         </td>
                                         )}
+                                        {!elternView && (
+                                        <td style={{ textAlign: 'center', whiteSpace: 'nowrap' }}>
+                                            <button
+                                                title="Belege"
+                                                onClick={() => setReceiptTx({ id: tx.id, label: tx.description || tx.counterparty })}
+                                                style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 15, padding: '2px 4px', color: 'var(--text-muted)', lineHeight: 1 }}
+                                            >
+                                                📎
+                                            </button>
+                                        </td>
+                                        )}
                                     </tr>
                                 ))
                             )}
@@ -387,6 +401,14 @@ export default function KontoauszugClient({ transactions: initialTransactions, c
                     </table>
                 </div>
             </div>
+
+            {receiptTx && (
+                <ReceiptModal
+                    transactionId={receiptTx.id}
+                    transactionLabel={receiptTx.label}
+                    onClose={() => setReceiptTx(null)}
+                />
+            )}
         </div>
     );
 }
