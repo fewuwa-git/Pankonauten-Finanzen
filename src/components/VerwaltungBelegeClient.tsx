@@ -307,22 +307,24 @@ export default function VerwaltungBelegeClient({ receipts: initialReceipts, unli
                         KI-Belegfunktion
                     </a>
                 </div>
-                <a href="/verwaltung/belege?tab=ki-workflow" style={{
-                    padding: '8px 20px', fontSize: 13, fontWeight: tab === 'ki-workflow' ? 600 : 500,
-                    color: tab === 'ki-workflow' ? 'var(--navy)' : 'var(--text-muted)',
-                    borderBottom: tab === 'ki-workflow' ? '2px solid var(--primary)' : '2px solid transparent',
-                    marginBottom: -2, textDecoration: 'none', whiteSpace: 'nowrap',
-                }}>
-                    KI Workflow
-                </a>
-                <a href="/verwaltung/belege?tab=ki-settings" style={{
-                    padding: '8px 20px', fontSize: 13, fontWeight: tab === 'ki-settings' ? 600 : 500,
-                    color: tab === 'ki-settings' ? 'var(--navy)' : 'var(--text-muted)',
-                    borderBottom: tab === 'ki-settings' ? '2px solid var(--primary)' : '2px solid transparent',
-                    marginBottom: -2, textDecoration: 'none', whiteSpace: 'nowrap',
-                }}>
-                    KI-Einstellungen
-                </a>
+                <div style={{ display: 'flex' }}>
+                    <a href="/verwaltung/belege?tab=ki-workflow" style={{
+                        padding: '8px 20px', fontSize: 13, fontWeight: tab === 'ki-workflow' ? 600 : 500,
+                        color: tab === 'ki-workflow' ? 'var(--navy)' : 'var(--text-muted)',
+                        borderBottom: tab === 'ki-workflow' ? '2px solid var(--primary)' : '2px solid transparent',
+                        marginBottom: -2, textDecoration: 'none', whiteSpace: 'nowrap',
+                    }}>
+                        KI Workflow
+                    </a>
+                    <a href="/verwaltung/belege?tab=ki-settings" style={{
+                        padding: '8px 20px', fontSize: 13, fontWeight: tab === 'ki-settings' ? 600 : 500,
+                        color: tab === 'ki-settings' ? 'var(--navy)' : 'var(--text-muted)',
+                        borderBottom: tab === 'ki-settings' ? '2px solid var(--primary)' : '2px solid transparent',
+                        marginBottom: -2, textDecoration: 'none', whiteSpace: 'nowrap',
+                    }}>
+                        KI-Einstellungen
+                    </a>
+                </div>
             </div>
 
             {/* Stats */}
