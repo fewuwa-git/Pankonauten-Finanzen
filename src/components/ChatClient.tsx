@@ -232,8 +232,10 @@ export default function ChatClient() {
                                     {/* Avatar */}
                                     <div style={{
                                         width: 32, height: 32, borderRadius: '50%', flexShrink: 0, marginTop: 2,
-                                        background: msg.role === 'user' ? '#475569' : 'var(--primary)',
-                                        color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                        background: msg.role === 'user' ? 'var(--card)' : 'var(--primary)',
+                                        border: msg.role === 'user' ? '1.5px solid var(--primary)' : 'none',
+                                        color: msg.role === 'user' ? 'var(--primary)' : '#fff',
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
                                         fontSize: msg.role === 'user' ? 13 : 15, fontWeight: 700,
                                     }}>
                                         {msg.role === 'user' ? 'Du' : '✦'}
@@ -244,10 +246,12 @@ export default function ChatClient() {
                                             padding: '12px 16px',
                                             borderRadius: msg.role === 'user' ? '18px 4px 18px 18px' : '4px 18px 18px 18px',
                                             background: msg.role === 'user'
-                                                ? 'var(--primary)'
+                                                ? 'var(--card)'
                                                 : msg.error ? '#fef2f2' : 'var(--card)',
-                                            color: msg.role === 'user' ? '#fff' : msg.error ? '#dc2626' : 'var(--text)',
-                                            border: msg.role === 'assistant' ? `1.5px solid ${msg.error ? '#fecaca' : 'var(--border)'}` : 'none',
+                                            color: msg.error ? '#dc2626' : 'var(--text)',
+                                            border: msg.role === 'user'
+                                                ? '1.5px solid var(--primary)'
+                                                : `1.5px solid ${msg.error ? '#fecaca' : 'var(--border)'}`,
                                             boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
                                         }}>
                                             {msg.role === 'user'
