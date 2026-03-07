@@ -26,6 +26,8 @@ export const CHANGELOG: ChangelogEntry[] = [
             'KI-Log-Button auf der Workflow-Seite: Öffnet ein Panel mit dem Änderungsprotokoll des KI-Workflows.',
             'Wenn der Beleginhalt von der KI nicht gelesen werden konnte, wird jetzt „Beleginhalt nicht lesbar" angezeigt sowie Nummern aus dem Dateinamen, die für die Zuordnung verwendet wurden.',
             'Die erneute KI-Analyse überschreibt bestehende Daten nur noch, wenn neue oder geänderte Informationen vorliegen – bestehende Felder bleiben erhalten.',
+            '— Buchungsbelege —',
+            'Buchungszuordnung: Die neuesten Buchungen erscheinen jetzt zuerst. Buchungen, die bereits einen Beleg haben, sind ausgegraut und als „belegt" markiert.',
         ],
     },
     {
