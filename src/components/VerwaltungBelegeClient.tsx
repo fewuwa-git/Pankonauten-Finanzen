@@ -61,6 +61,16 @@ export default function VerwaltungBelegeClient({ receipts: initialReceipts, unli
     const [infoReceipt, setInfoReceipt] = useState<TransactionReceipt | null>(null);
     const [linkModal, setLinkModal] = useState<{ id: string; fileName: string } | null>(null);
     const [suggestingId, setSuggestingId] = useState<string | null>(null);
+    const [autoLinkedId, setAutoLinkedId] = useState<string | null>(null);
+    const [showKiSettings, setShowKiSettings] = useState(false);
+    const [kiSettings, setKiSettings] = useState<{ autoAssign: boolean; threshold: number }>(() => {
+        try {
+            const stored = localStorage.getItem('ki_settings');
+            if (stored) return JSON.parse(stored);
+        } catch {}
+        return { autoAssign: false, threshold: 99 };
+    });
+    const [kiSettingsDraft, setKiSettingsDraft] = useState(kiSettings);
     const [suggestionResults, setSuggestionResults] = useState<Record<string, SuggestResult>>(() => {
         const initial: Record<string, SuggestResult> = {};
         for (const r of initialUnlinked) {
@@ -89,6 +99,12 @@ export default function VerwaltungBelegeClient({ receipts: initialReceipts, unli
         );
     }, [receipts, search]);
 
+    function saveKiSettings(settings: { autoAssign: boolean; threshold: number }) {
+        setKiSettings(settings);
+        try { localStorage.setItem('ki_settings', JSON.stringify(settings)); } catch {}
+        setShowKiSettings(false);
+    }
+
     async function handleSuggest(r: UnlinkedReceipt) {
         setSuggestingId(r.id);
         try {
@@ -96,15 +112,22 @@ export default function VerwaltungBelegeClient({ receipts: initialReceipts, unli
             const text = await res.text();
             const data = text ? JSON.parse(text) : {};
             if (data.suggestions) {
-                setSuggestionResults(prev => ({ ...prev, [r.id]: data }));
-                // Update local state with saved AI data
-                setUnlinked(prev => prev.map(u => u.id === r.id ? {
-                    ...u,
-                    ai_vendor: data.extracted?.vendor ?? null,
-                    ai_amount: data.extracted?.amount ?? null,
-                    ai_date: data.extracted?.date ?? null,
-                    ai_description: data.extracted?.description ?? null,
-                } : u));
+                const best: Suggestion | undefined = data.suggestions[0];
+                const shouldAutoAssign = kiSettings.autoAssign && best && best.confidence >= kiSettings.threshold / 100;
+                if (shouldAutoAssign && best) {
+                    setAutoLinkedId(r.id);
+                    await handleLinkSuggestion(r.id, best.transaction);
+                    setAutoLinkedId(null);
+                } else {
+                    setSuggestionResults(prev => ({ ...prev, [r.id]: data }));
+                    setUnlinked(prev => prev.map(u => u.id === r.id ? {
+                        ...u,
+                        ai_vendor: data.extracted?.vendor ?? null,
+                        ai_amount: data.extracted?.amount ?? null,
+                        ai_date: data.extracted?.date ?? null,
+                        ai_description: data.extracted?.description ?? null,
+                    } : u));
+                }
             } else {
                 alert('KI-Analyse fehlgeschlagen: ' + (data.error ?? 'Unbekannter Fehler') + (data.raw ? '\n\nRohantwort:\n' + data.raw.slice(0, 500) : ''));
             }
@@ -112,6 +135,7 @@ export default function VerwaltungBelegeClient({ receipts: initialReceipts, unli
             alert('Fehler bei der KI-Analyse: ' + e.message);
         } finally {
             setSuggestingId(null);
+            setAutoLinkedId(null);
         }
     }
 
@@ -327,8 +351,22 @@ export default function VerwaltungBelegeClient({ receipts: initialReceipts, unli
             {/* Tab: KI-Belegfunktion */}
             {tab === 'ki' && (
             <div className="card mb-6">
-                <div className="card-header">
-                    <div className="card-title">✨ KI-Beleganalyse</div>
+                <div className="card-header" style={{ justifyContent: 'space-between' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                        <div className="card-title">✨ KI-Beleganalyse</div>
+                        {kiSettings.autoAssign && (
+                            <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 10, background: '#d1fae5', color: '#065f46', fontWeight: 600 }}>
+                                Auto-Zuordnung ab {kiSettings.threshold}%
+                            </span>
+                        )}
+                    </div>
+                    <button
+                        className="btn"
+                        onClick={() => { setKiSettingsDraft(kiSettings); setShowKiSettings(true); }}
+                        style={{ fontSize: 12, padding: '5px 12px' }}
+                    >
+                        ⚙ KI Einstellungen
+                    </button>
                 </div>
                 {unlinked.length === 0 ? (
                     <div className="card-body" style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '24px 0' }}>
@@ -378,7 +416,7 @@ export default function VerwaltungBelegeClient({ receipts: initialReceipts, unli
                                                     }}
                                                 >
                                                     <span>{suggestingId === r.id ? '⏳' : '✨'}</span>
-                                                    <span>{suggestingId === r.id ? 'Analysiere…' : (suggestionResults[r.id] ? 'Neu analysieren' : 'KI-Vorschlag')}</span>
+                                                    <span>{autoLinkedId === r.id ? 'Zuordnen…' : suggestingId === r.id ? 'Analysiere…' : (suggestionResults[r.id] ? 'Neu analysieren' : 'KI-Vorschlag')}</span>
                                                 </button>
                                             </td>
                                             <td style={{ textAlign: 'right', fontSize: 13, color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
@@ -622,6 +660,69 @@ export default function VerwaltungBelegeClient({ receipts: initialReceipts, unli
                                     Keine Zuordnungsinfo verfügbar (vor Einführung dieser Funktion zugeordnet).
                                 </div>
                             )}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {showKiSettings && (
+                <div onClick={() => setShowKiSettings(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <div onClick={e => e.stopPropagation()} className="card" style={{ width: 460, padding: 0 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', borderBottom: '1px solid var(--border)' }}>
+                            <span style={{ fontWeight: 700, fontSize: 14 }}>⚙ KI Einstellungen</span>
+                            <button onClick={() => setShowKiSettings(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 18, color: 'var(--text-muted)', lineHeight: 1 }}>✕</button>
+                        </div>
+                        <div style={{ padding: '20px' }}>
+
+                            {/* Auto-Assign Toggle */}
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+                                <div>
+                                    <div style={{ fontWeight: 600, fontSize: 13, marginBottom: 3 }}>Automatische Zuordnung</div>
+                                    <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>Beleg wird automatisch der besten Buchung zugeordnet, wenn der Confidence-Score den Schwellenwert erreicht.</div>
+                                </div>
+                                <button
+                                    onClick={() => setKiSettingsDraft(prev => ({ ...prev, autoAssign: !prev.autoAssign }))}
+                                    style={{
+                                        marginLeft: 16, flexShrink: 0,
+                                        width: 44, height: 24, borderRadius: 12, border: 'none', cursor: 'pointer',
+                                        background: kiSettingsDraft.autoAssign ? 'var(--primary)' : 'var(--border)',
+                                        position: 'relative', transition: 'background 0.2s',
+                                    }}
+                                >
+                                    <span style={{
+                                        position: 'absolute', top: 3, borderRadius: '50%', width: 18, height: 18, background: 'white',
+                                        left: kiSettingsDraft.autoAssign ? 23 : 3, transition: 'left 0.2s',
+                                    }} />
+                                </button>
+                            </div>
+
+                            {/* Threshold */}
+                            <div style={{ opacity: kiSettingsDraft.autoAssign ? 1 : 0.4, transition: 'opacity 0.2s' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                                    <div style={{ fontWeight: 600, fontSize: 13 }}>Confidence-Schwellenwert</div>
+                                    <span style={{ fontSize: 20, fontWeight: 700, color: 'var(--navy)', minWidth: 52, textAlign: 'right' }}>{kiSettingsDraft.threshold}%</span>
+                                </div>
+                                <input
+                                    type="range"
+                                    min={50} max={100} step={1}
+                                    value={kiSettingsDraft.threshold}
+                                    disabled={!kiSettingsDraft.autoAssign}
+                                    onChange={e => setKiSettingsDraft(prev => ({ ...prev, threshold: Number(e.target.value) }))}
+                                    style={{ width: '100%', accentColor: 'var(--navy)', marginBottom: 8 }}
+                                />
+                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: 'var(--text-muted)' }}>
+                                    <span>50% – unsicher</span>
+                                    <span>99–100% – sehr sicher</span>
+                                </div>
+                                <div style={{ marginTop: 12, padding: '10px 14px', borderRadius: 'var(--radius-sm)', background: '#eff6ff', border: '1px solid #bfdbfe', fontSize: 12, color: '#1d4ed8' }}>
+                                    <strong>Hinweis:</strong> Bei Rechnungsnummer-Übereinstimmung vergibt die KI automatisch 99%. Exakte Betragsübereinstimmung ergibt mindestens 85%.
+                                    {kiSettingsDraft.autoAssign && <> Bei einem Schwellenwert von <strong>{kiSettingsDraft.threshold}%</strong> wird der Beleg sofort zugeordnet, ohne manuelle Bestätigung.</>}
+                                </div>
+                            </div>
+                        </div>
+                        <div style={{ padding: '12px 20px', borderTop: '1px solid var(--border)', display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+                            <button className="btn" onClick={() => setShowKiSettings(false)} style={{ fontSize: 13 }}>Abbrechen</button>
+                            <button className="btn btn-primary" onClick={() => saveKiSettings(kiSettingsDraft)} style={{ fontSize: 13 }}>Speichern</button>
                         </div>
                     </div>
                 </div>

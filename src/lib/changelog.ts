@@ -11,6 +11,7 @@ export const CHANGELOG: ChangelogEntry[] = [
             'Im Kontoauszug ersetzt jetzt ein navy „📄 PDF"-Button das Büroklammer-Symbol, sobald ein Beleg vorhanden ist – ein Klick öffnet den Beleg direkt. Ohne Beleg bleibt das Büroklammer-Symbol zum Hochladen.',
             '— Buchungsbelege —',
             'Neuer erster Tab „Beleg hochladen": Belege lassen sich per Drag & Drop oder Dateiauswahl hochladen – mehrere Dateien gleichzeitig, mit Fortschrittsanzeige pro Datei.',
+            'KI-Belegfunktion: Neuer „KI Einstellungen"-Button – Confidence-Schwellenwert (Slider 50–100%) festlegen, ab dem ein Beleg automatisch der passenden Buchung zugeordnet wird, ohne manuellen Klick.',
             'Zugeordnete Belege: Neues ℹ-Symbol zeigt Zuordnungsinfo – ob manuell oder per KI zugeordnet, wann, von wem und mit welchen KI-Daten.',
             'Kategorie-Badges auf der Belege-Seite werden jetzt farbig dargestellt – identisch zur Darstellung im Kontoauszug.',
             'Regelprotokoll: Schriftgröße, Beträge und Kategorie-Badges jetzt einheitlich mit den anderen Seiten.',
