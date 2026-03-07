@@ -195,7 +195,7 @@ ${txList}
 
 Welche 3 Buchungen passen am besten zu diesem Beleg? ★-markierte Buchungen haben sehr hohe Priorität. Antworte NUR mit JSON (kein Markdown), reason max. 8 Wörter auf Deutsch:
 {"suggestions":[{"nr":1,"confidence":0.9,"reason":"..."}]}`,
-        ], 256);
+        ]);
 
         const matchRaw = matchResult.response.text();
         console.log('[suggest] match raw response:', matchRaw);
