@@ -86,6 +86,10 @@ export default function VerwaltungBelegeClient({ receipts: initialReceipts, unli
             }
         } catch {}
     }, []);
+    const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+    const [bulkAnalyzing, setBulkAnalyzing] = useState(false);
+    const [bulkProgress, setBulkProgress] = useState<{ done: number; total: number } | null>(null);
+
     const [suggestionResults, setSuggestionResults] = useState<Record<string, SuggestResult>>(() => {
         const initial: Record<string, SuggestResult> = {};
         for (const r of initialUnlinked) {
@@ -152,6 +156,21 @@ export default function VerwaltungBelegeClient({ receipts: initialReceipts, unli
             setSuggestingId(null);
             setAutoLinkedId(null);
         }
+    }
+
+    async function handleBulkAnalyze() {
+        const ids = [...selectedIds];
+        if (ids.length === 0) return;
+        setBulkAnalyzing(true);
+        setBulkProgress({ done: 0, total: ids.length });
+        setSelectedIds(new Set());
+        for (let i = 0; i < ids.length; i++) {
+            const receipt = unlinked.find(r => r.id === ids[i]);
+            if (receipt) await handleSuggest(receipt);
+            setBulkProgress({ done: i + 1, total: ids.length });
+        }
+        setBulkAnalyzing(false);
+        setBulkProgress(null);
     }
 
     async function handleLinkSuggestion(receiptId: string, tx: Suggestion['transaction']) {
@@ -373,7 +392,7 @@ export default function VerwaltungBelegeClient({ receipts: initialReceipts, unli
             {/* Tab: KI-Belegfunktion */}
             {tab === 'ki' && (
             <div className="card mb-6">
-                <div className="card-header" style={{ justifyContent: 'space-between' }}>
+                <div className="card-header" style={{ justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                         <div className="card-title">✨ KI-Beleganalyse</div>
                         {kiSettings.autoAssign && (
@@ -382,13 +401,29 @@ export default function VerwaltungBelegeClient({ receipts: initialReceipts, unli
                             </span>
                         )}
                     </div>
-                    <button
-                        className="btn"
-                        onClick={() => { setKiSettingsDraft(kiSettings); setShowKiSettings(true); }}
-                        style={{ fontSize: 12, padding: '5px 12px' }}
-                    >
-                        ⚙ KI Einstellungen
-                    </button>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        {bulkProgress && (
+                            <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+                                {bulkProgress.done}/{bulkProgress.total} analysiert…
+                            </span>
+                        )}
+                        {selectedIds.size > 0 && !bulkAnalyzing && (
+                            <button
+                                className="btn btn-primary"
+                                onClick={handleBulkAnalyze}
+                                style={{ fontSize: 12, padding: '5px 12px' }}
+                            >
+                                ✨ {selectedIds.size} analysieren
+                            </button>
+                        )}
+                        <button
+                            className="btn"
+                            onClick={() => { setKiSettingsDraft(kiSettings); setShowKiSettings(true); }}
+                            style={{ fontSize: 12, padding: '5px 12px' }}
+                        >
+                            ⚙ KI Einstellungen
+                        </button>
+                    </div>
                 </div>
                 {unlinked.length === 0 ? (
                     <div className="card-body" style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '24px 0' }}>
@@ -399,6 +434,15 @@ export default function VerwaltungBelegeClient({ receipts: initialReceipts, unli
                         <table className="data-table">
                             <thead>
                                 <tr>
+                                    <th style={{ width: '1%' }}>
+                                        <input
+                                            type="checkbox"
+                                            checked={unlinked.length > 0 && selectedIds.size === unlinked.length}
+                                            ref={el => { if (el) el.indeterminate = selectedIds.size > 0 && selectedIds.size < unlinked.length; }}
+                                            onChange={e => setSelectedIds(e.target.checked ? new Set(unlinked.map(r => r.id)) : new Set())}
+                                            title="Alle auswählen"
+                                        />
+                                    </th>
                                     <th>Dateiname</th>
                                     <th>KI-Analyse</th>
                                     <th style={{ textAlign: 'right' }}>Größe</th>
@@ -409,12 +453,24 @@ export default function VerwaltungBelegeClient({ receipts: initialReceipts, unli
                                 {unlinked.map(r => (
                                     <React.Fragment key={r.id}>
                                         <tr>
+                                            <td>
+                                                <input
+                                                    type="checkbox"
+                                                    checked={selectedIds.has(r.id)}
+                                                    onChange={e => setSelectedIds(prev => {
+                                                        const next = new Set(prev);
+                                                        if (e.target.checked) next.add(r.id); else next.delete(r.id);
+                                                        return next;
+                                                    })}
+                                                    disabled={bulkAnalyzing}
+                                                />
+                                            </td>
                                             <td style={{ fontSize: 13, whiteSpace: 'nowrap' }}>
                                                 <button
                                                     onClick={async () => {
                                                         const res = await fetch(`/api/receipts/${r.id}`);
                                                         const data = await res.json();
-                                                        if (data.url) window.open(data.url, '_blank');
+                                                        if (data.url) setPreview({ url: data.url, fileName: r.file_name });
                                                     }}
                                                     style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontSize: 13, color: 'inherit' }}
                                                     title="Öffnen"
@@ -452,7 +508,7 @@ export default function VerwaltungBelegeClient({ receipts: initialReceipts, unli
                                         {/* KI-Vorschläge */}
                                         {suggestionResults[r.id] && (
                                             <tr key={`${r.id}-suggestions`}>
-                                                <td colSpan={4} style={{ padding: '0 16px 12px', background: 'var(--bg)' }}>
+                                                <td colSpan={5} style={{ padding: '0 16px 12px', background: 'var(--bg)' }}>
                                                     <div style={{ borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', overflow: 'hidden' }}>
                                                         {/* Extracted info */}
                                                         {(() => {

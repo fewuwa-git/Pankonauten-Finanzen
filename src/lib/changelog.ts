@@ -28,6 +28,8 @@ export const CHANGELOG: ChangelogEntry[] = [
             'Die erneute KI-Analyse überschreibt bestehende Daten nur noch, wenn neue oder geänderte Informationen vorliegen – bestehende Felder bleiben erhalten.',
             '— Buchungsbelege —',
             'Buchungszuordnung: Die neuesten Buchungen erscheinen jetzt zuerst. Buchungen, die bereits einen Beleg haben, sind ausgegraut und als „belegt" markiert.',
+            '— KI-Belegfunktion —',
+            'Neue Massenanalyse: Belege per Checkbox auswählen und mit einem Klick auf „X analysieren" alle auf einmal von der KI prüfen lassen – mit Fortschrittsanzeige. Dateien öffnen sich jetzt inline statt in einem neuen Fenster.',
         ],
     },
     {
