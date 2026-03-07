@@ -17,18 +17,33 @@ const ROLE_LABELS: Record<Role, string> = {
 type NavItem = { href: string; label: string; section: string; roles: Role[] };
 
 const ALL_PAGES: NavItem[] = [
+    // Übersicht
     { href: '/dashboard', label: 'Kontostand', section: 'Übersicht', roles: ['admin', 'member'] },
     { href: '/kontoauszug', label: 'Kontoauszug', section: 'Übersicht', roles: ['admin', 'member'] },
     { href: '/categories', label: 'Kategorien', section: 'Übersicht', roles: ['admin', 'member'] },
     { href: '/dashboard/springerin', label: 'Springerin-Übersicht', section: 'Übersicht', roles: ['admin', 'member'] },
+    { href: '/changelog', label: 'Changelog', section: 'Übersicht', roles: ['admin', 'member', 'springerin', 'eltern'] },
+    // Springerin
     { href: '/springerin/abrechnung', label: 'Abrechnung', section: 'Springerin', roles: ['admin', 'springerin'] },
+    { href: '/springerin/abrechnung/neu', label: 'Neue Abrechnung', section: 'Springerin', roles: ['admin', 'springerin'] },
+    // Eltern
     { href: '/eltern/buchungen', label: 'Meine Buchungen', section: 'Eltern', roles: ['eltern', 'member', 'admin'] },
     { href: '/eltern/belege', label: 'Meine Belege', section: 'Eltern', roles: ['eltern', 'member', 'admin'] },
+    { href: '/eltern/belege/neu', label: 'Neuer Beleg', section: 'Eltern', roles: ['eltern', 'member', 'admin'] },
+    { href: '/eltern/belege/[id]/bearbeiten', label: 'Beleg bearbeiten', section: 'Eltern', roles: ['eltern', 'member', 'admin'] },
+    // Upload
     { href: '/upload', label: 'Neuer Upload', section: 'Upload', roles: ['admin'] },
+    // Verwaltung
     { href: '/user', label: 'Benutzer', section: 'Verwaltung', roles: ['admin', 'springerin', 'eltern', 'member'] },
+    { href: '/user/[id]/edit', label: 'Profil bearbeiten', section: 'Verwaltung', roles: ['admin', 'springerin', 'eltern', 'member'] },
+    { href: '/verwaltung/belege', label: 'Buchungsbelege', section: 'Verwaltung', roles: ['admin'] },
     { href: '/verwaltung/kategorien', label: 'Kategorien verwalten', section: 'Verwaltung', roles: ['admin'] },
+    { href: '/verwaltung/kategorien/regeln', label: 'Kategorieregeln', section: 'Verwaltung', roles: ['admin'] },
+    { href: '/verwaltung/kategorien/regeln/log', label: 'Regelprotokoll (KI)', section: 'Verwaltung', roles: ['admin'] },
     { href: '/verwaltung/emails', label: 'E-Mails', section: 'Verwaltung', roles: ['admin'] },
+    { href: '/verwaltung/emails/[id]', label: 'E-Mail-Vorlage bearbeiten', section: 'Verwaltung', roles: ['admin'] },
     { href: '/verwaltung/zugriffsrechte', label: 'Zugriffsrechte', section: 'Verwaltung', roles: ['admin'] },
+    { href: '/logfiles', label: 'Audit-Log', section: 'Verwaltung', roles: ['admin'] },
 ];
 
 const ROLES: Role[] = ['admin', 'member', 'springerin', 'eltern'];
