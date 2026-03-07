@@ -35,24 +35,34 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         const mimeType = receipt.file_name.toLowerCase().endsWith('.pdf') ? 'application/pdf' : 'image/webp';
 
         const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
-        const getModel = (name: string, maxTokens: number) => genAI.getGenerativeModel({
-            model: name,
-            generationConfig: { maxOutputTokens: maxTokens, temperature: 0.1 },
+
+        // For extraction: thinkingBudget: 0 so the full 512 tokens go to the JSON output
+        const extractModel = genAI.getGenerativeModel({
+            model: 'gemini-2.5-flash',
+            generationConfig: {
+                maxOutputTokens: 512,
+                temperature: 0.1,
+                // @ts-ignore – thinkingConfig is supported but not yet typed in the SDK
+                thinkingConfig: { thinkingBudget: 0 },
+            },
         });
 
-        // For extraction: use 2.5-flash (better at reading documents), fallback to 2.0-flash
-        const extractWithFallback = async (contents: Parameters<ReturnType<typeof getModel>['generateContent']>[0]) => {
+        const extractWithFallback = async (contents: Parameters<typeof extractModel.generateContent>[0]) => {
             try {
-                return await getModel('gemini-2.5-flash', 256).generateContent(contents);
+                return await extractModel.generateContent(contents);
             } catch (err: any) {
                 if (err?.message?.includes('503') || err?.message?.includes('Service Unavailable') || err?.message?.includes('high demand') || err?.message?.includes('429') || err?.message?.includes('quota') || err?.message?.includes('Too Many Requests')) {
-                    return await getModel('gemini-2.0-flash', 256).generateContent(contents);
+                    const fallback = genAI.getGenerativeModel({
+                        model: 'gemini-2.0-flash',
+                        generationConfig: { maxOutputTokens: 512, temperature: 0.1 },
+                    });
+                    return await fallback.generateContent(contents);
                 }
                 throw err;
             }
         };
 
-        // For matching: use 2.5-flash with thinking disabled so no tokens are wasted on reasoning
+        // For matching: thinking disabled to save tokens
         const matchModel = genAI.getGenerativeModel({
             model: 'gemini-2.5-flash',
             generationConfig: {
@@ -88,10 +98,13 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         const extractResult = await extractWithFallback([
             { inlineData: { mimeType, data: base64 } },
             'Extrahiere aus diesem Beleg: Aussteller/Firma, Betrag (Zahl), Datum (YYYY-MM-DD), kurze Beschreibung, Rechnungsnummer oder Auftragsnummer (nur die Zahl/Nummer). Antworte NUR mit JSON (kein Markdown): {"vendor":"...","amount":0.00,"date":"YYYY-MM-DD","description":"...","invoice_number":"..."}. Falls ein Wert nicht erkennbar ist, setze null.',
-        ], 256);
+        ]);
+
+        const extractRaw = extractResult.response.text();
+        console.log('[suggest] extract raw response:', extractRaw);
 
         let extracted: { vendor?: string; amount?: number; date?: string; description?: string; invoice_number?: string } = {};
-        try { extracted = JSON.parse(extractJSON(extractResult.response.text())); } catch { /* use empty */ }
+        try { extracted = JSON.parse(extractJSON(extractRaw)); } catch (e) { console.log('[suggest] extract JSON parse failed:', e); }
 
         // Also extract numbers from the filename as additional hints
         const filenameNumbers = (receipt.file_name.match(/\d{4,}/g) || []);
