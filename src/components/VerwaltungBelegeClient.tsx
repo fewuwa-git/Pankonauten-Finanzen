@@ -403,7 +403,7 @@ export default function VerwaltungBelegeClient({ receipts: initialReceipts, unli
                                                 onClick={() => handleDeleteUnlinked(r)}
                                                 disabled={deletingId === r.id}
                                                 style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 14, color: 'var(--red)', padding: '2px 4px', opacity: deletingId === r.id ? 0.5 : 1 }}
-                                                title="Löschen"
+                                                title="PDF unwiderruflich löschen (Datei wird aus dem Speicher entfernt)"
                                             >
                                                 🗑
                                             </button>
@@ -696,7 +696,7 @@ export default function VerwaltungBelegeClient({ receipts: initialReceipts, unli
                                                 onClick={() => handleDeleteLinked(r)}
                                                 disabled={deletingId === r.id}
                                                 style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 14, color: 'var(--red)', padding: '2px 4px', opacity: deletingId === r.id ? 0.5 : 1 }}
-                                                title="Löschen"
+                                                title="PDF unwiderruflich löschen (Datei wird aus dem Speicher entfernt)"
                                             >
                                                 🗑
                                             </button>
