@@ -15,7 +15,7 @@ const NAV_ITEMS: NavGroup[] = [
     {
         section: 'CHAT',
         items: [
-            { href: '/chat', icon: '💬', label: 'Chat', roles: ['admin', 'member', 'eltern', 'springerin'] },
+            { href: '/chat', icon: '💬', label: 'Chat', roles: ['admin', 'member'] },
         ],
     },
     {

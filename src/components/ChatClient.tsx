@@ -107,6 +107,8 @@ export default function ChatClient() {
     const inputRef = useRef<HTMLTextAreaElement>(null);
     const hasMessages = messages.length > 0 || loading;
 
+    useEffect(() => { inputRef.current?.focus(); }, []);
+
     useEffect(() => {
         if (hasMessages) bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages, loading, hasMessages]);

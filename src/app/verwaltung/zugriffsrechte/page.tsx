@@ -18,7 +18,7 @@ type NavItem = { href: string; label: string; section: string; roles: Role[] };
 
 const ALL_PAGES: NavItem[] = [
     // Chat
-    { href: '/chat', label: 'Chat', section: 'Chat', roles: ['admin', 'member', 'eltern', 'springerin'] },
+    { href: '/chat', label: 'Chat', section: 'Chat', roles: ['admin', 'member'] },
     // Übersicht
     { href: '/dashboard', label: 'Kontostand', section: 'Übersicht', roles: ['admin', 'member'] },
     { href: '/kontoauszug', label: 'Kontoauszug', section: 'Übersicht', roles: ['admin', 'member'] },
