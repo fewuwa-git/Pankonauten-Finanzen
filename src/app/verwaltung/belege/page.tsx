@@ -55,6 +55,8 @@ async function BelegeSection({ tab }: { tab: string }) {
         geminiApiKeySet: !!kiSettings.geminiApiKey,
         claudeApiKey: mask(kiSettings.claudeApiKey),
         claudeApiKeySet: !!kiSettings.claudeApiKey,
+        openaiApiKey: mask(kiSettings.openaiApiKey),
+        openaiApiKeySet: !!kiSettings.openaiApiKey,
     };
     return <VerwaltungBelegeClient receipts={receipts} unlinked={unlinkedWithSuggestions} initialTab={tab} categories={categories} kiSettingsInitial={kiSettingsForClient} />;
 }

@@ -23,6 +23,8 @@ export async function GET(req: NextRequest) {
         geminiApiKeySet: !!settings.geminiApiKey,
         claudeApiKey: maskKey(settings.claudeApiKey),
         claudeApiKeySet: !!settings.claudeApiKey,
+        openaiApiKey: maskKey(settings.openaiApiKey),
+        openaiApiKeySet: !!settings.openaiApiKey,
     });
 }
 
@@ -47,6 +49,9 @@ export async function PATCH(req: NextRequest) {
     }
     if (body.claudeApiKey !== undefined && body.claudeApiKey !== '' && !body.claudeApiKey.startsWith('•')) {
         push('ki_claude_api_key', body.claudeApiKey);
+    }
+    if (body.openaiApiKey !== undefined && body.openaiApiKey !== '' && !body.openaiApiKey.startsWith('•')) {
+        push('ki_openai_api_key', body.openaiApiKey);
     }
     push('ki_extract_model', body.extractModel);
     push('ki_match_model', body.matchModel);

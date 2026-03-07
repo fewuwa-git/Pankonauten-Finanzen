@@ -4,16 +4,20 @@ import { useState } from 'react';
 
 const GEMINI_DEFAULTS = { extractModel: 'gemini-2.5-flash', matchModel: 'gemini-2.5-flash', fallbackModel: 'gemini-2.0-flash' };
 const CLAUDE_DEFAULTS = { extractModel: 'claude-sonnet-4-6', matchModel: 'claude-sonnet-4-6', fallbackModel: 'claude-haiku-4-5-20251001' };
+const OPENAI_DEFAULTS = { extractModel: 'gpt-4o', matchModel: 'gpt-4o', fallbackModel: 'gpt-4o-mini' };
 
 const GEMINI_MODELS = ['gemini-2.5-flash', 'gemini-2.5-pro', 'gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-1.5-pro'];
 const CLAUDE_MODELS = ['claude-sonnet-4-6', 'claude-opus-4-6', 'claude-haiku-4-5-20251001'];
+const OPENAI_MODELS = ['gpt-4o', 'gpt-4.1', 'gpt-4o-mini', 'gpt-4.1-mini'];
 
 interface Settings {
-    provider: 'gemini' | 'claude';
+    provider: 'gemini' | 'claude' | 'openai';
     geminiApiKey: string;
     geminiApiKeySet: boolean;
     claudeApiKey: string;
     claudeApiKeySet: boolean;
+    openaiApiKey: string;
+    openaiApiKeySet: boolean;
     extractModel: string;
     matchModel: string;
     fallbackModel: string;
@@ -84,8 +88,8 @@ export default function BelegeKiSettings({ initial }: { initial: Settings }) {
     const set = <K extends keyof Settings>(key: K, value: Settings[K]) =>
         setDraft(prev => ({ ...prev, [key]: value }));
 
-    const switchProvider = (provider: 'gemini' | 'claude') => {
-        const defaults = provider === 'claude' ? CLAUDE_DEFAULTS : GEMINI_DEFAULTS;
+    const switchProvider = (provider: 'gemini' | 'claude' | 'openai') => {
+        const defaults = provider === 'claude' ? CLAUDE_DEFAULTS : provider === 'openai' ? OPENAI_DEFAULTS : GEMINI_DEFAULTS;
         setDraft(prev => ({ ...prev, provider, ...defaults }));
     };
 
@@ -103,7 +107,7 @@ export default function BelegeKiSettings({ initial }: { initial: Settings }) {
         finally { setSaving(false); }
     };
 
-    const models = draft.provider === 'claude' ? CLAUDE_MODELS : GEMINI_MODELS;
+    const models = draft.provider === 'claude' ? CLAUDE_MODELS : draft.provider === 'openai' ? OPENAI_MODELS : GEMINI_MODELS;
     const selectStyle = {
         width: '100%', padding: '8px 12px', borderRadius: 6, border: '1px solid var(--border)',
         background: 'var(--card-bg)', fontSize: 13, color: 'var(--text)', boxSizing: 'border-box' as const,
@@ -118,6 +122,7 @@ export default function BelegeKiSettings({ initial }: { initial: Settings }) {
                     {([
                         { id: 'gemini', label: 'Google Gemini', desc: 'Multimodal, kostenloser Einstieg verfügbar' },
                         { id: 'claude', label: 'Anthropic Claude', desc: 'Exzellente PDF- und Dokumentenanalyse' },
+                        { id: 'openai', label: 'OpenAI ChatGPT', desc: 'GPT-4o, Vision für Bilder (kein nativer PDF-Support)' },
                     ] as const).map(({ id, label, desc }) => (
                         <div key={id} onClick={() => switchProvider(id)} style={{
                             flex: 1, padding: '14px 16px', borderRadius: 8, cursor: 'pointer',
@@ -142,6 +147,11 @@ export default function BelegeKiSettings({ initial }: { initial: Settings }) {
                         Claude unterstützt PDFs nativ als Dokument-Block – keine Konvertierung nötig. Bilder werden als Base64 übergeben.
                     </div>
                 )}
+                {draft.provider === 'openai' && (
+                    <div style={{ marginTop: 12, padding: '10px 14px', borderRadius: 6, background: '#fef9c3', fontSize: 12, color: '#854d0e' }}>
+                        OpenAI unterstützt Vision für Bilder (JPG, PNG, WebP). PDFs werden nicht nativ erkannt – bei PDF-Belegen kann die Extraktion eingeschränkt sein.
+                    </div>
+                )}
             </Section>
 
             {/* API Keys */}
@@ -160,10 +170,17 @@ export default function BelegeKiSettings({ initial }: { initial: Settings }) {
                     placeholder="sk-ant-..."
                     onChange={v => set('claudeApiKey', v)}
                 />
+                <ApiKeyField
+                    label="OpenAI API Key"
+                    value={draft.openaiApiKey}
+                    isSet={draft.openaiApiKeySet}
+                    placeholder="sk-..."
+                    onChange={v => set('openaiApiKey', v)}
+                />
             </Section>
 
             {/* Modelle */}
-            <Section title={`KI-Modelle (${draft.provider === 'claude' ? 'Claude' : 'Gemini'})`}>
+            <Section title={`KI-Modelle (${draft.provider === 'claude' ? 'Claude' : draft.provider === 'openai' ? 'OpenAI' : 'Gemini'})`}>
                 <Field label="Extraktionsmodell" hint="Liest den Beleg und extrahiert Aussteller, Betrag, Datum und Rechnungsnummer.">
                     <select value={draft.extractModel} onChange={e => set('extractModel', e.target.value)} style={selectStyle}>
                         {models.map(m => <option key={m} value={m}>{m}</option>)}

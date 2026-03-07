@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import Anthropic from '@anthropic-ai/sdk';
+import OpenAI from 'openai';
 import { supabase } from '@/lib/db';
 import { getTransactions } from '@/lib/data';
 import { verifyToken } from '@/lib/auth';
@@ -119,6 +120,52 @@ async function runClaude(
     return { extractText, matchText: matchText2 };
 }
 
+// ─── OpenAI ──────────────────────────────────────────────────────────────────
+async function runOpenAI(
+    apiKey: string,
+    extractModel: string,
+    matchModel: string,
+    fallbackModel: string,
+    base64: string,
+    mimeType: string,
+    extractPrompt: string,
+    matchPrompt: string,
+): Promise<{ extractText: string; matchText: string }> {
+    const client = new OpenAI({ apiKey });
+
+    const callOpenAI = async (model: string, prompt: string): Promise<string> => {
+        const isPdf = mimeType === 'application/pdf';
+        const content: OpenAI.Chat.ChatCompletionContentPart[] = isPdf
+            ? [{ type: 'text', text: prompt }]
+            : [
+                { type: 'image_url', image_url: { url: `data:${mimeType};base64,${base64}` } },
+                { type: 'text', text: prompt },
+            ];
+        try {
+            const res = await client.chat.completions.create({
+                model,
+                max_tokens: 512,
+                messages: [{ role: 'user', content }],
+            });
+            return res.choices[0].message.content ?? '';
+        } catch (err: any) {
+            if (isOverloadError(err)) {
+                const res = await client.chat.completions.create({
+                    model: fallbackModel,
+                    max_tokens: 512,
+                    messages: [{ role: 'user', content }],
+                });
+                return res.choices[0].message.content ?? '';
+            }
+            throw err;
+        }
+    };
+
+    const extractText = await callOpenAI(extractModel, extractPrompt);
+    const matchText = await callOpenAI(matchModel, matchPrompt);
+    return { extractText, matchText };
+}
+
 // ─── Main ─────────────────────────────────────────────────────────────────────
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     const token = req.cookies.get('token')?.value;
@@ -178,6 +225,19 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
                 messages: [{ role: 'user', content: [mediaBlock, { type: 'text', text: extractPrompt }] }],
             });
             extractText = (res.content[0] as any).text;
+        } else if (kiSettings.provider === 'openai') {
+            const openaiKey = kiSettings.openaiApiKey || process.env.OPENAI_API_KEY!;
+            const client = new OpenAI({ apiKey: openaiKey });
+            const isPdf = mimeType === 'application/pdf';
+            const content: OpenAI.Chat.ChatCompletionContentPart[] = isPdf
+                ? [{ type: 'text', text: extractPrompt }]
+                : [{ type: 'image_url', image_url: { url: `data:${mimeType};base64,${base64}` } }, { type: 'text', text: extractPrompt }];
+            const res = await client.chat.completions.create({
+                model: kiSettings.extractModel,
+                max_tokens: 512,
+                messages: [{ role: 'user', content }],
+            });
+            extractText = res.choices[0].message.content ?? '';
         } else {
             const genAI = new GoogleGenerativeAI(kiSettings.geminiApiKey || process.env.GEMINI_API_KEY!);
             const model = genAI.getGenerativeModel({
@@ -286,6 +346,30 @@ Welche 3 Buchungen passen am besten zu diesem Beleg? ★-markierte Buchungen hab
                         messages: [{ role: 'user', content: [mediaBlock, { type: 'text', text: matchPrompt }] }],
                     });
                     matchText = (res.content[0] as any).text;
+                } else throw err;
+            }
+        } else if (kiSettings.provider === 'openai') {
+            const openaiKey = kiSettings.openaiApiKey || process.env.OPENAI_API_KEY!;
+            const client = new OpenAI({ apiKey: openaiKey });
+            const isPdf = mimeType === 'application/pdf';
+            const content: OpenAI.Chat.ChatCompletionContentPart[] = isPdf
+                ? [{ type: 'text', text: matchPrompt }]
+                : [{ type: 'image_url', image_url: { url: `data:${mimeType};base64,${base64}` } }, { type: 'text', text: matchPrompt }];
+            try {
+                const res = await client.chat.completions.create({
+                    model: kiSettings.matchModel,
+                    max_tokens: 512,
+                    messages: [{ role: 'user', content }],
+                });
+                matchText = res.choices[0].message.content ?? '';
+            } catch (err: any) {
+                if (isOverloadError(err)) {
+                    const res = await client.chat.completions.create({
+                        model: kiSettings.fallbackModel,
+                        max_tokens: 512,
+                        messages: [{ role: 'user', content }],
+                    });
+                    matchText = res.choices[0].message.content ?? '';
                 } else throw err;
             }
         } else {

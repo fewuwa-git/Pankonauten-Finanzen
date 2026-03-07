@@ -17,6 +17,7 @@
     "jspdf": "^4.2.0",
     "jspdf-autotable": "^5.0.7",
     "next": "16.1.6",
+    "openai": "^6.27.0",
     "papaparse": "^5.5.3",
     "pg": "^8.19.0",
     "react": "19.2.3",

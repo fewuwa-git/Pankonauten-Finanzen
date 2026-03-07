@@ -2,79 +2,37 @@
 
 import { useState } from 'react';
 
-const STEP_STYLE = {
-    display: 'flex',
-    gap: 20,
-    position: 'relative' as const,
-};
+const STEP_STYLE = { display: 'flex', gap: 20, position: 'relative' as const };
 
 const STEP_NUMBER_STYLE = (color: string) => ({
-    width: 36,
-    height: 36,
-    borderRadius: '50%',
-    background: color,
-    color: '#fff',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontWeight: 700,
-    fontSize: 14,
-    flexShrink: 0,
-    marginTop: 2,
-    zIndex: 1,
-    position: 'relative' as const,
+    width: 36, height: 36, borderRadius: '50%', background: color, color: '#fff',
+    display: 'flex', alignItems: 'center', justifyContent: 'center',
+    fontWeight: 700, fontSize: 14, flexShrink: 0, marginTop: 2, zIndex: 1, position: 'relative' as const,
 });
 
 const CONNECTOR_STYLE = {
-    position: 'absolute' as const,
-    left: 17,
-    top: 40,
-    bottom: -24,
-    width: 2,
-    background: 'var(--border)',
-    zIndex: 0,
+    position: 'absolute' as const, left: 17, top: 40, bottom: -24,
+    width: 2, background: 'var(--border)', zIndex: 0,
 };
 
 const CODE_STYLE = {
-    background: '#1a2e45',
-    color: '#e2e8f0',
-    borderRadius: 'var(--radius-sm)',
-    padding: '12px 16px',
-    fontSize: 12,
-    fontFamily: 'monospace',
-    lineHeight: 1.6,
-    overflowX: 'auto' as const,
-    marginTop: 10,
-    whiteSpace: 'pre' as const,
+    background: '#1a2e45', color: '#e2e8f0', borderRadius: 'var(--radius-sm)',
+    padding: '12px 16px', fontSize: 12, fontFamily: 'monospace',
+    lineHeight: 1.6, overflowX: 'auto' as const, marginTop: 10, whiteSpace: 'pre' as const,
 };
 
 const TAG_STYLE = (color: string, bg: string) => ({
-    display: 'inline-block',
-    padding: '2px 8px',
-    borderRadius: 4,
-    fontSize: 11,
-    fontWeight: 600,
-    color,
-    background: bg,
-    marginRight: 4,
+    display: 'inline-block', padding: '2px 8px', borderRadius: 4,
+    fontSize: 11, fontWeight: 600, color, background: bg, marginRight: 4,
 });
 
 const FIELD_ROW = {
-    display: 'flex',
-    alignItems: 'flex-start',
-    gap: 8,
-    padding: '5px 0',
-    borderBottom: '1px solid var(--border)',
-    fontSize: 13,
+    display: 'flex', alignItems: 'flex-start', gap: 8,
+    padding: '5px 0', borderBottom: '1px solid var(--border)', fontSize: 13,
 };
 
 interface StepProps {
-    number: number;
-    color: string;
-    title: string;
-    subtitle?: string;
-    isLast?: boolean;
-    children: React.ReactNode;
+    number: number; color: string; title: string; subtitle?: string; isLast?: boolean; children: React.ReactNode;
 }
 
 function Step({ number, color, title, subtitle, isLast, children }: StepProps) {
@@ -123,44 +81,39 @@ export default function BelegeKiWorkflow() {
         <div>
             {/* Log Modal */}
             {logOpen && (
-                <div
-                    onClick={() => setLogOpen(false)}
-                    style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', zIndex: 1000, display: 'flex', alignItems: 'flex-start', justifyContent: 'flex-end', padding: '64px 32px 32px' }}
-                >
-                    <div
-                        onClick={e => e.stopPropagation()}
-                        style={{ background: 'var(--card)', borderRadius: 'var(--radius)', width: 520, maxHeight: '75vh', display: 'flex', flexDirection: 'column', boxShadow: '0 20px 60px rgba(0,0,0,0.2)' }}
-                    >
+                <div onClick={() => setLogOpen(false)}
+                    style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', zIndex: 1000, display: 'flex', alignItems: 'flex-start', justifyContent: 'flex-end', padding: '64px 32px 32px' }}>
+                    <div onClick={e => e.stopPropagation()}
+                        style={{ background: 'var(--card)', borderRadius: 'var(--radius)', width: 520, maxHeight: '75vh', display: 'flex', flexDirection: 'column', boxShadow: '0 20px 60px rgba(0,0,0,0.2)' }}>
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', borderBottom: '1px solid var(--border)' }}>
                             <span style={{ fontWeight: 700, fontSize: 14 }}>KI-Workflow Log</span>
                             <button onClick={() => setLogOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 18, color: 'var(--text-muted)', lineHeight: 1 }}>✕</button>
                         </div>
                         <div style={{ overflowY: 'auto', padding: '16px 20px', flex: 1 }}>
-                            {logLoading
-                                ? <div style={{ color: 'var(--text-muted)', fontSize: 13 }}>Lade…</div>
-                                : logContent !== null ? renderLog(logContent) : null
-                            }
+                            {logLoading ? <div style={{ color: 'var(--text-muted)', fontSize: 13 }}>Lade…</div>
+                                : logContent !== null ? renderLog(logContent) : null}
                         </div>
                     </div>
                 </div>
             )}
 
-            {/* Header Info */}
+            {/* Header */}
             <div className="card mb-6" style={{ padding: '20px 24px' }}>
                 <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', alignItems: 'flex-start', justifyContent: 'space-between' }}>
                     <div style={{ flex: 1, minWidth: 280 }}>
-                        <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 6 }}>Wie funktioniert die KI-Beleganalyse?</div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+                            <div style={{ fontWeight: 700, fontSize: 15 }}>Wie funktioniert die KI-Beleganalyse?</div>
+                            <span style={{ ...TAG_STYLE('#1d4ed8', '#dbeafe'), marginRight: 0, fontSize: 12 }}>Google Gemini</span>
+                        </div>
                         <div style={{ fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.6 }}>
-                            Wenn du auf "KI-Vorschlag" klickst, durchläuft der Beleg automatisch zwei KI-Schritte:
+                            Wenn du auf „KI-Vorschlag" klickst, durchläuft der Beleg automatisch zwei KI-Schritte:
                             zuerst eine <strong>Extraktion</strong> (was steht auf dem Beleg?), dann ein <strong>Matching</strong> (welche Buchung passt dazu?).
                             Alle Ergebnisse werden dauerhaft in der Datenbank gespeichert.
                         </div>
                     </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8, minWidth: 200, alignItems: 'flex-end', flexShrink: 0 }}>
-                        <button
-                            onClick={openLog}
-                            style={{ padding: '5px 12px', fontSize: 12, fontWeight: 600, borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'var(--bg)', cursor: 'pointer', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}
-                        >
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8, minWidth: 220, alignItems: 'flex-end', flexShrink: 0 }}>
+                        <button onClick={openLog}
+                            style={{ padding: '5px 12px', fontSize: 12, fontWeight: 600, borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'var(--bg)', cursor: 'pointer', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
                             KI-Log
                         </button>
                         <div style={{ fontSize: 12, color: 'var(--text-muted)', fontWeight: 600, marginBottom: 2, marginTop: 4 }}>VERWENDETE MODELLE</div>
@@ -182,38 +135,36 @@ export default function BelegeKiWorkflow() {
                 </div>
             </div>
 
-            {/* Workflow Steps */}
+            {/* Steps */}
             <div className="card" style={{ padding: '28px 28px' }}>
                 <div style={{ fontWeight: 700, marginBottom: 28, color: 'var(--text-muted)', letterSpacing: '0.05em', textTransform: 'uppercase', fontSize: 11 }}>
                     ABLAUF SCHRITT FÜR SCHRITT
                 </div>
 
-                <Step number={1} color="#3b82f6" title="Beleg aus Storage laden"
-                    subtitle="API-Route: POST /api/receipts/[id]/suggest">
+                <Step number={1} color="#3b82f6" title="Beleg aus Storage laden" subtitle="API-Route: POST /api/receipts/[id]/suggest">
                     <div style={{ fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.6 }}>
-                        Der Beleg wird anhand der <code style={{ fontSize: 12, background: 'var(--bg)', padding: '1px 5px', borderRadius: 3 }}>id</code> aus der Tabelle
-                        {' '}<code style={{ fontSize: 12, background: 'var(--bg)', padding: '1px 5px', borderRadius: 3 }}>pankonauten_transaction_receipts</code> geladen.
-                        Dann wird die Datei aus dem Supabase Storage Bucket heruntergeladen und als Base64 kodiert.
+                        Der Beleg wird anhand der <code style={{ fontSize: 12, background: 'var(--bg)', padding: '1px 5px', borderRadius: 3 }}>id</code> aus der Tabelle{' '}
+                        <code style={{ fontSize: 12, background: 'var(--bg)', padding: '1px 5px', borderRadius: 3 }}>pankonauten_transaction_receipts</code> geladen.
+                        Die Datei wird aus dem Supabase Storage Bucket heruntergeladen und als Base64 kodiert.
                     </div>
                     <div style={{ marginTop: 12 }}>
-                        <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 6 }}>STORAGE BUCKET</div>
+                        <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 6 }}>ÜBERGABE AN KI</div>
                         <div style={{ ...FIELD_ROW, borderBottom: 'none' }}>
-                            <span style={TAG_STYLE('#1d4ed8', '#dbeafe')}>bucket</span>
-                            <span style={{ fontFamily: 'monospace', fontSize: 12 }}>transaction-receipts</span>
+                            <span style={TAG_STYLE('#374151', '#f3f4f6')}>PDF</span>
+                            <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>inlineData (mimeType: application/pdf)</span>
                         </div>
                         <div style={{ ...FIELD_ROW, borderBottom: 'none' }}>
-                            <span style={TAG_STYLE('#374151', '#f3f4f6')}>mime</span>
-                            <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>PDF → application/pdf · Bilder → image/webp</span>
+                            <span style={TAG_STYLE('#374151', '#f3f4f6')}>Bild</span>
+                            <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>inlineData (mimeType: image/webp)</span>
                         </div>
                     </div>
                 </Step>
 
-                <Step number={2} color="#8b5cf6" title="Schritt 1: KI-Extraktion"
-                    subtitle="Gemini liest den Beleg und extrahiert strukturierte Daten">
+                <Step number={2} color="#8b5cf6"
+                    title="Schritt 1: KI-Extraktion"
+                    subtitle="Google Gemini liest den Beleg und extrahiert strukturierte Daten">
                     <div style={{ fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.6 }}>
-                        Das Belegbild/PDF wird direkt an die KI übergeben (multimodal). <strong>thinkingBudget=0</strong> ist gesetzt,
-                        damit alle 512 Output-Tokens für die JSON-Ausgabe verfügbar sind und nicht für internes Reasoning verbraucht werden.
-                        Der folgende Prompt wird verwendet:
+                        <strong>thinkingBudget=0</strong> ist gesetzt, damit alle 512 Output-Tokens für die JSON-Ausgabe verfügbar sind und nicht für internes Reasoning verbraucht werden.
                     </div>
                     <div style={CODE_STYLE}>{`Extrahiere aus diesem Beleg: Aussteller/Firma, Betrag (Zahl),
 Datum (YYYY-MM-DD), kurze Beschreibung, Rechnungsnummer oder
@@ -247,7 +198,8 @@ Falls ein Wert nicht erkennbar ist, setze null.`}</div>
                     </div>
                 </Step>
 
-                <Step number={3} color="#f59e0b" title="Buchungskandidaten filtern & priorisieren"
+                <Step number={3} color="#f59e0b"
+                    title="Buchungskandidaten filtern & priorisieren"
                     subtitle="Zeitfenster ±60 Tage · max. 300 Buchungen · Nummernabgleich">
                     <div style={{ fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.6 }}>
                         Alle Buchungen aus der Datenbank werden nach Relevanz gefiltert und sortiert, bevor sie an die KI übergeben werden.
@@ -272,11 +224,11 @@ Beispiel:
    2 | 2025-11-01 | Amazon     | Bestellung 4892-AB   | -120.00€`}</div>
                 </Step>
 
-                <Step number={4} color="#8b5cf6" title="Schritt 2: KI-Matching"
-                    subtitle="Gemini vergleicht Beleg mit Buchungsliste und nennt die 3 besten Treffer">
+                <Step number={4} color="#8b5cf6"
+                    title="Schritt 2: KI-Matching"
+                    subtitle="Google Gemini vergleicht Beleg mit Buchungsliste und nennt die 3 besten Treffer">
                     <div style={{ fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.6 }}>
-                        Das Belegbild/PDF wird erneut übergeben – zusammen mit der gefilterten Buchungsliste. <strong>thinkingBudget=0</strong> verhindert,
-                        dass das Modell in einen langen Denkmodus wechselt, was sonst die JSON-Ausgabe stört.
+                        Das Belegbild/PDF wird erneut übergeben – zusammen mit der gefilterten Buchungsliste. <strong>thinkingBudget=0</strong> verhindert, dass das Modell in einen langen Denkmodus wechselt, was sonst die JSON-Ausgabe stört.
                     </div>
                     <div style={CODE_STYLE}>{`Beleg-Info: Aussteller="[vendor]", Betrag=[amount]€, Datum=[date]
 Rechnungs-/Auftragsnummern aus Beleg/Dateiname: [numbers]
@@ -296,8 +248,7 @@ Antworte NUR mit JSON (kein Markdown), reason max. 8 Wörter auf Deutsch:
 }`}</div>
                 </Step>
 
-                <Step number={5} color="#10b981" title="Confidence-Korrektur (regelbasiert)"
-                    subtitle="Harte Fakten überschreiben die KI-Einschätzung">
+                <Step number={5} color="#10b981" title="Confidence-Korrektur (regelbasiert)" subtitle="Harte Fakten überschreiben die KI-Einschätzung">
                     <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 12, lineHeight: 1.6 }}>
                         Die KI-Confidence wird durch deterministische Regeln überschrieben, wenn objektive Fakten vorliegen:
                     </div>
@@ -323,8 +274,7 @@ Antworte NUR mit JSON (kein Markdown), reason max. 8 Wörter auf Deutsch:
                 </Step>
 
                 <Step number={6} color="#3b82f6" title="Vorschläge in DB speichern"
-                    subtitle="Ergebnisse werden dauerhaft gespeichert und beim nächsten Seitenaufruf wiederhergestellt"
-                    isLast>
+                    subtitle="Ergebnisse werden dauerhaft gespeichert und beim nächsten Seitenaufruf wiederhergestellt" isLast>
                     <div style={{ fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.6, marginBottom: 12 }}>
                         Die fertigen Vorschläge werden als JSON-Array in der Datenbank gespeichert. Beim nächsten Laden der Seite werden sie
                         automatisch wiederhergestellt – kein erneuter KI-Aufruf nötig.

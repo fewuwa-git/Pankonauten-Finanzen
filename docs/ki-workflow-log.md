@@ -7,6 +7,20 @@ Relevante Dateien:
 
 ---
 
+## 07.03.2026 – OpenAI ChatGPT als dritter KI-Anbieter
+
+**Änderung:** Neben Gemini und Claude kann jetzt auch OpenAI (ChatGPT) als KI-Anbieter gewählt werden.
+
+**OpenAI-spezifisch:**
+- Bilder werden als `data:image/...;base64,...` in `image_url`-Blöcken übergeben (Vision API)
+- PDFs werden **nicht** nativ unterstützt – bei PDF-Belegen wird nur der Text-Prompt ohne Dateiinhalt gesendet (Extraktion ggf. eingeschränkt)
+- Modelle: `gpt-4o` (Standard), `gpt-4.1`, `gpt-4o-mini`, `gpt-4.1-mini`
+- Fallback bei Überlast: Fallback-Modell (kein extra Delay)
+
+**Technisch:** `suggest/route.ts` hat jetzt drei Branches: `gemini`, `claude`, `openai`. `kiSettings.ts` und `ki-settings` API erweitert um `openaiApiKey` / `ki_openai_api_key`.
+
+---
+
 ## 07.03.2026 – Claude als zweiter KI-Anbieter
 
 **Änderung:** Neben Gemini kann jetzt auch Anthropic Claude als KI-Anbieter gewählt werden. Umschaltung in KI-Einstellungen unter „KI-Anbieter".
