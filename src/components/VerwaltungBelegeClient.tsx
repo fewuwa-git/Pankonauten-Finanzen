@@ -257,7 +257,11 @@ export default function VerwaltungBelegeClient({ receipts: initialReceipts, unli
             transaction_counterparty: tx.counterparty,
             transaction_amount: tx.amount,
             transaction_category: tx.category,
-        }, ...prev]);
+            linked_method: null,
+            linked_at: null,
+            linked_by: null,
+            ai_invoice_number: null,
+        } as TransactionReceipt, ...prev]);
         setLinkModal(null);
     }
 
