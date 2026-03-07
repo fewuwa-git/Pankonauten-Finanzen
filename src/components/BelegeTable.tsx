@@ -154,7 +154,7 @@ export default function BelegeTable({
                                                         <BelegStatusButton id={b.id} label={b.titel} targetStatus="eingereicht" />
                                                     )}
                                                     {isAdmin && isEingereicht && (
-                                                        <BelegStatusButton id={b.id} label={b.titel} targetStatus="bezahlt" />
+                                                        <BelegStatusButton id={b.id} label={b.titel} targetStatus="bezahlt" beleg={b} />
                                                     )}
                                                     {isAdmin && isEingereicht && (
                                                         <BelegStatusButton id={b.id} label={b.titel} targetStatus="abgelehnt" />

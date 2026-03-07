@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import ConfirmModal from '@/components/ConfirmModal';
+import type { Beleg } from '@/lib/data';
 
 type TargetStatus = 'eingereicht' | 'bezahlt' | 'abgelehnt';
 
@@ -40,10 +41,11 @@ const CONFIG: Record<TargetStatus, {
     },
 };
 
-export default function BelegStatusButton({ id, label, targetStatus }: {
+export default function BelegStatusButton({ id, label, targetStatus, beleg }: {
     id: string;
     label: string;
     targetStatus: TargetStatus;
+    beleg?: Beleg;
 }) {
     const [showModal, setShowModal] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
@@ -58,7 +60,30 @@ export default function BelegStatusButton({ id, label, targetStatus }: {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ status: targetStatus }),
             });
-            if (res.ok) { setShowModal(false); router.refresh(); }
+            if (res.ok) {
+                setShowModal(false);
+
+                if (targetStatus === 'bezahlt' && beleg) {
+                    try {
+                        const { generateBelegPDF } = await import('@/lib/belegPdf');
+                        const blobUrl = await generateBelegPDF(beleg);
+                        const blobRes = await fetch(blobUrl);
+                        const blob = await blobRes.blob();
+                        URL.revokeObjectURL(blobUrl);
+
+                        const safeName = (beleg.belegnummer || beleg.titel).replace(/[^a-zA-Z0-9äöüÄÖÜß\-]/g, '_');
+                        const file = new File([blob], `Beleg_${safeName}.pdf`, { type: 'application/pdf' });
+
+                        const formData = new FormData();
+                        formData.append('file', file);
+                        await fetch('/api/receipts', { method: 'POST', body: formData });
+                    } catch (pdfErr) {
+                        console.error('PDF konnte nicht in Belegverwaltung hochgeladen werden:', pdfErr);
+                    }
+                }
+
+                router.refresh();
+            }
             else alert('Fehler beim Aktualisieren des Status.');
         } catch {
             alert('Netzwerkfehler.');
