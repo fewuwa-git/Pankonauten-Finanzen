@@ -127,7 +127,7 @@ export default function LinkReceiptModal({ receiptId, fileName, linkedTransactio
                                         <td style={{ whiteSpace: 'nowrap', fontSize: 13, color: 'var(--text-muted)' }}>
                                             {fmtDate(tx.date)}
                                         </td>
-                                        <td style={{ fontSize: 13, maxWidth: 220, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                        <td style={{ fontSize: 13, maxWidth: 220, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={tx.description}>
                                             {tx.description}
                                         </td>
                                         <td style={{ fontSize: 13, color: 'var(--text-muted)', maxWidth: 140, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
@@ -142,7 +142,8 @@ export default function LinkReceiptModal({ receiptId, fileName, linkedTransactio
                                             ) : (
                                                 <button
                                                     disabled={!!linkingId}
-                                                    style={{ fontSize: 12, color: 'var(--primary)', background: 'none', border: 'none', cursor: 'pointer', opacity: linkingId === tx.id ? 0.5 : 1, whiteSpace: 'nowrap' }}
+                                                    className="btn btn-primary"
+                                                    style={{ fontSize: 12, padding: '4px 10px', whiteSpace: 'nowrap', opacity: linkingId === tx.id ? 0.6 : 1 }}
                                                 >
                                                     {linkingId === tx.id ? 'Zuordnen…' : 'Zuordnen →'}
                                                 </button>
