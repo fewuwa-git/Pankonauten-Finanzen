@@ -1,7 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { GEMINI_DEFAULTS, CLAUDE_DEFAULTS } from '@/lib/kiSettings';
+
+const GEMINI_DEFAULTS = { extractModel: 'gemini-2.5-flash', matchModel: 'gemini-2.5-flash', fallbackModel: 'gemini-2.0-flash' };
+const CLAUDE_DEFAULTS = { extractModel: 'claude-sonnet-4-6', matchModel: 'claude-sonnet-4-6', fallbackModel: 'claude-haiku-4-5-20251001' };
 
 const GEMINI_MODELS = ['gemini-2.5-flash', 'gemini-2.5-pro', 'gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-1.5-pro'];
 const CLAUDE_MODELS = ['claude-sonnet-4-6', 'claude-opus-4-6', 'claude-haiku-4-5-20251001'];
