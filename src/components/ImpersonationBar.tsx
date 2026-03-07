@@ -88,7 +88,7 @@ export default function ImpersonationBar() {
         await fetch('/api/impersonate', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ userId: user.id, name: user.name, email: user.email, role: user.role }),
+            body: JSON.stringify({ userId: user.id }),
         });
         await refreshState();
         setLoading(false);

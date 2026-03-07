@@ -1,10 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/db';
+import { verifyToken } from '@/lib/auth';
 
 const BUCKET = 'transaction-receipts';
 
 // Get signed URL for a receipt
-export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+    const token = req.cookies.get('token')?.value;
+    const payload = token ? await verifyToken(token) : null;
+    if (!payload) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
     const { id } = await params;
     const { data } = await supabase
         .from('pankonauten_transaction_receipts')
@@ -18,9 +23,13 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
 
 // Link receipt to a transaction
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+    const token = req.cookies.get('token')?.value;
+    const payload = token ? await verifyToken(token) : null;
+    if (!payload) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
     const { id } = await params;
     const { transaction_id, method } = await req.json();
-    const linkedBy = req.headers.get('x-user-name') || req.headers.get('x-user-email') || 'Unbekannt';
+    const linkedBy = payload.name || payload.email;
     const linkedAt = new Date().toISOString();
     const linkedMethod = method === 'ki' ? 'ki' : 'manual';
 
@@ -55,7 +64,11 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 }
 
 // Delete unlinked receipt
-export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+    const token = req.cookies.get('token')?.value;
+    const payload = token ? await verifyToken(token) : null;
+    if (!payload) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
     const { id } = await params;
 
     const { data } = await supabase

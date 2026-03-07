@@ -7,6 +7,11 @@ export const CHANGELOG: ChangelogEntry[] = [
     {
         date: '07.03.2026',
         changes: [
+            '— Sicherheit —',
+            'Alle Beleg- und Upload-Endpunkte sind jetzt gegen unauthentifizierte Zugriffe geschützt (Login erforderlich).',
+            'Der „Verlinkt von"-Eintrag bei Belegen wird jetzt aus dem verifizierten Login-Token gelesen statt aus einem fälschbaren HTTP-Header.',
+            'Der KI-Log und die Kategorieregeln sind jetzt nur noch für eingeloggte Nutzer abrufbar.',
+            'Beim Nutzer-Wechsel (Admin-Impersonation) wird die Identität jetzt immer gegen die Datenbank geprüft.',
             '— Kontoauszug —',
             'Im Kontoauszug ersetzt jetzt ein navy „📄 PDF"-Button das Büroklammer-Symbol, sobald ein Beleg vorhanden ist – ein Klick öffnet den Beleg direkt. Ohne Beleg bleibt das Büroklammer-Symbol zum Hochladen.',
             '— Buchungsbelege —',

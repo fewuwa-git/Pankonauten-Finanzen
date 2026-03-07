@@ -1,9 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/db';
+import { verifyToken } from '@/lib/auth';
 
 const BUCKET = 'transaction-receipts';
 
-export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string; receiptId: string }> }) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string; receiptId: string }> }) {
+    const token = req.cookies.get('token')?.value;
+    const payload = token ? await verifyToken(token) : null;
+    if (!payload) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
     const { receiptId } = await params;
 
     const { data, error: fetchError } = await supabase

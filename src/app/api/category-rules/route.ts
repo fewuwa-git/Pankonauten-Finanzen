@@ -4,6 +4,11 @@ import { verifyToken } from '@/lib/auth';
 import { getCategoryRules, createCategoryRule } from '@/lib/data';
 
 export async function GET() {
+    const cookieStore = await cookies();
+    const token = cookieStore.get('token')?.value;
+    const payload = token ? await verifyToken(token) : null;
+    if (!payload) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
     const rules = await getCategoryRules();
     return NextResponse.json(rules);
 }

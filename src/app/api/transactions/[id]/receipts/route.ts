@@ -1,10 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/db';
 import { compressIfImage } from '@/lib/compressImage';
+import { verifyToken } from '@/lib/auth';
 
 const BUCKET = 'transaction-receipts';
 
-export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+    const token = req.cookies.get('token')?.value;
+    const payload = token ? await verifyToken(token) : null;
+    if (!payload) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
     const { id } = await params;
     const { data, error } = await supabase
         .from('pankonauten_transaction_receipts')
@@ -27,6 +32,10 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
 }
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+    const token = req.cookies.get('token')?.value;
+    const payload = token ? await verifyToken(token) : null;
+    if (!payload) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
     const { id } = await params;
     const formData = await req.formData();
     const file = formData.get('file') as File | null;

@@ -1,10 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/db';
 import { compressIfImage } from '@/lib/compressImage';
+import { verifyToken } from '@/lib/auth';
 
 const BUCKET = 'transaction-receipts';
 
 export async function POST(req: NextRequest) {
+    const token = req.cookies.get('token')?.value;
+    const payload = token ? await verifyToken(token) : null;
+    if (!payload) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
     const formData = await req.formData();
     const file = formData.get('file') as File | null;
     if (!file) return NextResponse.json({ error: 'Keine Datei' }, { status: 400 });

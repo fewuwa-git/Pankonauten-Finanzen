@@ -38,13 +38,19 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
 
-    const { userId, name, email, role } = await req.json();
-    if (!userId || !name || !email || !role) {
+    const { userId } = await req.json();
+    if (!userId) {
         return NextResponse.json({ error: 'Fehlende Felder' }, { status: 400 });
     }
 
+    const allUsers = await getUsers();
+    const target = allUsers.find(u => u.id === userId && u.status === 'active');
+    if (!target) {
+        return NextResponse.json({ error: 'Benutzer nicht gefunden' }, { status: 404 });
+    }
+
     const response = NextResponse.json({ ok: true });
-    response.cookies.set('impersonate', JSON.stringify({ userId, name, email, role }), COOKIE_OPTIONS);
+    response.cookies.set('impersonate', JSON.stringify({ userId: target.id, name: target.name, email: target.email, role: target.role }), COOKIE_OPTIONS);
     return response;
 }
 

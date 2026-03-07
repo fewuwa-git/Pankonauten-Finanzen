@@ -2,10 +2,15 @@ import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { supabase } from '@/lib/db';
 import { getTransactions } from '@/lib/data';
+import { verifyToken } from '@/lib/auth';
 
 const BUCKET = 'transaction-receipts';
 
-export async function POST(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+    const token = req.cookies.get('token')?.value;
+    const payload = token ? await verifyToken(token) : null;
+    if (!payload) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
     try {
         const { id } = await params;
 
