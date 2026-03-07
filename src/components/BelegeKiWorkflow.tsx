@@ -184,7 +184,7 @@ export default function BelegeKiWorkflow() {
 
             {/* Workflow Steps */}
             <div className="card" style={{ padding: '28px 28px' }}>
-                <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 28, color: 'var(--text-muted)', letterSpacing: '0.05em', textTransform: 'uppercase', fontSize: 11 }}>
+                <div style={{ fontWeight: 700, marginBottom: 28, color: 'var(--text-muted)', letterSpacing: '0.05em', textTransform: 'uppercase', fontSize: 11 }}>
                     ABLAUF SCHRITT FÜR SCHRITT
                 </div>
 
