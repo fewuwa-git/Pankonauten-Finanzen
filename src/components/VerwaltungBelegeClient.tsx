@@ -91,6 +91,7 @@ export default function VerwaltungBelegeClient({ receipts: initialReceipts, unli
     const [bulkProgress, setBulkProgress] = useState<{ done: number; total: number } | null>(null);
     const [unlinkConfirm, setUnlinkConfirm] = useState<TransactionReceipt | null>(null);
     const [unlinkingId, setUnlinkingId] = useState<string | null>(null);
+    const [kiErrors, setKiErrors] = useState<Record<string, string>>({});
 
     const [suggestionResults, setSuggestionResults] = useState<Record<string, SuggestResult>>(() => {
         const initial: Record<string, SuggestResult> = {};
@@ -150,10 +151,11 @@ export default function VerwaltungBelegeClient({ receipts: initialReceipts, unli
                     } : u));
                 }
             } else {
-                alert('KI-Analyse fehlgeschlagen: ' + (data.error ?? 'Unbekannter Fehler') + (data.raw ? '\n\nRohantwort:\n' + data.raw.slice(0, 500) : ''));
+                const msg = (data.error ?? 'Unbekannter Fehler') + (data.raw ? `\n\nRohantwort: ${data.raw.slice(0, 300)}` : '');
+                setKiErrors(prev => ({ ...prev, [r.id]: msg }));
             }
         } catch (e: any) {
-            alert('Fehler bei der KI-Analyse: ' + e.message);
+            setKiErrors(prev => ({ ...prev, [r.id]: e.message }));
         } finally {
             setSuggestingId(null);
             setAutoLinkedId(null);
@@ -538,6 +540,20 @@ export default function VerwaltungBelegeClient({ receipts: initialReceipts, unli
                                         </tr>
 
                                         {/* KI-Vorschläge */}
+                                        {kiErrors[r.id] && (
+                                            <tr key={`${r.id}-error`}>
+                                                <td colSpan={5} style={{ padding: '0 16px 12px', background: 'var(--bg)' }}>
+                                                    <div style={{ borderRadius: 'var(--radius-sm)', border: '1px solid #fca5a5', background: '#fef2f2', padding: '10px 14px', display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+                                                        <span style={{ fontSize: 16, flexShrink: 0 }}>⚠️</span>
+                                                        <div style={{ flex: 1, minWidth: 0 }}>
+                                                            <div style={{ fontSize: 12, fontWeight: 600, color: '#b91c1c', marginBottom: 4 }}>KI-Analyse fehlgeschlagen</div>
+                                                            <div style={{ fontSize: 12, color: '#7f1d1d', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{kiErrors[r.id]}</div>
+                                                        </div>
+                                                        <button onClick={() => setKiErrors(prev => { const n = { ...prev }; delete n[r.id]; return n; })} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#b91c1c', fontSize: 14, padding: '0 2px', flexShrink: 0 }}>✕</button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        )}
                                         {suggestionResults[r.id] && (
                                             <tr key={`${r.id}-suggestions`}>
                                                 <td colSpan={5} style={{ padding: '0 16px 12px', background: 'var(--bg)' }}>
