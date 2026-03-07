@@ -147,7 +147,7 @@ export default function BelegeKiWorkflow() {
 
             {/* Header Info */}
             <div className="card mb-6" style={{ padding: '20px 24px' }}>
-                <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', alignItems: 'flex-start' }}>
+                <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', alignItems: 'flex-start', justifyContent: 'space-between' }}>
                     <div style={{ flex: 1, minWidth: 280 }}>
                         <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 6 }}>Wie funktioniert die KI-Beleganalyse?</div>
                         <div style={{ fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.6 }}>
@@ -156,7 +156,7 @@ export default function BelegeKiWorkflow() {
                             Alle Ergebnisse werden dauerhaft in der Datenbank gespeichert.
                         </div>
                     </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8, minWidth: 200, alignItems: 'flex-end' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8, minWidth: 200, alignItems: 'flex-end', flexShrink: 0 }}>
                         <button
                             onClick={openLog}
                             style={{ padding: '5px 12px', fontSize: 12, fontWeight: 600, borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'var(--bg)', cursor: 'pointer', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}
