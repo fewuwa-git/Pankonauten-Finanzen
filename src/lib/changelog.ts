@@ -7,6 +7,8 @@ export const CHANGELOG: ChangelogEntry[] = [
     {
         date: '07.03.2026',
         changes: [
+            '— Buchungsbelege —',
+            'Neue Seite „KI-Einstellungen" in der Belegverwaltung: Gemini API Key, Modellauswahl (Extraktion, Matching, Fallback), Zeitfenster, max. Buchungen und Auto-Zuordnung lassen sich jetzt direkt in der Oberfläche konfigurieren.',
             '— Abrechnungen & Belege —',
             'Wenn eine Abrechnung oder ein Eltern-Beleg als „Bezahlt" markiert wird, wird das PDF automatisch in die Belegverwaltung hochgeladen und erscheint dort unter den unzugeordneten Belegen.',
             '— Sicherheit —',

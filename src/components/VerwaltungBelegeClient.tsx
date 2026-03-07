@@ -6,6 +6,7 @@ import { CATEGORY_COLORS } from '@/lib/constants';
 import { fmtDate, fmtDateTime } from '@/lib/formatDate';
 import LinkReceiptModal from './LinkReceiptModal';
 import BelegeKiWorkflow from './BelegeKiWorkflow';
+import BelegeKiSettings from './BelegeKiSettings';
 import BelegeUpload from './BelegeUpload';
 import ConfirmModal from './ConfirmModal';
 
@@ -49,10 +50,11 @@ interface Props {
     unlinked: UnlinkedReceipt[];
     initialTab: string;
     categories: Category[];
+    kiSettingsInitial?: any;
 }
 
-export default function VerwaltungBelegeClient({ receipts: initialReceipts, unlinked: initialUnlinked, initialTab, categories }: Props) {
-    const tab = initialTab as 'upload' | 'linked' | 'unlinked' | 'ki' | 'ki-workflow';
+export default function VerwaltungBelegeClient({ receipts: initialReceipts, unlinked: initialUnlinked, initialTab, categories, kiSettingsInitial }: Props) {
+    const tab = initialTab as 'upload' | 'linked' | 'unlinked' | 'ki' | 'ki-workflow' | 'ki-settings';
     const categoryColorMap: Record<string, string> = { ...CATEGORY_COLORS };
     for (const cat of categories) categoryColorMap[cat.name] = cat.color;
     const [receipts, setReceipts] = useState(initialReceipts);
@@ -270,39 +272,41 @@ export default function VerwaltungBelegeClient({ receipts: initialReceipts, unli
     return (
         <div>
             {/* Tab Nav */}
-            <div style={{ display: 'flex', gap: 0, borderBottom: '2px solid var(--border)', marginBottom: 24 }}>
-                <a href="/verwaltung/belege?tab=upload" style={{
-                    padding: '8px 20px', fontSize: 13, fontWeight: tab === 'upload' ? 600 : 500,
-                    color: tab === 'upload' ? 'var(--navy)' : 'var(--text-muted)',
-                    borderBottom: tab === 'upload' ? '2px solid var(--primary)' : '2px solid transparent',
-                    marginBottom: -2, textDecoration: 'none', whiteSpace: 'nowrap',
-                }}>
-                    Beleg hochladen
-                </a>
-                <a href="/verwaltung/belege?tab=linked" style={{
-                    padding: '8px 20px', fontSize: 13, fontWeight: tab === 'linked' ? 600 : 500,
-                    color: tab === 'linked' ? 'var(--navy)' : 'var(--text-muted)',
-                    borderBottom: tab === 'linked' ? '2px solid var(--primary)' : '2px solid transparent',
-                    marginBottom: -2, textDecoration: 'none', whiteSpace: 'nowrap',
-                }}>
-                    Zugeordnete Belege {receipts.length > 0 && <span style={{ fontSize: 11, marginLeft: 4, opacity: 0.7 }}>({receipts.length})</span>}
-                </a>
-                <a href="/verwaltung/belege?tab=unlinked" style={{
-                    padding: '8px 20px', fontSize: 13, fontWeight: tab === 'unlinked' ? 600 : 500,
-                    color: tab === 'unlinked' ? 'var(--navy)' : (unlinked.length > 0 ? 'var(--red)' : 'var(--text-muted)'),
-                    borderBottom: tab === 'unlinked' ? '2px solid var(--primary)' : '2px solid transparent',
-                    marginBottom: -2, textDecoration: 'none', whiteSpace: 'nowrap',
-                }}>
-                    Unzugeordnete Belege {unlinked.length > 0 && <span style={{ fontSize: 11, marginLeft: 4, opacity: 0.7 }}>({unlinked.length})</span>}
-                </a>
-                <a href="/verwaltung/belege?tab=ki" style={{
-                    padding: '8px 20px', fontSize: 13, fontWeight: tab === 'ki' ? 600 : 500,
-                    color: tab === 'ki' ? 'var(--navy)' : 'var(--text-muted)',
-                    borderBottom: tab === 'ki' ? '2px solid var(--primary)' : '2px solid transparent',
-                    marginBottom: -2, textDecoration: 'none', whiteSpace: 'nowrap',
-                }}>
-                    KI-Belegfunktion
-                </a>
+            <div style={{ display: 'flex', gap: 0, borderBottom: '2px solid var(--border)', marginBottom: 24, justifyContent: 'space-between' }}>
+                <div style={{ display: 'flex' }}>
+                    <a href="/verwaltung/belege?tab=upload" style={{
+                        padding: '8px 20px', fontSize: 13, fontWeight: tab === 'upload' ? 600 : 500,
+                        color: tab === 'upload' ? 'var(--navy)' : 'var(--text-muted)',
+                        borderBottom: tab === 'upload' ? '2px solid var(--primary)' : '2px solid transparent',
+                        marginBottom: -2, textDecoration: 'none', whiteSpace: 'nowrap',
+                    }}>
+                        Beleg hochladen
+                    </a>
+                    <a href="/verwaltung/belege?tab=linked" style={{
+                        padding: '8px 20px', fontSize: 13, fontWeight: tab === 'linked' ? 600 : 500,
+                        color: tab === 'linked' ? 'var(--navy)' : 'var(--text-muted)',
+                        borderBottom: tab === 'linked' ? '2px solid var(--primary)' : '2px solid transparent',
+                        marginBottom: -2, textDecoration: 'none', whiteSpace: 'nowrap',
+                    }}>
+                        Zugeordnete Belege {receipts.length > 0 && <span style={{ fontSize: 11, marginLeft: 4, opacity: 0.7 }}>({receipts.length})</span>}
+                    </a>
+                    <a href="/verwaltung/belege?tab=unlinked" style={{
+                        padding: '8px 20px', fontSize: 13, fontWeight: tab === 'unlinked' ? 600 : 500,
+                        color: tab === 'unlinked' ? 'var(--navy)' : (unlinked.length > 0 ? 'var(--red)' : 'var(--text-muted)'),
+                        borderBottom: tab === 'unlinked' ? '2px solid var(--primary)' : '2px solid transparent',
+                        marginBottom: -2, textDecoration: 'none', whiteSpace: 'nowrap',
+                    }}>
+                        Unzugeordnete Belege {unlinked.length > 0 && <span style={{ fontSize: 11, marginLeft: 4, opacity: 0.7 }}>({unlinked.length})</span>}
+                    </a>
+                    <a href="/verwaltung/belege?tab=ki" style={{
+                        padding: '8px 20px', fontSize: 13, fontWeight: tab === 'ki' ? 600 : 500,
+                        color: tab === 'ki' ? 'var(--navy)' : 'var(--text-muted)',
+                        borderBottom: tab === 'ki' ? '2px solid var(--primary)' : '2px solid transparent',
+                        marginBottom: -2, textDecoration: 'none', whiteSpace: 'nowrap',
+                    }}>
+                        KI-Belegfunktion
+                    </a>
+                </div>
                 <a href="/verwaltung/belege?tab=ki-workflow" style={{
                     padding: '8px 20px', fontSize: 13, fontWeight: tab === 'ki-workflow' ? 600 : 500,
                     color: tab === 'ki-workflow' ? 'var(--navy)' : 'var(--text-muted)',
@@ -310,6 +314,14 @@ export default function VerwaltungBelegeClient({ receipts: initialReceipts, unli
                     marginBottom: -2, textDecoration: 'none', whiteSpace: 'nowrap',
                 }}>
                     KI Workflow
+                </a>
+                <a href="/verwaltung/belege?tab=ki-settings" style={{
+                    padding: '8px 20px', fontSize: 13, fontWeight: tab === 'ki-settings' ? 600 : 500,
+                    color: tab === 'ki-settings' ? 'var(--navy)' : 'var(--text-muted)',
+                    borderBottom: tab === 'ki-settings' ? '2px solid var(--primary)' : '2px solid transparent',
+                    marginBottom: -2, textDecoration: 'none', whiteSpace: 'nowrap',
+                }}>
+                    KI-Einstellungen
                 </a>
             </div>
 
@@ -620,6 +632,7 @@ export default function VerwaltungBelegeClient({ receipts: initialReceipts, unli
 
             {/* Tab: KI Workflow */}
             {tab === 'ki-workflow' && <BelegeKiWorkflow />}
+            {tab === 'ki-settings' && kiSettingsInitial && <BelegeKiSettings initial={kiSettingsInitial} />}
 
             {/* Tab: Zugeordnete Belege */}
             {tab === 'linked' && (

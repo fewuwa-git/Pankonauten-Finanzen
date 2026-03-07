@@ -3,6 +3,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import { supabase } from '@/lib/db';
 import { getTransactions } from '@/lib/data';
 import { verifyToken } from '@/lib/auth';
+import { getKiSettings } from '@/lib/kiSettings';
 
 const BUCKET = 'transaction-receipts';
 
@@ -13,6 +14,9 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
     try {
         const { id } = await params;
+
+        const kiSettings = await getKiSettings();
+        const apiKey = kiSettings.apiKey || process.env.GEMINI_API_KEY!;
 
         const { data: receipt } = await supabase
             .from('pankonauten_transaction_receipts')
@@ -34,11 +38,11 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         const base64 = Buffer.from(arrayBuffer).toString('base64');
         const mimeType = receipt.file_name.toLowerCase().endsWith('.pdf') ? 'application/pdf' : 'image/webp';
 
-        const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+        const genAI = new GoogleGenerativeAI(apiKey);
 
         // For extraction: thinkingBudget: 0 so the full 512 tokens go to the JSON output
         const extractModel = genAI.getGenerativeModel({
-            model: 'gemini-2.5-flash',
+            model: kiSettings.extractModel,
             generationConfig: {
                 maxOutputTokens: 512,
                 temperature: 0.1,
@@ -53,7 +57,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
             } catch (err: any) {
                 if (err?.message?.includes('503') || err?.message?.includes('Service Unavailable') || err?.message?.includes('high demand') || err?.message?.includes('429') || err?.message?.includes('quota') || err?.message?.includes('Too Many Requests')) {
                     const fallback = genAI.getGenerativeModel({
-                        model: 'gemini-2.0-flash',
+                        model: kiSettings.fallbackModel,
                         generationConfig: { maxOutputTokens: 512, temperature: 0.1 },
                     });
                     return await fallback.generateContent(contents);
@@ -64,7 +68,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
         // For matching: thinking disabled to save tokens
         const matchModel = genAI.getGenerativeModel({
-            model: 'gemini-2.5-flash',
+            model: kiSettings.matchModel,
             generationConfig: {
                 maxOutputTokens: 512,
                 temperature: 0.1,
@@ -136,7 +140,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         let candidates = allTransactions;
         if (extracted.date) {
             const receiptDate = new Date(extracted.date);
-            const windowMs = 60 * 24 * 60 * 60 * 1000; // ±60 days
+            const windowMs = kiSettings.timeWindowDays * 24 * 60 * 60 * 1000;
             candidates = allTransactions.filter(t => {
                 const diff = Math.abs(new Date(t.date).getTime() - receiptDate.getTime());
                 return diff <= windowMs;
@@ -149,15 +153,15 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
                 if (!extracted.date) return new Date(b.date).getTime() - new Date(a.date).getTime();
                 const ref = new Date(extracted.date!).getTime();
                 return Math.abs(new Date(a.date).getTime() - ref) - Math.abs(new Date(b.date).getTime() - ref);
-            }).slice(0, 300);
+            }).slice(0, kiSettings.maxTransactions);
         }
 
-        // Sort by proximity to receipt date, cap at 300
+        // Sort by proximity to receipt date, cap at maxTransactions
         if (extracted.date) {
             const ref = new Date(extracted.date).getTime();
             candidates = [...candidates].sort((a, b) =>
                 Math.abs(new Date(a.date).getTime() - ref) - Math.abs(new Date(b.date).getTime() - ref)
-            ).slice(0, 300);
+            ).slice(0, kiSettings.maxTransactions);
         }
 
         // Use short numeric indices instead of UUIDs so the AI doesn't hallucinate IDs

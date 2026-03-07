@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation';
 import { Suspense } from 'react';
 import { getAllTransactionReceipts, getUnlinkedReceipts, getCategories } from '@/lib/data';
 import { supabase } from '@/lib/db';
+import { getKiSettings } from '@/lib/kiSettings';
 import Sidebar from '@/components/Sidebar';
 import VerwaltungBelegeClient from '@/components/VerwaltungBelegeClient';
 
@@ -11,10 +12,11 @@ export const metadata: Metadata = { title: 'Buchungsbelege' };
 export const dynamic = 'force-dynamic';
 
 async function BelegeSection({ tab }: { tab: string }) {
-    const [receipts, unlinked, categories] = await Promise.all([
+    const [receipts, unlinked, categories, kiSettings] = await Promise.all([
         getAllTransactionReceipts(),
         getUnlinkedReceipts(),
         getCategories(),
+        getKiSettings(),
     ]);
 
     // Hydrate saved AI suggestions with full transaction data
@@ -46,7 +48,14 @@ async function BelegeSection({ tab }: { tab: string }) {
             .filter(Boolean),
     }));
 
-    return <VerwaltungBelegeClient receipts={receipts} unlinked={unlinkedWithSuggestions} initialTab={tab} categories={categories} />;
+    const kiSettingsForClient = {
+        ...kiSettings,
+        apiKey: kiSettings.apiKey
+            ? `${'•'.repeat(Math.max(0, kiSettings.apiKey.length - 4))}${kiSettings.apiKey.slice(-4)}`
+            : '',
+        apiKeySet: !!kiSettings.apiKey,
+    };
+    return <VerwaltungBelegeClient receipts={receipts} unlinked={unlinkedWithSuggestions} initialTab={tab} categories={categories} kiSettingsInitial={kiSettingsForClient} />;
 }
 
 function BelegeSkeleton() {
@@ -70,7 +79,7 @@ export default async function VerwaltungBelegePage({ searchParams }: { searchPar
     if (role !== 'admin') redirect('/dashboard');
 
     const { tab } = await searchParams;
-    const activeTab = tab === 'linked' || tab === 'unlinked' || tab === 'ki' || tab === 'ki-workflow' ? tab : 'upload';
+    const activeTab = tab === 'linked' || tab === 'unlinked' || tab === 'ki' || tab === 'ki-workflow' || tab === 'ki-settings' ? tab : 'upload';
 
     return (
         <div className="app-layout">

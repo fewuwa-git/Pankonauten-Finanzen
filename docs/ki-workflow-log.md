@@ -7,6 +7,21 @@ Relevante Dateien:
 
 ---
 
+## 07.03.2026 – KI-Einstellungen über Datenbank konfigurierbar
+
+**Änderung:** Neue Seite „KI-Einstellungen" in der Belegverwaltung. Alle zentralen Parameter sind jetzt über die UI konfigurierbar und werden in der Tabelle `pankonauten_settings` gespeichert.
+
+**Konfigurierbare Parameter:**
+- Gemini API Key (überschreibt `GEMINI_API_KEY` aus `.env`)
+- Extraktionsmodell, Matching-Modell, Fallback-Modell
+- Zeitfenster ±N Tage (vorher hardcoded 60)
+- Max. Buchungen (vorher hardcoded 300)
+- Auto-Zuordnung + Schwellenwert
+
+**Technisch:** `src/lib/kiSettings.ts` liest Einstellungen aus DB (Fallback auf `.env`/Defaults). `suggest/route.ts` nutzt jetzt `getKiSettings()` statt Hardcodes.
+
+---
+
 ## 07.03.2026 – Fix: thinkingBudget=0 für Extraktion + maxOutputTokens 256→512
 
 **Problem:** Bei mehreren PDFs wurde „Beleginhalt nicht lesbar" angezeigt – alle extrahierten Felder (vendor, amount, date, description) kamen als null zurück.
