@@ -89,6 +89,8 @@ export default function VerwaltungBelegeClient({ receipts: initialReceipts, unli
     const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
     const [bulkAnalyzing, setBulkAnalyzing] = useState(false);
     const [bulkProgress, setBulkProgress] = useState<{ done: number; total: number } | null>(null);
+    const [unlinkConfirm, setUnlinkConfirm] = useState<TransactionReceipt | null>(null);
+    const [unlinkingId, setUnlinkingId] = useState<string | null>(null);
 
     const [suggestionResults, setSuggestionResults] = useState<Record<string, SuggestResult>>(() => {
         const initial: Record<string, SuggestResult> = {};
@@ -197,6 +199,32 @@ export default function VerwaltungBelegeClient({ receipts: initialReceipts, unli
 
     async function handleDeleteUnlinked(r: UnlinkedReceipt) {
         setDeleteConfirm({ type: 'unlinked', receipt: r });
+    }
+
+    async function confirmUnlink() {
+        if (!unlinkConfirm) return;
+        const r = unlinkConfirm;
+        setUnlinkingId(r.id);
+        setUnlinkConfirm(null);
+        const res = await fetch(`/api/receipts/${r.id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ unlink: true }),
+        });
+        const data = await res.json();
+        setReceipts(prev => prev.filter(x => x.id !== r.id));
+        setUnlinked(prev => [{
+            id: r.id,
+            file_name: r.file_name,
+            file_size: r.file_size,
+            uploaded_at: r.uploaded_at,
+            ai_vendor: null,
+            ai_amount: null,
+            ai_date: null,
+            ai_description: null,
+            ai_suggestions: null,
+        }, ...prev]);
+        setUnlinkingId(null);
     }
 
     async function confirmDelete() {
@@ -657,6 +685,15 @@ export default function VerwaltungBelegeClient({ receipts: initialReceipts, unli
                                                 {loadingUrl === r.id ? '…' : '📄 PDF'}
                                             </button>
                                             <button
+                                                onClick={() => setUnlinkConfirm(r)}
+                                                disabled={unlinkingId === r.id}
+                                                title="Zuordnung trennen (Beleg bleibt erhalten)"
+                                                className="btn"
+                                                style={{ fontSize: 11, padding: '4px 8px', opacity: unlinkingId === r.id ? 0.5 : 1 }}
+                                            >
+                                                🔗 Trennen
+                                            </button>
+                                            <button
                                                 onClick={() => handleDeleteLinked(r)}
                                                 disabled={deletingId === r.id}
                                                 style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 14, color: 'var(--red)', padding: '2px 4px', opacity: deletingId === r.id ? 0.5 : 1 }}
@@ -839,6 +876,17 @@ export default function VerwaltungBelegeClient({ receipts: initialReceipts, unli
                 isLoading={!!deletingId}
                 onConfirm={confirmDelete}
                 onCancel={() => setDeleteConfirm(null)}
+            />
+
+            <ConfirmModal
+                isOpen={!!unlinkConfirm}
+                title="Zuordnung trennen"
+                message={unlinkConfirm ? `Die Verknüpfung zwischen „${unlinkConfirm.file_name}" und der Buchung wird aufgehoben. Die Datei bleibt erhalten und erscheint unter „Unzugeordnete Belege".` : ''}
+                confirmLabel="Trennen"
+                confirmClass="btn-primary"
+                isLoading={!!unlinkingId}
+                onConfirm={confirmUnlink}
+                onCancel={() => setUnlinkConfirm(null)}
             />
 
             {linkModal && (

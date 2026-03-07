@@ -21,26 +21,47 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     return NextResponse.json({ url: urlData?.signedUrl ?? null });
 }
 
-// Link receipt to a transaction
+// Link or unlink receipt from a transaction
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     const token = req.cookies.get('token')?.value;
     const payload = token ? await verifyToken(token) : null;
     if (!payload) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const { id } = await params;
-    const { transaction_id, method } = await req.json();
-    const linkedBy = payload.name || payload.email;
-    const linkedAt = new Date().toISOString();
-    const linkedMethod = method === 'ki' ? 'ki' : 'manual';
+    const body = await req.json();
 
     const { data: receipt } = await supabase
         .from('pankonauten_transaction_receipts')
-        .select('file_path')
+        .select('file_path, file_name')
         .eq('id', id)
         .single();
 
     if (!receipt) return NextResponse.json({ error: 'Nicht gefunden' }, { status: 404 });
 
+    // Unlink: remove transaction association, move file back to unlinked/
+    if (body.unlink === true) {
+        const fileName = receipt.file_path.split('/').pop();
+        const newPath = `unlinked/${fileName}`;
+        if (!receipt.file_path.startsWith('unlinked/')) {
+            const { error: moveError } = await supabase.storage.from(BUCKET).move(receipt.file_path, newPath);
+            if (!moveError) {
+                await supabase.from('pankonauten_transaction_receipts')
+                    .update({ file_path: newPath, transaction_id: null, linked_method: null, linked_at: null, linked_by: null })
+                    .eq('id', id);
+                return NextResponse.json({ ok: true, file_path: newPath });
+            }
+        }
+        await supabase.from('pankonauten_transaction_receipts')
+            .update({ transaction_id: null, linked_method: null, linked_at: null, linked_by: null })
+            .eq('id', id);
+        return NextResponse.json({ ok: true, file_path: receipt.file_path });
+    }
+
+    // Link: set transaction association
+    const { transaction_id, method } = body;
+    const linkedBy = payload.name || payload.email;
+    const linkedAt = new Date().toISOString();
+    const linkedMethod = method === 'ki' ? 'ki' : 'manual';
     const linkFields = { transaction_id, linked_method: linkedMethod, linked_at: linkedAt, linked_by: linkedBy };
 
     // Move file from unlinked/ to transaction folder if needed
