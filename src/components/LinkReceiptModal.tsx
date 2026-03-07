@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { fmtDate } from '@/lib/formatDate';
 
 interface Transaction {
     id: string;
@@ -116,7 +117,7 @@ export default function LinkReceiptModal({ receiptId, fileName, onLinked, onClos
                                 {filtered.map(tx => (
                                     <tr key={tx.id} style={{ cursor: 'pointer' }} onClick={() => !linkingId && handleLink(tx)}>
                                         <td style={{ whiteSpace: 'nowrap', fontSize: 13, color: 'var(--text-muted)' }}>
-                                            {new Date(tx.date).toLocaleDateString('de-DE')}
+                                            {fmtDate(tx.date)}
                                         </td>
                                         <td style={{ fontSize: 13, maxWidth: 220, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                                             {tx.description}

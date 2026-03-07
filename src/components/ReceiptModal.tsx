@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { fmtDateTime } from '@/lib/formatDate';
 
 function formatSize(bytes: number | null | undefined): string {
     if (!bytes) return '';
@@ -122,7 +123,7 @@ export default function ReceiptModal({ transactionId, transactionLabel, onReceip
                                             {r.file_name}
                                         </div>
                                         <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
-                                            {new Date(r.uploaded_at).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                                            {fmtDateTime(r.uploaded_at)}
                                             {r.file_size ? <span style={{ marginLeft: 6 }}>{formatSize(r.file_size)}</span> : null}
                                         </div>
                                     </div>

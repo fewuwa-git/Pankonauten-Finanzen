@@ -171,7 +171,7 @@ export const generateAbrechnungPDF = async (
         body: tage.map(t => {
             const date = new Date(t.datum);
             return [
-                date.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' }),
+                date.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: '2-digit' }),
                 `${t.von.slice(0, 5)} – ${t.bis.slice(0, 5)}`,
                 `${t.stunden.toFixed(2)} h`,
                 `${t.betrag.toLocaleString('de-DE', { minimumFractionDigits: 2 })} €`
@@ -224,7 +224,7 @@ export const generateAbrechnungPDF = async (
             doc.setFont('helvetica', 'normal');
             doc.setFontSize(8);
             doc.text(
-                `Erstellt am ${new Date().toLocaleDateString('de-DE')} · Pankonauten Finanzen · Nr. ${docNumber}`,
+                `Erstellt am ${new Date().toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: '2-digit' })} · Pankonauten Finanzen · Nr. ${docNumber}`,
                 margin,
                 footerY
             );

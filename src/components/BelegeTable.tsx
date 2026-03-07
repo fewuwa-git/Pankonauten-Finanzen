@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { fmtDate } from '@/lib/formatDate';
 import { Beleg, User } from '@/lib/data';
 import { generateBelegPDF } from '@/lib/belegPdf';
 import BelegStatusButton from '@/components/BelegStatusButton';
@@ -126,7 +127,7 @@ export default function BelegeTable({
                                             )}
                                             <td style={{ fontWeight: 500 }}>{b.titel}</td>
                                             <td style={{ color: 'var(--text-muted)', fontSize: '14px' }}>
-                                                {new Date(b.datum).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })}
+                                                {fmtDate(b.datum)}
                                             </td>
                                             <td style={{ textAlign: 'right', fontWeight: 700, color: 'var(--navy)', fontSize: '15px', whiteSpace: 'nowrap' }}>
                                                 {b.betrag.toLocaleString('de-DE', { minimumFractionDigits: 2 })} €

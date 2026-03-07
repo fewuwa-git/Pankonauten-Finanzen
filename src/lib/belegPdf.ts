@@ -194,7 +194,7 @@ export async function generateBelegPDF(beleg: Beleg): Promise<string> {
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(9);
     doc.text('Ort/Datum', M + 2, ortY + 5.5);
-    const datumFormatiert = new Date(beleg.datum).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    const datumFormatiert = new Date(beleg.datum).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: '2-digit' });
     doc.setFont('helvetica', 'bold');
     doc.text(`Berlin, ${datumFormatiert}`, M + 30, ortY + 5.5);
     const ortEndY = ortY + 12;

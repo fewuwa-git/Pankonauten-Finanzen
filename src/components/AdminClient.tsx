@@ -147,12 +147,12 @@ export default function AdminClient({ currentUser }: AdminClientProps) {
     // ─── Helpers ──────────────────────────────────────────────────────────────
 
     const formatDate = (iso: string) =>
-        new Date(iso).toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric' });
+        new Date(iso).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: '2-digit' });
 
     const formatDateTime = (iso: string | null | undefined) => {
         if (!iso) return 'Noch nie';
         return new Date(iso).toLocaleString('de-DE', {
-            day: '2-digit', month: '2-digit', year: 'numeric',
+            day: '2-digit', month: '2-digit', year: '2-digit',
             hour: '2-digit', minute: '2-digit',
         });
     };

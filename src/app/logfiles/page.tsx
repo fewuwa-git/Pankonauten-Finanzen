@@ -82,7 +82,7 @@ export default async function LogfilesPage() {
                                     <tbody>
                                         {log.map((entry) => {
                                             const dt = new Date(entry.created_at);
-                                            const date = dt.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+                                            const date = dt.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: '2-digit' });
                                             const time = dt.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
                                             const details = formatDetails(entry.action, entry.details);
                                             const icon = ACTION_ICONS[entry.action] ?? '•';

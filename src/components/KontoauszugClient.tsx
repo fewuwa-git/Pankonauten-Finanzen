@@ -3,6 +3,7 @@
 import { useMemo, useState, useCallback, useRef, useEffect } from 'react';
 import { useFilterState, PeriodKey } from '@/hooks/useFilterState';
 import { CATEGORY_COLORS, ALL_CATEGORIES } from '@/lib/constants';
+import { fmtDate } from '@/lib/formatDate';
 import type { Category } from '@/lib/data';
 import ReceiptModal from './ReceiptModal';
 
@@ -310,7 +311,7 @@ export default function KontoauszugClient({ transactions: initialTransactions, c
                                 filteredTransactions.map((tx) => (
                                     <tr key={tx.id}>
                                         <td style={{ whiteSpace: 'nowrap', color: 'var(--text-muted)', fontSize: '13px' }}>
-                                            {new Date(tx.date).toLocaleDateString('de-DE')}
+                                            {fmtDate(tx.date)}
                                         </td>
                                         <td style={{ maxWidth: 500 }}>
                                             <div title={tx.description} style={{ fontWeight: 500, fontSize: '13px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>

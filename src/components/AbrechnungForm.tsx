@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { generateAbrechnungPDF } from '@/lib/pdf';
 import ConfirmModal from '@/components/ConfirmModal';
+import { fmtDate } from '@/lib/formatDate';
 
 interface User {
     id: string;
@@ -669,7 +670,7 @@ export default function AbrechnungForm({
                                             tage.map(tag => (
                                                 <tr key={tag.id}>
                                                     <td>
-                                                        <div style={{ fontWeight: '600' }}>{new Date(tag.datum).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })}</div>
+                                                        <div style={{ fontWeight: '600' }}>{fmtDate(tag.datum)}</div>
                                                         <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{new Date(tag.datum).toLocaleDateString('de-DE', { weekday: 'long' })}</div>
                                                     </td>
                                                     <td>
@@ -730,7 +731,7 @@ export default function AbrechnungForm({
                                                 <div style={{ flex: 1, minWidth: 0 }}>
                                                     <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px', flexWrap: 'wrap' }}>
                                                         <span style={{ fontWeight: 600, fontSize: '14px' }}>
-                                                            {new Date(tag.datum).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })}
+                                                            {fmtDate(tag.datum)}
                                                         </span>
                                                         <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
                                                             {new Date(tag.datum).toLocaleDateString('de-DE', { weekday: 'long' })}

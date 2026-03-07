@@ -3,6 +3,7 @@
 import React, { useState, useMemo } from 'react';
 import type { TransactionReceipt, Category } from '@/lib/data';
 import { CATEGORY_COLORS } from '@/lib/constants';
+import { fmtDate, fmtDateTime } from '@/lib/formatDate';
 import LinkReceiptModal from './LinkReceiptModal';
 import BelegeKiWorkflow from './BelegeKiWorkflow';
 import BelegeUpload from './BelegeUpload';
@@ -327,7 +328,7 @@ export default function VerwaltungBelegeClient({ receipts: initialReceipts, unli
                                             {formatSize(r.file_size)}
                                         </td>
                                         <td style={{ whiteSpace: 'nowrap', fontSize: 13, color: 'var(--text-muted)' }}>
-                                            {new Date(r.uploaded_at).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                                            {fmtDateTime(r.uploaded_at)}
                                         </td>
                                         <td>
                                             <button
@@ -423,7 +424,7 @@ export default function VerwaltungBelegeClient({ receipts: initialReceipts, unli
                                                 {formatSize(r.file_size)}
                                             </td>
                                             <td style={{ whiteSpace: 'nowrap', fontSize: 13, color: 'var(--text-muted)' }}>
-                                                {new Date(r.uploaded_at).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                                                {fmtDateTime(r.uploaded_at)}
                                             </td>
                                         </tr>
 
@@ -442,7 +443,7 @@ export default function VerwaltungBelegeClient({ receipts: initialReceipts, unli
                                                                     <span style={{ color: 'var(--text-muted)' }}>✨ KI-Analyse:</span>
                                                                     {ex.vendor && <span><strong>Aussteller:</strong> {ex.vendor}</span>}
                                                                     {ex.amount != null && <span><strong>Betrag:</strong> {formatCurrency(ex.amount!)}</span>}
-                                                                    {ex.date && <span><strong>Datum:</strong> {new Date(ex.date!).toLocaleDateString('de-DE')}</span>}
+                                                                    {ex.date && <span><strong>Datum:</strong> {fmtDate(ex.date!)}</span>}
                                                                     {ex.description && <span><strong>Zweck:</strong> {ex.description}</span>}
                                                                     {!hasData && <span style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>Beleginhalt nicht lesbar</span>}
                                                                     {!hasData && filenameNums.length > 0 && <span><strong>Nummer aus Dateiname:</strong> {filenameNums.join(', ')}</span>}
@@ -463,7 +464,7 @@ export default function VerwaltungBelegeClient({ receipts: initialReceipts, unli
                                                                 </div>
                                                                 <div style={{ flex: 1, minWidth: 0 }}>
                                                                     <div style={{ fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                                                        {new Date(s.transaction.date).toLocaleDateString('de-DE')} · {s.transaction.counterparty || s.transaction.description}
+                                                                        {fmtDate(s.transaction.date)} · {s.transaction.counterparty || s.transaction.description}
                                                                         <span className={`tx-amount ${s.transaction.amount >= 0 ? 'positive' : 'negative'}`} style={{ marginLeft: 8 }}>
                                                                             {(s.transaction.amount >= 0 ? '+' : '') + formatCurrency(s.transaction.amount)}
                                                                         </span>
@@ -534,7 +535,7 @@ export default function VerwaltungBelegeClient({ receipts: initialReceipts, unli
                             ) : filtered.map(r => (
                                 <tr key={r.id}>
                                     <td style={{ whiteSpace: 'nowrap', color: 'var(--text-muted)', fontSize: 13 }}>
-                                        {r.transaction_date ? new Date(r.transaction_date).toLocaleDateString('de-DE') : '–'}
+                                        {r.transaction_date ? fmtDate(r.transaction_date) : '–'}
                                     </td>
                                     <td style={{ fontSize: 13, maxWidth: 240, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                                         <span title={r.transaction_description}>{r.transaction_description || '–'}</span>
@@ -558,7 +559,7 @@ export default function VerwaltungBelegeClient({ receipts: initialReceipts, unli
                                         {formatSize(r.file_size)}
                                     </td>
                                     <td style={{ whiteSpace: 'nowrap', fontSize: 13, color: 'var(--text-muted)' }}>
-                                        {new Date(r.uploaded_at).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                                        {fmtDateTime(r.uploaded_at)}
                                     </td>
                                     <td style={{ whiteSpace: 'nowrap' }}>
                                         <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
@@ -620,7 +621,7 @@ export default function VerwaltungBelegeClient({ receipts: initialReceipts, unli
                                 </span>
                                 {infoReceipt.linked_at && (
                                     <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-                                        {new Date(infoReceipt.linked_at).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })} Uhr
+                                        {fmtDateTime(infoReceipt.linked_at)} Uhr
                                     </span>
                                 )}
                             </div>
@@ -641,7 +642,7 @@ export default function VerwaltungBelegeClient({ receipts: initialReceipts, unli
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                                             {infoReceipt.ai_vendor && <div style={{ fontSize: 13 }}><span style={{ color: 'var(--text-muted)', minWidth: 100, display: 'inline-block' }}>Aussteller</span><strong>{infoReceipt.ai_vendor}</strong></div>}
                                             {infoReceipt.ai_amount != null && <div style={{ fontSize: 13 }}><span style={{ color: 'var(--text-muted)', minWidth: 100, display: 'inline-block' }}>Betrag</span><strong>{new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(infoReceipt.ai_amount)}</strong></div>}
-                                            {infoReceipt.ai_date && <div style={{ fontSize: 13 }}><span style={{ color: 'var(--text-muted)', minWidth: 100, display: 'inline-block' }}>Datum</span><strong>{new Date(infoReceipt.ai_date).toLocaleDateString('de-DE')}</strong></div>}
+                                            {infoReceipt.ai_date && <div style={{ fontSize: 13 }}><span style={{ color: 'var(--text-muted)', minWidth: 100, display: 'inline-block' }}>Datum</span><strong>{fmtDate(infoReceipt.ai_date)}</strong></div>}
                                             {infoReceipt.ai_description && <div style={{ fontSize: 13 }}><span style={{ color: 'var(--text-muted)', minWidth: 100, display: 'inline-block' }}>Zweck</span><strong>{infoReceipt.ai_description}</strong></div>}
                                             {infoReceipt.ai_invoice_number && <div style={{ fontSize: 13 }}><span style={{ color: 'var(--text-muted)', minWidth: 100, display: 'inline-block' }}>Rechnungs-Nr.</span><strong>{infoReceipt.ai_invoice_number}</strong></div>}
                                         </div>

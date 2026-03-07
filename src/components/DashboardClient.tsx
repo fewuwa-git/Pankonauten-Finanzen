@@ -15,6 +15,7 @@ import {
     ResponsiveContainer,
     Legend,
 } from 'recharts';
+import { fmtDate } from '@/lib/formatDate';
 
 type ChartType = 'line' | 'waterfall' | 'columns';
 
@@ -500,7 +501,7 @@ export default function DashboardClient({ transactions }: DashboardClientProps) 
                             {recentTx.map((tx) => (
                                 <tr key={tx.id}>
                                     <td style={{ whiteSpace: 'nowrap', color: 'var(--text-muted)', fontSize: '13px' }}>
-                                        {new Date(tx.date).toLocaleDateString('de-DE')}
+                                        {fmtDate(tx.date)}
                                     </td>
                                     <td style={{ maxWidth: 500 }}>
                                         <div title={tx.description} style={{ fontWeight: 500, fontSize: '13px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
