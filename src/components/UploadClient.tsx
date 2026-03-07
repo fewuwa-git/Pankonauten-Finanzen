@@ -102,16 +102,10 @@ export default function UploadClient({ user }: UploadClientProps) {
     const [categoryColors, setCategoryColors] = useState<Record<string, string>>({});
 
     useEffect(() => {
-        const stored = localStorage.getItem('anonymizeNames');
-        if (stored) {
-            try {
-                setNamesToAnonymize(JSON.parse(stored));
-            } catch {
-                setNamesToAnonymize(['Annett Kirchner', 'Marlene Brecht']);
-            }
-        } else {
-            setNamesToAnonymize(['Annett Kirchner', 'Marlene Brecht']);
-        }
+        fetch('/api/admin/anonymize-names')
+            .then(r => r.json())
+            .then(data => { if (Array.isArray(data.names)) setNamesToAnonymize(data.names); })
+            .catch(() => setNamesToAnonymize(['Annett Kirchner', 'Marlene Brecht']));
     }, []);
 
     useEffect(() => {
@@ -133,7 +127,11 @@ export default function UploadClient({ user }: UploadClientProps) {
 
     const saveNames = (names: string[]) => {
         setNamesToAnonymize(names);
-        localStorage.setItem('anonymizeNames', JSON.stringify(names));
+        fetch('/api/admin/anonymize-names', {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ names }),
+        }).catch(() => {});
     };
 
     const handleAddName = () => {
@@ -588,7 +586,7 @@ export default function UploadClient({ user }: UploadClientProps) {
                         <div className="card-body">
                             <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '16px' }}>
                                 Diese Namen werden beim Import in &quot;********&quot; umgwandelt, sowohl im Buchungstext als auch beim Empfänger/Absender.
-                                Änderungen werden in deinem Browser gespeichert.
+                                Änderungen werden in der Datenbank gespeichert und sind auf allen Geräten verfügbar.
                             </p>
 
                             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '16px' }}>
