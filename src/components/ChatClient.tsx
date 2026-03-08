@@ -124,6 +124,7 @@ export default function ChatClient() {
     const [sessions, setSessions] = useState<Session[]>([]);
     const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
     const [deletingId, setDeletingId] = useState<string | null>(null);
+    const [sidebarOpen, setSidebarOpen] = useState(false);
     const bottomRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLTextAreaElement>(null);
     const hasMessages = messages.length > 0 || loading;
@@ -239,14 +240,14 @@ export default function ChatClient() {
                 e.target.style.height = Math.min(e.target.scrollHeight, 236) + 'px';
             }}
             onKeyDown={handleKeyDown}
-            placeholder="Stell eine Frage zu den Pankonauten-Finanzen… (Enter zum Senden)"
+            placeholder="Frage zu den Finanzen… (Enter zum Senden)"
             rows={1}
             disabled={loading}
             style={{
                 width: '100%', padding: '13px 18px', borderRadius: 14,
                 border: '2px solid var(--border)',
                 background: 'var(--card)',
-                fontSize: 14, color: 'var(--text)', resize: 'none', outline: 'none',
+                fontSize: 16, color: 'var(--text)', resize: 'none', outline: 'none',
                 fontFamily: 'inherit', lineHeight: 1.5, boxSizing: 'border-box',
                 transition: 'border-color 0.15s',
                 boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
@@ -256,111 +257,112 @@ export default function ChatClient() {
         />
     );
 
-    return (
-        <div style={{ display: 'flex', flex: 1, minHeight: 0, height: '100%', gap: 0 }}>
+    const sessionPanel = (
+        <div style={{
+            width: 260, display: 'flex', flexDirection: 'column',
+            overflowY: 'auto', background: 'var(--bg-secondary)',
+            height: '100%',
+        }}>
+            {/* New Chat Button */}
+            <div style={{ padding: '16px 12px 12px' }}>
+                <button
+                    onClick={() => { startNewChat(); setSidebarOpen(false); }}
+                    style={{
+                        width: '100%', padding: '10px 14px', borderRadius: 10,
+                        border: '1.5px solid var(--border)',
+                        background: currentSessionId === null && !hasMessages ? 'var(--primary)' : 'var(--card)',
+                        color: currentSessionId === null && !hasMessages ? '#fff' : '#000',
+                        fontSize: 15, fontWeight: 600, cursor: 'pointer',
+                        display: 'flex', alignItems: 'center', gap: 8,
+                        transition: 'all 0.15s', fontFamily: 'inherit',
+                    }}
+                    onMouseEnter={e => {
+                        if (currentSessionId !== null || hasMessages) {
+                            (e.currentTarget as HTMLElement).style.borderColor = 'var(--primary)';
+                            (e.currentTarget as HTMLElement).style.color = 'var(--primary)';
+                        }
+                    }}
+                    onMouseLeave={e => {
+                        if (currentSessionId !== null || hasMessages) {
+                            (e.currentTarget as HTMLElement).style.borderColor = 'var(--border)';
+                            (e.currentTarget as HTMLElement).style.color = '#000';
+                        }
+                    }}
+                >
+                    <span style={{ fontSize: 16, lineHeight: 1 }}>+</span>
+                    Neuer Chat
+                </button>
+            </div>
 
-            {/* ── Sessions Sidebar ── */}
-            <div style={{
-                width: 260, flexShrink: 0, display: 'flex', flexDirection: 'column',
-                borderRight: '1px solid var(--border)', paddingRight: 0, overflowY: 'auto',
-                background: 'var(--bg-secondary)',
-            }}>
-                {/* New Chat Button */}
-                <div style={{ padding: '16px 12px 12px' }}>
-                    <button
-                        onClick={startNewChat}
+            {/* Session list */}
+            <div style={{ flex: 1, overflowY: 'auto', padding: '0 12px 16px' }}>
+                {sessions.length === 0 && (
+                    <div style={{ fontSize: 12, color: 'var(--text-muted)', textAlign: 'center', marginTop: 24, lineHeight: 1.6 }}>
+                        Noch keine gespeicherten Chats
+                    </div>
+                )}
+                {sessions.map(s => (
+                    <div
+                        key={s.id}
+                        onClick={() => { loadSession(s); setSidebarOpen(false); }}
                         style={{
-                            width: '100%', padding: '10px 14px', borderRadius: 10,
-                            border: '1.5px solid var(--border)',
-                            background: currentSessionId === null && !hasMessages ? 'var(--primary)' : 'var(--card)',
-                            color: currentSessionId === null && !hasMessages ? '#fff' : 'var(--text)',
-                            fontSize: 13, fontWeight: 600, cursor: 'pointer',
-                            display: 'flex', alignItems: 'center', gap: 8,
-                            transition: 'all 0.15s', fontFamily: 'inherit',
+                            padding: '10px 12px', borderRadius: 8, marginBottom: 4,
+                            background: currentSessionId === s.id ? 'var(--card)' : 'transparent',
+                            border: currentSessionId === s.id ? '1px solid var(--border)' : '1px solid transparent',
+                            cursor: 'pointer', display: 'flex', flexDirection: 'column', gap: 3,
+                            transition: 'background 0.12s', position: 'relative',
                         }}
                         onMouseEnter={e => {
-                            if (currentSessionId !== null || hasMessages) {
-                                (e.currentTarget as HTMLElement).style.borderColor = 'var(--primary)';
-                                (e.currentTarget as HTMLElement).style.color = 'var(--primary)';
-                            }
+                            if (currentSessionId !== s.id) (e.currentTarget as HTMLElement).style.background = 'var(--card)';
+                            const btn = e.currentTarget.querySelector('.del-btn') as HTMLElement;
+                            if (btn) btn.style.opacity = '1';
                         }}
                         onMouseLeave={e => {
-                            if (currentSessionId !== null || hasMessages) {
-                                (e.currentTarget as HTMLElement).style.borderColor = 'var(--border)';
-                                (e.currentTarget as HTMLElement).style.color = 'var(--text)';
-                            }
+                            if (currentSessionId !== s.id) (e.currentTarget as HTMLElement).style.background = 'transparent';
+                            const btn = e.currentTarget.querySelector('.del-btn') as HTMLElement;
+                            if (btn) btn.style.opacity = '0';
                         }}
                     >
-                        <span style={{ fontSize: 16, lineHeight: 1 }}>+</span>
-                        Neuer Chat
-                    </button>
-                </div>
-
-                {/* Session list */}
-                <div style={{ flex: 1, overflowY: 'auto', padding: '0 12px 16px' }}>
-                    {sessions.length === 0 && (
-                        <div style={{ fontSize: 12, color: 'var(--text-muted)', textAlign: 'center', marginTop: 24, lineHeight: 1.6 }}>
-                            Noch keine gespeicherten Chats
+                        <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)', lineHeight: 1.4, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', paddingRight: 20 }}>
+                            {s.title}
                         </div>
-                    )}
-                    {sessions.map(s => (
-                        <div
-                            key={s.id}
-                            onClick={() => loadSession(s)}
+                        <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+                            {formatRelativeDate(s.updated_at)}
+                        </div>
+                        <button
+                            className="del-btn"
+                            onClick={e => deleteSession(s.id, e)}
+                            disabled={deletingId === s.id}
                             style={{
-                                padding: '10px 12px', borderRadius: 8, marginBottom: 4,
-                                background: currentSessionId === s.id ? 'var(--card)' : 'transparent',
-                                border: currentSessionId === s.id ? '1px solid var(--border)' : '1px solid transparent',
-                                cursor: 'pointer', display: 'flex', flexDirection: 'column', gap: 3,
-                                transition: 'background 0.12s', position: 'relative',
+                                position: 'absolute', top: 8, right: 8,
+                                width: 28, height: 28, borderRadius: 6,
+                                border: 'none', background: 'transparent',
+                                color: 'var(--text-muted)', cursor: 'pointer',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                fontSize: 16, opacity: 0, transition: 'opacity 0.1s, color 0.1s',
+                                padding: 0,
                             }}
-                            onMouseEnter={e => {
-                                if (currentSessionId !== s.id) (e.currentTarget as HTMLElement).style.background = 'var(--card)';
-                                const btn = e.currentTarget.querySelector('.del-btn') as HTMLElement;
-                                if (btn) btn.style.opacity = '1';
-                            }}
-                            onMouseLeave={e => {
-                                if (currentSessionId !== s.id) (e.currentTarget as HTMLElement).style.background = 'transparent';
-                                const btn = e.currentTarget.querySelector('.del-btn') as HTMLElement;
-                                if (btn) btn.style.opacity = '0';
-                            }}
+                            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = '#ef4444'; }}
+                            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = 'var(--text-muted)'; }}
+                            title="Chat löschen"
                         >
-                            <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)', lineHeight: 1.4, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', paddingRight: 20 }}>
-                                {s.title}
-                            </div>
-                            <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
-                                {formatRelativeDate(s.updated_at)}
-                            </div>
-                            <button
-                                className="del-btn"
-                                onClick={e => deleteSession(s.id, e)}
-                                disabled={deletingId === s.id}
-                                style={{
-                                    position: 'absolute', top: 8, right: 8,
-                                    width: 22, height: 22, borderRadius: 6,
-                                    border: 'none', background: 'transparent',
-                                    color: 'var(--text-muted)', cursor: 'pointer',
-                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                    fontSize: 14, opacity: 0, transition: 'opacity 0.1s, color 0.1s',
-                                    padding: 0,
-                                }}
-                                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = '#ef4444'; }}
-                                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = 'var(--text-muted)'; }}
-                                title="Chat löschen"
-                            >
-                                ×
-                            </button>
-                        </div>
-                    ))}
-                </div>
+                            ×
+                        </button>
+                    </div>
+                ))}
             </div>
+        </div>
+    );
+
+    return (
+        <div style={{ display: 'flex', flex: 1, minHeight: 0, height: '100%', gap: 0, position: 'relative' }}>
 
             {/* ── Chat Area ── */}
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0, minWidth: 0 }}>
 
                 {/* Empty state */}
                 {!hasMessages && (
-                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '0 24px' }}>
+                    <div className="chat-empty-state">
                         <div style={{ width: '100%', maxWidth: 680 }}>
                             <div style={{ textAlign: 'center', marginBottom: 36 }}>
                                 <div style={{ width: 52, height: 52, borderRadius: '50%', background: 'var(--primary)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, margin: '0 auto 14px' }}>✦</div>
@@ -371,7 +373,7 @@ export default function ChatClient() {
                             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, justifyContent: 'center', marginTop: 16 }}>
                                 {SUGGESTIONS.map(s => (
                                     <button key={s} onClick={() => send(s)} style={{
-                                        padding: '8px 16px', borderRadius: 20, border: '1.5px solid var(--border)',
+                                        padding: '8px 14px', borderRadius: 20, border: '1.5px solid var(--border)',
                                         background: 'var(--bg)', color: 'var(--text)', fontSize: 13, cursor: 'pointer',
                                         transition: 'border-color 0.15s, background 0.15s', fontFamily: 'inherit',
                                     }}
@@ -381,7 +383,7 @@ export default function ChatClient() {
                                 ))}
                             </div>
                             <div style={{ textAlign: 'center', marginTop: 16, fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.6 }}>
-                                Hallo! Ich bin dein Finanz-Assistent für die Kita Pankonauten. Ich beantworte Fragen <strong>ausschließlich</strong> auf Basis der Daten in diesem Dashboard – keine externen Quellen.
+                                Ich beantworte Fragen <strong>ausschließlich</strong> auf Basis der Dashboard-Daten – keine externen Quellen.
                             </div>
                         </div>
                     </div>
@@ -390,14 +392,14 @@ export default function ChatClient() {
                 {/* Active chat */}
                 {hasMessages && (
                     <>
-                        <div style={{ flex: 1, overflowY: 'auto', padding: '16px 24px 16px' }}>
+                        <div style={{ flex: 1, overflowY: 'auto', padding: '16px 16px 16px' }}>
                             <div style={{ maxWidth: 720, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 6 }}>
                                 {messages.map((msg, i) => (
                                     <div key={i} style={{
                                         display: 'flex',
                                         flexDirection: msg.role === 'user' ? 'row-reverse' : 'row',
                                         alignItems: 'flex-start',
-                                        gap: 12,
+                                        gap: 8,
                                         padding: '6px 0',
                                     }}>
                                         <div style={{
@@ -410,9 +412,9 @@ export default function ChatClient() {
                                         }}>
                                             {msg.role === 'user' ? 'Du' : '✦'}
                                         </div>
-                                        <div style={{ maxWidth: '80%' }}>
+                                        <div style={{ maxWidth: '85%' }}>
                                             <div style={{
-                                                padding: '12px 16px',
+                                                padding: '12px 14px',
                                                 borderRadius: msg.role === 'user' ? '18px 4px 18px 18px' : '4px 18px 18px 18px',
                                                 background: msg.role === 'user' ? 'var(--card)' : msg.error ? '#fef2f2' : 'var(--card)',
                                                 color: msg.error ? '#dc2626' : 'var(--text)',
@@ -437,7 +439,7 @@ export default function ChatClient() {
                                 ))}
 
                                 {loading && (
-                                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, padding: '6px 0' }}>
+                                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, padding: '6px 0' }}>
                                         <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'var(--primary)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15, flexShrink: 0, marginTop: 2 }}>✦</div>
                                         <div style={{ padding: '14px 18px', borderRadius: '4px 18px 18px 18px', background: 'var(--card)', border: '1.5px solid var(--border)', display: 'flex', gap: 6, alignItems: 'center' }}>
                                             {[0, 1, 2].map(j => (
@@ -451,7 +453,7 @@ export default function ChatClient() {
                         </div>
 
                         {/* Input pinned to bottom */}
-                        <div style={{ padding: '12px 24px 0', borderTop: '1px solid var(--border)' }}>
+                        <div className="chat-input-bar">
                             <div style={{ maxWidth: 720, margin: '0 auto' }}>
                                 {inputBar}
                                 <div style={{ textAlign: 'center', marginTop: 8, fontSize: 11, color: 'var(--text-muted)' }}>
@@ -463,10 +465,102 @@ export default function ChatClient() {
                 )}
             </div>
 
+            {/* ── Sessions Sidebar (right, collapsible) – Desktop ── */}
+            <div className="chat-history-desktop" style={{
+                display: 'flex', flexShrink: 0, position: 'relative',
+                borderLeft: '1px solid var(--border)',
+            }}>
+                {/* Toggle button */}
+                <button
+                    onClick={() => setSidebarOpen(o => !o)}
+                    title={sidebarOpen ? 'Verlauf einklappen' : 'Verlauf ausklappen'}
+                    style={{
+                        position: 'absolute', top: 12, left: -17, zIndex: 10,
+                        width: 34, height: 34, borderRadius: '50%',
+                        border: '1px solid var(--border)',
+                        background: 'var(--card)', color: 'var(--text-muted)',
+                        cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontSize: 15, boxShadow: '0 1px 4px rgba(0,0,0,0.12)',
+                        transition: 'color 0.15s, background 0.15s', padding: 0,
+                        fontFamily: 'inherit',
+                    }}
+                    onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = 'var(--primary)'; (e.currentTarget as HTMLElement).style.background = 'var(--bg)'; }}
+                    onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = 'var(--text-muted)'; (e.currentTarget as HTMLElement).style.background = 'var(--card)'; }}
+                >
+                    {sidebarOpen ? '›' : '‹'}
+                </button>
+
+                {sidebarOpen && sessionPanel}
+            </div>
+
+            {/* ── Sessions Sidebar – Mobile (overlay) ── */}
+            <div className="chat-history-mobile">
+                {/* Floating toggle button */}
+                <button
+                    onClick={() => setSidebarOpen(o => !o)}
+                    title={sidebarOpen ? 'Verlauf schließen' : 'Verlauf öffnen'}
+                    style={{
+                        position: 'fixed', bottom: 90, right: 16, zIndex: 200,
+                        width: 44, height: 44, borderRadius: '50%',
+                        border: '1px solid var(--border)',
+                        background: sidebarOpen ? 'var(--primary)' : 'var(--card)',
+                        color: sidebarOpen ? '#fff' : 'var(--text-muted)',
+                        cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontSize: 18, boxShadow: '0 2px 8px rgba(0,0,0,0.18)',
+                        padding: 0, fontFamily: 'inherit',
+                    }}
+                >
+                    {sidebarOpen ? '✕' : '☰'}
+                </button>
+
+                {/* Overlay backdrop */}
+                {sidebarOpen && (
+                    <div
+                        onClick={() => setSidebarOpen(false)}
+                        style={{
+                            position: 'fixed', inset: 0, zIndex: 190,
+                            background: 'rgba(0,0,0,0.4)',
+                        }}
+                    />
+                )}
+
+                {/* Slide-in panel */}
+                {sidebarOpen && (
+                    <div style={{
+                        position: 'fixed', top: 0, right: 0, bottom: 0, zIndex: 195,
+                        width: '80vw', maxWidth: 300,
+                        boxShadow: '-4px 0 20px rgba(0,0,0,0.2)',
+                    }}>
+                        {sessionPanel}
+                    </div>
+                )}
+            </div>
+
             <style>{`
                 @keyframes chatPulse {
                     0%, 80%, 100% { transform: scale(0.7); opacity: 0.4; }
                     40% { transform: scale(1); opacity: 1; }
+                }
+                .chat-empty-state {
+                    flex: 1;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    padding: 0 16px;
+                }
+                .chat-input-bar {
+                    padding: 12px 16px 0;
+                    padding-bottom: max(8px, env(safe-area-inset-bottom));
+                    border-top: 1px solid var(--border);
+                }
+                .chat-history-mobile { display: none; }
+                .chat-history-desktop { display: flex; }
+                @media (max-width: 640px) {
+                    .chat-history-mobile { display: block; }
+                    .chat-history-desktop { display: none; }
+                    .chat-empty-state { padding: 0 12px; justify-content: flex-start; padding-top: 32px; }
+                    .chat-input-bar { padding: 10px 12px; padding-bottom: max(12px, env(safe-area-inset-bottom)); }
                 }
             `}</style>
         </div>
