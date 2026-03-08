@@ -54,6 +54,7 @@ export default function BelegeTable({
 }: BelegeTableProps) {
     const router = useRouter();
     const searchParams = useSearchParams();
+    const [search, setSearch] = useState('');
 
     const updateParam = (key: string, value: string) => {
         const params = new URLSearchParams(searchParams.toString());
@@ -63,54 +64,70 @@ export default function BelegeTable({
 
     const colCount = isAdmin ? 6 : 5;
 
+    const filteredBelege = search.trim()
+        ? belege.filter(b =>
+            b.titel.toLowerCase().includes(search.toLowerCase()) ||
+            (b.beschreibung || '').toLowerCase().includes(search.toLowerCase()) ||
+            (b.pankonauten_users?.name || '').toLowerCase().includes(search.toLowerCase())
+        )
+        : belege;
+
     return (
         <>
-            {/* Filter */}
-            <div style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
-                {isAdmin && (
+            {/* Admin User-Filter */}
+            {isAdmin && (
+                <div style={{ marginBottom: '1.5rem' }}>
                     <select value={selectedUserId || ''} onChange={(e) => updateParam('userId', e.target.value)}
                         className="form-control"
                         style={{ padding: '8px 12px', borderRadius: '6px', border: '1px solid var(--border)', backgroundColor: 'var(--card-bg)', minWidth: '200px' }}>
                         <option value="">Alle Benutzer</option>
                         {allUsers.map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
                     </select>
-                )}
-                <select value={selectedStatus || ''} onChange={(e) => updateParam('status', e.target.value)}
-                    className="form-control"
-                    style={{ padding: '8px 12px', borderRadius: '6px', border: '1px solid var(--border)', backgroundColor: 'var(--card-bg)', minWidth: '160px' }}>
-                    <option value="">Alle Status</option>
-                    {Object.entries(statusLabels).map(([val, label]) => (
-                        <option key={val} value={val}>{label}</option>
-                    ))}
-                </select>
-            </div>
+                </div>
+            )}
 
             {/* Tabelle */}
             <div className="card">
-                <div className="card-header">
+                <div className="card-header" style={{ flexWrap: 'wrap', gap: '12px' }}>
                     <div className="card-title">📋 Alle Belege</div>
+                    <div style={{ display: 'flex', gap: '8px', marginLeft: 'auto', alignItems: 'center', flexWrap: 'wrap' }}>
+                        <input
+                            type="text"
+                            placeholder="Suche..."
+                            value={search}
+                            onChange={e => setSearch(e.target.value)}
+                            style={{ padding: '6px 12px', borderRadius: '6px', border: '1px solid var(--border)', backgroundColor: 'var(--card-bg)', fontSize: '14px', minWidth: '180px' }}
+                        />
+                        <select value={selectedStatus || ''} onChange={(e) => updateParam('status', e.target.value)}
+                            style={{ padding: '6px 12px', borderRadius: '6px', border: '1px solid var(--border)', backgroundColor: 'var(--card-bg)', fontSize: '14px' }}>
+                            <option value="">Alle Status</option>
+                            {Object.entries(statusLabels).map(([val, label]) => (
+                                <option key={val} value={val}>{label}</option>
+                            ))}
+                        </select>
+                    </div>
                 </div>
                 <div style={{ overflowX: 'auto' }}>
                     <table className="data-table">
                             <thead>
                                 <tr>
+                                    <th style={{ whiteSpace: 'nowrap' }}>Datum</th>
                                     {isAdmin && <th>Name</th>}
                                     <th>Titel</th>
-                                    <th>Datum</th>
                                     <th style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>Betrag €</th>
                                     <th>Status</th>
                                     <th style={{ width: '220px' }}></th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {belege.length === 0 ? (
+                                {filteredBelege.length === 0 ? (
                                     <tr>
                                         <td colSpan={colCount} style={{ textAlign: 'center', padding: '48px 16px', color: 'var(--text-muted)' }}>
                                             <div style={{ fontSize: '24px', marginBottom: '8px' }}>📁</div>
                                             Keine Belege gefunden.
                                         </td>
                                     </tr>
-                                ) : belege.map(b => {
+                                ) : filteredBelege.map(b => {
                                     const badge = STATUS_BADGE[b.status] || STATUS_BADGE.entwurf;
                                     const isEntwurf = b.status === 'entwurf';
                                     const isEingereicht = b.status === 'eingereicht';
@@ -120,15 +137,15 @@ export default function BelegeTable({
                                     const canDelete = isEntwurf && (isAdmin || b.user_id === currentUserId);
                                     return (
                                         <tr key={b.id}>
+                                            <td style={{ color: 'var(--text-muted)', fontSize: '14px', whiteSpace: 'nowrap' }}>
+                                                {fmtDate(b.datum)}
+                                            </td>
                                             {isAdmin && (
                                                 <td style={{ color: 'var(--text-muted)', fontSize: '14px' }}>
                                                     {b.pankonauten_users?.name || '–'}
                                                 </td>
                                             )}
                                             <td style={{ fontWeight: 500 }}>{b.titel}</td>
-                                            <td style={{ color: 'var(--text-muted)', fontSize: '14px' }}>
-                                                {fmtDate(b.datum)}
-                                            </td>
                                             <td style={{ textAlign: 'right', fontWeight: 700, color: 'var(--navy)', fontSize: '15px', whiteSpace: 'nowrap' }}>
                                                 {b.betrag.toLocaleString('de-DE', { minimumFractionDigits: 2 })} €
                                             </td>
