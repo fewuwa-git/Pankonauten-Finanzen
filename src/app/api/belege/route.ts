@@ -8,7 +8,7 @@ export async function GET(req: NextRequest) {
     const payload = token ? await verifyToken(token) : null;
     if (!payload) return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
 
-    const isAdmin = payload.role === 'admin' || payload.role === 'member';
+    const isAdmin = payload.role === 'admin';
     const userId = isAdmin ? undefined : payload.userId;
     const belege = await getBelege(userId);
     return NextResponse.json(belege);

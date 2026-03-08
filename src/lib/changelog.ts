@@ -5,6 +5,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
     {
+        date: '08.03.2026',
+        changes: [
+            '— Zugriffsrechte —',
+            'Vorstandsmitglieder sehen unter „Belege" jetzt nur noch ihre eigenen Belege – nicht mehr alle Belege aller Nutzer.',
+        ],
+    },
+    {
         date: '07.03.2026',
         changes: [
             '— Dashboard —',

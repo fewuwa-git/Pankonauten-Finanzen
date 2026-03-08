@@ -27,7 +27,7 @@ async function BelegeSection({
     selectedUserId?: string;
     selectedStatus?: string;
 }) {
-    const isAdmin = role === 'admin' || role === 'member';
+    const isAdmin = role === 'admin';
     const filterUserId = isAdmin ? selectedUserId : userId;
     const allBelege = await getBelege(filterUserId);
 
