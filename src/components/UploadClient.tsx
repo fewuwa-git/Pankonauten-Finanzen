@@ -308,37 +308,6 @@ export default function UploadClient({ user }: UploadClientProps) {
             <Sidebar user={user} />
             <main className="main-content">
                 <div className="page-body">
-                    <div className="card" style={{ padding: '16px 24px', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <div className="page-header-left">
-                            <h1>Kontoauszug hochladen</h1>
-                            <p>CSV-Datei importieren und Transaktionen einlesen</p>
-                        </div>
-                    </div>
-                    {/* CSV Format Hint */}
-                    <div className="card mb-6">
-                        <div
-                            className="card-header"
-                            onClick={() => setFormatOpen(o => !o)}
-                            style={{ cursor: 'pointer', userSelect: 'none' }}
-                        >
-                            <div className="card-title">ℹ️ CSV-Format</div>
-                            <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{formatOpen ? '▲ schließen' : '▼ anzeigen'}</span>
-                        </div>
-                        {formatOpen && (
-                            <div className="card-body">
-                                <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '8px' }}>
-                                    <strong>Trennzeichen:</strong> Semikolon (;) oder Komma (,) – wird automatisch erkannt.
-                                </p>
-                                <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '8px' }}>
-                                    <strong>Zeichenkodierung:</strong> ISO-8859-1 und UTF-8 werden unterstützt (kompatibel mit Sparkasse, ING, DKB, Commerzbank u.a.).
-                                </p>
-                                <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
-                                    <strong>Duplikate:</strong> Bereits vorhandene Buchungen werden beim Import automatisch erkannt und ignoriert – Zeiträume dürfen sich überschneiden.
-                                </p>
-                            </div>
-                        )}
-                    </div>
-
                     {/* Drop Zone */}
                     <div className="card mb-6">
                         <div className="card-body">
@@ -643,6 +612,31 @@ export default function UploadClient({ user }: UploadClientProps) {
                                 </button>
                             </div>
                         </div>
+                    </div>
+
+                    {/* CSV Format Hint */}
+                    <div className="card">
+                        <div
+                            className="card-header"
+                            onClick={() => setFormatOpen(o => !o)}
+                            style={{ cursor: 'pointer', userSelect: 'none', paddingBottom: formatOpen ? '0' : '20px' }}
+                        >
+                            <div className="card-title">ℹ️ CSV-Format</div>
+                            <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{formatOpen ? '▲ schließen' : '▼ anzeigen'}</span>
+                        </div>
+                        {formatOpen && (
+                            <div className="card-body">
+                                <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '8px' }}>
+                                    <strong>Trennzeichen:</strong> Semikolon (;) oder Komma (,) – wird automatisch erkannt.
+                                </p>
+                                <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '8px' }}>
+                                    <strong>Zeichenkodierung:</strong> ISO-8859-1 und UTF-8 werden unterstützt (kompatibel mit Sparkasse, ING, DKB, Commerzbank u.a.).
+                                </p>
+                                <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
+                                    <strong>Duplikate:</strong> Bereits vorhandene Buchungen werden beim Import automatisch erkannt und ignoriert – Zeiträume dürfen sich überschneiden.
+                                </p>
+                            </div>
+                        )}
                     </div>
                 </div>
             </main>

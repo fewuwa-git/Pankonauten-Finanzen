@@ -64,12 +64,6 @@ export default async function SpringerinDashboardPage() {
             <Sidebar user={{ name, email, role }} />
             <main className="main-content">
                 <div className="page-body">
-                    <div className="card" style={{ padding: '16px 24px', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <div className="page-header-left">
-                            <h1>Springerin Übersicht</h1>
-                            <p>Monatliche Übersicht der Springerstunden und -kosten</p>
-                        </div>
-                    </div>
                     <Suspense fallback={<SpringerinSkeleton />}>
                         <SpringerinSection currentUserName={name} />
                     </Suspense>

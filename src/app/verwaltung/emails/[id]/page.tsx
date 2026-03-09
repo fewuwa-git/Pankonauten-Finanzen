@@ -26,12 +26,6 @@ export default async function EmailTemplateEditPage({ params }: { params: Promis
             <Sidebar user={{ name, email, role }} />
             <main className="main-content">
                 <div className="page-body">
-                    <div className="card" style={{ padding: '16px 24px', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <div className="page-header-left">
-                            <h1>{template.name}</h1>
-                            <p>E-Mail-Template bearbeiten</p>
-                        </div>
-                    </div>
                     <EmailTemplateEditClient template={template} />
                 </div>
             </main>

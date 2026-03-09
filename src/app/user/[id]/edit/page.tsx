@@ -32,12 +32,6 @@ export default async function UserEditPage({ params }: { params: Promise<{ id: s
             <Sidebar user={{ name, email, role }} />
             <main className="main-content">
                 <div className="page-body">
-                    <div className="card" style={{ padding: '16px 24px', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <div className="page-header-left">
-                            <h1>Benutzer bearbeiten</h1>
-                            <p>{user.name} ({user.email})</p>
-                        </div>
-                    </div>
                     <div className="card" style={{ padding: '24px' }}>
                         <UserEditClient user={userWithoutPassword} currentUserRole={role} />
                     </div>

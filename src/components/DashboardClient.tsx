@@ -507,8 +507,8 @@ export default function DashboardClient({ transactions }: DashboardClientProps) 
                         <thead>
                             <tr>
                                 <th style={{ width: '1%', whiteSpace: 'nowrap' }}>Datum</th>
-                                <th>Beschreibung</th>
-                                <th className="col-desktop">Gegenüber</th>
+                                <th className="col-desktop">Beschreibung</th>
+                                <th>Gegenüber</th>
                                 <th className="col-desktop" style={{ width: 100, maxWidth: 100 }}>Kategorie</th>
                                 <th style={{ textAlign: 'right' }}>Betrag</th>
                                 <th className="col-desktop" style={{ textAlign: 'right' }}>Saldo</th>
@@ -528,12 +528,12 @@ export default function DashboardClient({ transactions }: DashboardClientProps) 
                                             <td style={{ whiteSpace: 'nowrap', color: 'var(--text-muted)', fontSize: '13px' }}>
                                                 {fmtDate(tx.date)}
                                             </td>
-                                            <td className="tx-desc-cell" style={{ maxWidth: 500, width: '100%' }}>
+                                            <td className="tx-desc-cell col-desktop" style={{ maxWidth: 500, width: '100%' }}>
                                                 <div title={tx.description} style={{ fontWeight: 500, fontSize: '13px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                                                     {tx.description}
                                                 </div>
                                             </td>
-                                            <td className="col-desktop" style={{ fontSize: '13px', color: 'var(--text-muted)', maxWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                            <td style={{ fontSize: '13px', color: 'var(--text-muted)', maxWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                                                 {tx.counterparty}
                                             </td>
                                             <td className="col-desktop" style={{ fontSize: '13px', color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 100 }}>

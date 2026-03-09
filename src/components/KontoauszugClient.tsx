@@ -218,7 +218,7 @@ export default function KontoauszugClient({ transactions: initialTransactions, c
             </div>
 
             {/* Stats Grid */}
-            <div className="stats-grid mb-6" style={{ gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
+            <div className="stats-grid stats-grid-4 mb-6" style={{ gap: 12 }}>
                 <div className="stat-card" style={{ padding: '12px 16px' }}>
                     <div className="stat-card-label">🧾 Anzahl Buchungen</div>
                     <div className="stat-card-value" style={{ fontSize: 20 }}>{stats.count}</div>
@@ -286,12 +286,12 @@ export default function KontoauszugClient({ transactions: initialTransactions, c
                         <thead>
                             <tr>
                                 <th style={{ width: '1%', whiteSpace: 'nowrap' }}>Datum</th>
-                                <th>Beschreibung</th>
+                                <th className="hide-mobile">Beschreibung</th>
                                 <th>Gegenüber</th>
-                                <th>Kategorie</th>
+                                <th className="hide-mobile">Kategorie</th>
                                 <th style={{ textAlign: 'right' }}>Betrag</th>
-                                {!elternView && <th style={{ textAlign: 'right' }}>Saldo</th>}
-                                {!elternView && <th style={{ width: '1%' }} />}
+                                {!elternView && <th className="hide-mobile" style={{ textAlign: 'right' }}>Saldo</th>}
+                                {!elternView && <th className="hide-mobile" style={{ width: '1%' }} />}
                             </tr>
                         </thead>
                         <tbody>
@@ -307,7 +307,7 @@ export default function KontoauszugClient({ transactions: initialTransactions, c
                                         <td style={{ whiteSpace: 'nowrap', color: 'var(--text-muted)', fontSize: '13px' }}>
                                             {fmtDate(tx.date)}
                                         </td>
-                                        <td style={{ maxWidth: 500 }}>
+                                        <td className="hide-mobile" style={{ maxWidth: 500 }}>
                                             <div title={tx.description} style={{ fontWeight: 500, fontSize: '13px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                                                 {tx.description}
                                             </div>
@@ -315,7 +315,7 @@ export default function KontoauszugClient({ transactions: initialTransactions, c
                                         <td style={{ fontSize: '13px', color: 'var(--text-muted)', maxWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                                             {tx.counterparty}
                                         </td>
-                                        <td style={{ position: 'relative', fontSize: '13px' }}>
+                                        <td className="hide-mobile" style={{ position: 'relative', fontSize: '13px' }}>
                                             {userRole === 'admin' ? (
                                                 <button
                                                     className="category-badge"
@@ -391,12 +391,12 @@ export default function KontoauszugClient({ transactions: initialTransactions, c
                                             }
                                         </td>
                                         {!elternView && (
-                                        <td style={{ textAlign: 'right', fontWeight: 500, whiteSpace: 'nowrap', fontSize: '13px' }}>
+                                        <td className="hide-mobile" style={{ textAlign: 'right', fontWeight: 500, whiteSpace: 'nowrap', fontSize: '13px' }}>
                                             {formatCurrency(tx.balance)}
                                         </td>
                                         )}
                                         {!elternView && (
-                                        <td style={{ textAlign: 'center', whiteSpace: 'nowrap' }}>
+                                        <td className="hide-mobile" style={{ textAlign: 'center', whiteSpace: 'nowrap' }}>
                                             {txsWithReceipts.has(tx.id) ? (
                                                 <button
                                                     title="Belege anzeigen"

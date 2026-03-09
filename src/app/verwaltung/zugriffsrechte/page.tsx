@@ -65,12 +65,6 @@ export default async function ZugriffsrechtePage() {
             <Sidebar user={{ name, email, role }} />
             <main className="main-content">
                 <div className="page-body">
-                    <div className="card" style={{ padding: '16px 24px', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <div className="page-header-left">
-                            <h1>Zugriffsrechte</h1>
-                            <p>Übersicht, welche Rollen auf welche Seiten zugreifen dürfen</p>
-                        </div>
-                    </div>
                     <div className="card" style={{ overflowX: 'auto' }}>
                         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px' }}>
                             <thead>

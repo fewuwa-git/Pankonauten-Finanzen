@@ -82,12 +82,6 @@ export default async function MeineBuchungenPage({
             <Sidebar user={{ name, email, role }} />
             <main className="main-content">
                 <div className="page-body">
-                    <div className="card" style={{ padding: '16px 24px', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <div className="page-header-left">
-                            <h1>Eltern-Buchungen</h1>
-                            <p>{isAdmin ? 'Buchungen nach Eltern-Account filtern' : `Alle Buchungen für ${name}`}</p>
-                        </div>
-                    </div>
                     {isAdmin && (
                         <ElternUserSelector
                             users={elternUsers}

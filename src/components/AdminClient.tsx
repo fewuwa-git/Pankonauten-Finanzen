@@ -161,18 +161,12 @@ export default function AdminClient({ currentUser }: AdminClientProps) {
         <div className="app-layout">
             <Sidebar user={currentUser} />
             <main className="main-content">
-                <div className="page-body" style={{ paddingBottom: 0 }}>
-                    <div className="card" style={{ padding: '16px 24px', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <div className="page-header-left">
-                            <h1>{currentUser.role === 'admin' ? 'Benutzer' : 'Benutzer - Verwalte hier deine Angaben'}</h1>
-                            <p>{currentUser.role === 'admin' ? 'Verwalte hier alle Benutzer' : 'Verwalte hier deine persönlichen Daten'}</p>
-                        </div>
-                        {currentUser.role === 'admin' && (
-                            <button className="btn btn-primary" onClick={() => setShowCreateModal(true)}>
-                                + Neuen Benutzer anlegen
-                            </button>
-                        )}
+                <div className="page-body">
+                {currentUser.role === 'admin' && (
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '16px' }}>
+                        <button className="btn btn-primary" onClick={() => setShowCreateModal(true)}>Neuen Benutzer anlegen</button>
                     </div>
+                )}
                 {currentUser.role === 'admin' && (() => {
                     const pending = users.filter(u => u.status === 'pending');
                     if (pending.length === 0) return null;
@@ -218,37 +212,31 @@ export default function AdminClient({ currentUser }: AdminClientProps) {
                 {currentUser.role === 'admin' && <div className="card mb-6">
                     <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px', alignItems: 'center', paddingBottom: '16px' }}>
                         <div className="card-title" style={{ marginBottom: 0 }}>🔍 Suchen & Filtern</div>
-                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px', alignItems: 'center' }}>
-                            <div className="period-selector">
-                                <input
-                                    type="text"
-                                    placeholder="Nach Name oder E-Mail suchen..."
-                                    className="form-input"
-                                    style={{ padding: '8px 12px', minWidth: '300px', margin: 0 }}
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                />
-                            </div>
-                            <div className="granularity-selector">
-                                <select
-                                    className="form-select"
-                                    style={{ padding: '8px 12px', width: '200px', margin: 0 }}
-                                    value={roleFilter}
-                                    onChange={(e) => setRoleFilter(e.target.value)}
-                                >
-                                    <option value="all">Alle Rollen</option>
-                                    <option value="admin">Finanzvorstand</option>
-                                    <option value="member">Vorstandsmitglied</option>
-                                    <option value="eltern">Eltern</option>
-                                    <option value="springerin">Springerin</option>
-                                </select>
-                            </div>
+                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                            <input
+                                type="text"
+                                placeholder="Nach Name oder E-Mail suchen..."
+                                className="form-input"
+                                style={{ padding: '8px 12px', width: '260px', margin: 0 }}
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                            />
+                            <select
+                                className="form-select"
+                                style={{ padding: '8px 12px', width: '180px', margin: 0 }}
+                                value={roleFilter}
+                                onChange={(e) => setRoleFilter(e.target.value)}
+                            >
+                                <option value="all">Alle Rollen</option>
+                                <option value="admin">Finanzvorstand</option>
+                                <option value="member">Vorstandsmitglied</option>
+                                <option value="eltern">Eltern</option>
+                                <option value="springerin">Springerin</option>
+                            </select>
                         </div>
                     </div>
                 </div>}
-                </div>
 
-                <div className="page-body">
                     {(() => {
                         const ROLE_SECTIONS = [
                             { role: 'admin',      label: 'Finanzvorstand',    icon: '⭐' },
@@ -314,7 +302,7 @@ export default function AdminClient({ currentUser }: AdminClientProps) {
                                         const canEdit = currentUser.role === 'admin' || isMe;
                                         return (
                                             <div key={u.id} className="user-item" style={{ opacity: u.status === 'inactive' ? 0.6 : 1 }}>
-                                                <div className="user-item-avatar">{initials}</div>
+                                                <div className="user-item-avatar hide-mobile">{initials}</div>
                                                 <div className="user-item-info">
                                                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                                         <div className="user-item-name">{u.name}</div>
@@ -326,7 +314,7 @@ export default function AdminClient({ currentUser }: AdminClientProps) {
                                                     </div>
                                                     <div className="user-item-email">{u.email}</div>
                                                 </div>
-                                                <div style={{ fontSize: '12px', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
+                                                <div className="hide-mobile" style={{ fontSize: '12px', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
                                                     <div>Seit {formatDate(u.created_at)}</div>
                                                     <div>Login: {formatDateTime(u.last_login_at)}</div>
                                                 </div>

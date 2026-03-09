@@ -210,6 +210,16 @@ function ImpersonationWidget() {
     );
 }
 
+function MobilePageTitle() {
+    const [title, setTitle] = useState('');
+    useEffect(() => {
+        const raw = document.title || '';
+        setTitle(raw.split('|')[0].trim());
+    }, []);
+    if (!title) return null;
+    return <span className="mobile-header-title">{title}</span>;
+}
+
 export default function Sidebar({ user }: SidebarProps) {
     const pathname = usePathname();
     const router = useRouter();
@@ -245,6 +255,7 @@ export default function Sidebar({ user }: SidebarProps) {
                 <button className="mobile-menu-btn" onClick={() => setIsOpen(true)}>
                     <span style={{ fontSize: '24px' }}>☰</span>
                 </button>
+                <MobilePageTitle />
             </div>
 
             <aside className={`sidebar ${isOpen ? 'open' : ''}`}>

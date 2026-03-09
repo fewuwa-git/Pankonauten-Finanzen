@@ -7,6 +7,10 @@ export const CHANGELOG: ChangelogEntry[] = [
     {
         date: '08.03.2026',
         changes: [
+            '— Mobile-Optimierung —',
+            'Auf kleinen Bildschirmen wird der Seitentitel jetzt oben in der Navigationsleiste angezeigt. In Tabellen werden nur die wichtigsten Spalten (Datum, Gegenüber, Betrag) eingeblendet.',
+            '— Benutzerverwaltung —',
+            'Die Benutzerverwaltung wurde für Mobile optimiert: Avatar, Datum und Login-Zeit werden auf kleinen Bildschirmen ausgeblendet.',
             '— Zugriffsrechte —',
             'Vorstandsmitglieder sehen unter „Belege" jetzt nur noch ihre eigenen Belege – nicht mehr alle Belege aller Nutzer.',
             '— Belege —',
