@@ -1352,6 +1352,11 @@ body {
   .hide-on-mobile { display: none; }
 }
 
+.show-on-mobile { display: none; }
+@media (max-width: 640px) {
+  .show-on-mobile { display: inline; }
+}
+
 @media (max-width: 1024px) {
   .hide-on-tablet { display: none; }
 }
