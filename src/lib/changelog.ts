@@ -11,6 +11,8 @@ export const CHANGELOG: ChangelogEntry[] = [
             'Es gibt jetzt eine eigene Rolle „Finanzvorstand" mit Zugriff auf alle finanziellen Verwaltungsseiten (Buchungsbelege, Kategorien, Abrechnungen, Upload).',
             '— Benutzerprofil bearbeiten —',
             'Das Bearbeitungsformular ist jetzt übersichtlicher: Die Felder sind auf Tabs aufgeteilt (Konto, Kontakt, Abrechnung, Unterschrift). Beim Verlassen der Seite mit ungespeicherten Änderungen erscheint eine Warnung.',
+            '— Neue Rolle: Teammitglied —',
+            'Es gibt jetzt eine Rolle „Teammitglied" für interne Teammitglieder. Sie haben dieselben Zugriffsrechte wie Eltern (Meine Buchungen, Meine Belege) und werden auf der Benutzerseite unter „Team" aufgelistet.',
         ],
     },
     {
