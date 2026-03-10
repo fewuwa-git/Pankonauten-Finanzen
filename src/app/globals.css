@@ -258,6 +258,11 @@ body {
   gap: 12px;
 }
 
+.card-header .btn {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
 .card-title {
   font-size: 15px;
   font-weight: 600;
