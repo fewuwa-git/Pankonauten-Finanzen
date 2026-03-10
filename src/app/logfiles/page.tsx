@@ -103,6 +103,38 @@ export default async function LogfilesPage() {
                             </div>
                         )}
                     </div>
+                    <div className="card" style={{ marginTop: '16px' }}>
+                        <div style={{ padding: '16px 20px', display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+                            <span style={{ fontSize: '18px', flexShrink: 0 }}>ℹ️</span>
+                            <div>
+                                <div style={{ fontWeight: 600, fontSize: '14px', marginBottom: '8px' }}>Was wird geloggt?</div>
+                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                                    {([
+                                        ['📄', 'Beleg erstellt'],
+                                        ['📤', 'Beleg eingereicht'],
+                                        ['✅', 'Beleg bezahlt'],
+                                        ['❌', 'Beleg abgelehnt'],
+                                        ['🧾', 'Abrechnung erstellt'],
+                                        ['📤', 'Abrechnung eingereicht'],
+                                        ['✅', 'Abrechnung bezahlt'],
+                                        ['⬆️', 'CSV-Import'],
+                                    ] as [string, string][]).map(([icon, label]) => (
+                                        <span key={label} style={{
+                                            display: 'inline-flex', alignItems: 'center', gap: '5px',
+                                            fontSize: '12px', padding: '3px 10px',
+                                            background: 'var(--bg-secondary)', borderRadius: '20px',
+                                            border: '1px solid var(--border)', color: 'var(--text-secondary)',
+                                        }}>
+                                            {icon} {label}
+                                        </span>
+                                    ))}
+                                </div>
+                                <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '10px' }}>
+                                    Es werden maximal 300 Einträge angezeigt. Benutzeranmeldungen und Profiländerungen werden nicht protokolliert.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </main>
         </div>

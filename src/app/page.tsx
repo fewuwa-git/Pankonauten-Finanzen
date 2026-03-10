@@ -8,7 +8,7 @@ export default async function Home() {
 
     if (userId) {
         if (role === 'springerin') redirect('/springerin/abrechnung');
-        if (role === 'eltern') redirect('/eltern/buchungen');
+        if (role === 'eltern' || role === 'teammitglied') redirect('/eltern/buchungen');
         redirect('/dashboard');
     }
     redirect('/login');

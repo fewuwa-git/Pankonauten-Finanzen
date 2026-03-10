@@ -56,7 +56,7 @@ function LoginForm() {
             }
             if (data.user?.role === 'springerin') {
                 router.push('/springerin/abrechnung');
-            } else if (data.user?.role === 'eltern') {
+            } else if (data.user?.role === 'eltern' || data.user?.role === 'teammitglied') {
                 router.push('/eltern/buchungen');
             } else {
                 router.push('/dashboard');

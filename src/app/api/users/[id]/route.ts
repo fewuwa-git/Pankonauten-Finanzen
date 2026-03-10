@@ -51,7 +51,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     }
 
     // Eltern und Vorstandsmitglieder können Adresse, IBAN und Unterschrift ändern
-    if (isAdmin || (isSelf && ['eltern', 'member', 'springerin', 'finanzvorstand'].includes(user.role))) {
+    if (isAdmin || (isSelf && ['eltern', 'teammitglied', 'member', 'springerin', 'finanzvorstand'].includes(user.role))) {
         if (body.strasse !== undefined) user.strasse = body.strasse;
         if (body.ort !== undefined) user.ort = body.ort;
         if (body.iban !== undefined) user.iban = body.iban;

@@ -219,6 +219,7 @@ export default function UserEditClient({ user, currentUserRole, isSelf = false }
                                 <option value="finanzvorstand">Finanzvorstand</option>
                                 <option value="eltern">Eltern</option>
                                 <option value="springerin">Springerin</option>
+                                <option value="teammitglied">Teammitglied</option>
                             </select>
                         </div>
                     </>

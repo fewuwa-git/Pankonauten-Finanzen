@@ -70,12 +70,12 @@ export default async function BelegePage({
 }) {
     const headersList = await headers();
     const userId = headersList.get('x-user-id');
-    const role = headersList.get('x-user-role') as 'admin' | 'member' | 'eltern' | 'springerin' | null;
+    const role = headersList.get('x-user-role') as 'admin' | 'member' | 'eltern' | 'springerin' | 'teammitglied' | null;
     const name = headersList.get('x-user-name') || '';
     const email = headersList.get('x-user-email') || '';
 
     if (!userId || !role) redirect('/login');
-    if (role !== 'eltern' && role !== 'member' && role !== 'admin') redirect('/dashboard');
+    if (role !== 'eltern' && role !== 'teammitglied' && role !== 'member' && role !== 'admin') redirect('/dashboard');
 
     const params = await searchParams;
     const selectedUserId = params?.userId as string | undefined;

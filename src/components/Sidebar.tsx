@@ -35,8 +35,8 @@ const NAV_ITEMS: NavGroup[] = [
     {
         section: 'ELTERN',
         items: [
-            { href: '/eltern/belege', icon: '🧾', label: 'Meine Belege', roles: ['eltern', 'finanzvorstand', 'member', 'admin'] },
-            { href: '/eltern/buchungen', icon: '📒', label: 'Meine Buchungen', roles: ['eltern', 'finanzvorstand', 'member', 'admin'] },
+            { href: '/eltern/belege', icon: '🧾', label: 'Meine Belege', roles: ['eltern', 'teammitglied', 'finanzvorstand', 'member', 'admin'] },
+            { href: '/eltern/buchungen', icon: '📒', label: 'Meine Buchungen', roles: ['eltern', 'teammitglied', 'finanzvorstand', 'member', 'admin'] },
         ],
     },
     {
@@ -48,7 +48,7 @@ const NAV_ITEMS: NavGroup[] = [
     {
         section: 'VERWALTUNG',
         items: [
-            { href: '/user', icon: '👥', label: 'Benutzer', roles: ['admin', 'finanzvorstand', 'springerin', 'eltern', 'member'] },
+            { href: '/user', icon: '👥', label: 'Benutzer', roles: ['admin', 'finanzvorstand', 'springerin', 'teammitglied', 'eltern', 'member'] },
             { href: '/verwaltung/kategorien', icon: '🏷️', label: 'Kategorien', roles: ['admin', 'finanzvorstand'] },
             { href: '/verwaltung/belege', icon: '📎', label: 'Buchungsbelege', roles: ['admin', 'finanzvorstand'] },
             { href: '/verwaltung/emails', icon: '✉️', label: 'E-Mails', roles: ['admin'] },
@@ -64,6 +64,7 @@ const ROLE_LABELS: Record<string, string> = {
     finanzvorstand: 'Finanzvorstand',
     member: 'Vorstandsmitglied',
     springerin: 'Springer*in',
+    teammitglied: 'Teammitglied',
     eltern: 'Eltern',
 };
 
@@ -313,9 +314,11 @@ export default function Sidebar({ user }: SidebarProps) {
                         <div className="sidebar-user-info">
                             <div className="user-name">{user.name}</div>
                             <div className="user-role">
-                                {user.role === 'admin' ? 'Finanzvorstand' :
-                                    user.role === 'eltern' ? 'Eltern' :
-                                        user.role === 'springerin' ? 'Springer*in' : 'Vorstandsmitglied'}
+                                {user.role === 'admin' ? 'Admin' :
+                                    user.role === 'finanzvorstand' ? 'Finanzvorstand' :
+                                        user.role === 'eltern' ? 'Eltern' :
+                                            user.role === 'springerin' ? 'Springer*in' :
+                                                user.role === 'teammitglied' ? 'Teammitglied' : 'Vorstandsmitglied'}
                             </div>
                         </div>
                     </div>

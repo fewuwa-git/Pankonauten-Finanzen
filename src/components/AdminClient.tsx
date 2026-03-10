@@ -192,8 +192,9 @@ export default function AdminClient({ currentUser }: AdminClientProps) {
                                             <option value="member">Vorstandsmitglied</option>
                                             <option value="admin">Admin</option>
                                             <option value="finanzvorstand">Finanzvorstand</option>
-                                            <option value="eltern">Eltern</option>
                                             <option value="springerin">Springerin</option>
+                                            <option value="teammitglied">Teammitglied</option>
+                                            <option value="eltern">Eltern</option>
                                         </select>
                                         <div style={{ display: 'flex', gap: '6px' }}>
                                             <button className="btn btn-primary btn-sm" onClick={() => handleApprove(u.id, u.name)}>
@@ -232,8 +233,9 @@ export default function AdminClient({ currentUser }: AdminClientProps) {
                                 <option value="admin">Admin</option>
                                 <option value="finanzvorstand">Finanzvorstand</option>
                                 <option value="member">Vorstandsmitglied</option>
-                                <option value="eltern">Eltern</option>
                                 <option value="springerin">Springerin</option>
+                                <option value="teammitglied">Teammitglied</option>
+                                <option value="eltern">Eltern</option>
                             </select>
                         </div>
                     </div>
@@ -244,8 +246,9 @@ export default function AdminClient({ currentUser }: AdminClientProps) {
                             { role: 'admin',          label: 'Admin',               icon: '⭐' },
                             { role: 'finanzvorstand', label: 'Finanzvorstand',       icon: '💰' },
                             { role: 'member',         label: 'Vorstandsmitglieder',  icon: '👤' },
-                            { role: 'eltern',         label: 'Eltern',               icon: '👪' },
                             { role: 'springerin',     label: 'Springerinnen',        icon: '🏃' },
+                            { role: 'teammitglied',   label: 'Team',                 icon: '🤝' },
+                            { role: 'eltern',         label: 'Eltern',               icon: '👪' },
                         ];
 
                         const visibleUsers = users
@@ -375,8 +378,9 @@ export default function AdminClient({ currentUser }: AdminClientProps) {
                                     <option value="member">Vorstandsmitglied</option>
                                     <option value="admin">Admin</option>
                                     <option value="finanzvorstand">Finanzvorstand</option>
-                                    <option value="eltern">Eltern</option>
                                     <option value="springerin">Springerin</option>
+                                    <option value="teammitglied">Teammitglied</option>
+                                    <option value="eltern">Eltern</option>
                                 </select>
                             </div>
                             {createError && <div className="error-msg">⚠️ {createError}</div>}

@@ -5,13 +5,14 @@ import Sidebar from '@/components/Sidebar';
 
 export const metadata: Metadata = { title: 'Zugriffsrechte' };
 
-type Role = 'admin' | 'finanzvorstand' | 'member' | 'eltern' | 'springerin';
+type Role = 'admin' | 'finanzvorstand' | 'member' | 'eltern' | 'springerin' | 'teammitglied';
 
 const ROLE_LABELS: Record<Role, string> = {
     admin: 'Admin',
     finanzvorstand: 'Finanzvorstand',
     member: 'Vorstandsmitglied',
     springerin: 'Springer*in',
+    teammitglied: 'Teammitglied',
     eltern: 'Eltern',
 };
 
@@ -25,20 +26,20 @@ const ALL_PAGES: NavItem[] = [
     { href: '/kontoauszug', label: 'Kontoauszug', section: 'Übersicht', roles: ['admin', 'finanzvorstand', 'member'] },
     { href: '/categories', label: 'Kategorien', section: 'Übersicht', roles: ['admin', 'finanzvorstand', 'member'] },
     { href: '/dashboard/springerin', label: 'Springerin-Übersicht', section: 'Übersicht', roles: ['admin', 'finanzvorstand', 'member'] },
-    { href: '/changelog', label: 'Changelog', section: 'Übersicht', roles: ['admin', 'finanzvorstand', 'member', 'springerin', 'eltern'] },
+    { href: '/changelog', label: 'Changelog', section: 'Übersicht', roles: ['admin', 'finanzvorstand', 'member', 'springerin', 'teammitglied', 'eltern'] },
     // Springerin
     { href: '/springerin/abrechnung', label: 'Abrechnung', section: 'Springerin', roles: ['admin', 'finanzvorstand', 'springerin'] },
     { href: '/springerin/abrechnung/neu', label: 'Neue Abrechnung', section: 'Springerin', roles: ['admin', 'finanzvorstand', 'springerin'] },
     // Eltern
-    { href: '/eltern/buchungen', label: 'Meine Buchungen', section: 'Eltern', roles: ['eltern', 'finanzvorstand', 'member', 'admin'] },
-    { href: '/eltern/belege', label: 'Meine Belege', section: 'Eltern', roles: ['eltern', 'finanzvorstand', 'member', 'admin'] },
-    { href: '/eltern/belege/neu', label: 'Neuer Beleg', section: 'Eltern', roles: ['eltern', 'finanzvorstand', 'member', 'admin'] },
-    { href: '/eltern/belege/[id]/bearbeiten', label: 'Beleg bearbeiten', section: 'Eltern', roles: ['eltern', 'finanzvorstand', 'member', 'admin'] },
+    { href: '/eltern/buchungen', label: 'Meine Buchungen', section: 'Eltern', roles: ['eltern', 'teammitglied', 'finanzvorstand', 'member', 'admin'] },
+    { href: '/eltern/belege', label: 'Meine Belege', section: 'Eltern', roles: ['eltern', 'teammitglied', 'finanzvorstand', 'member', 'admin'] },
+    { href: '/eltern/belege/neu', label: 'Neuer Beleg', section: 'Eltern', roles: ['eltern', 'teammitglied', 'finanzvorstand', 'member', 'admin'] },
+    { href: '/eltern/belege/[id]/bearbeiten', label: 'Beleg bearbeiten', section: 'Eltern', roles: ['eltern', 'teammitglied', 'finanzvorstand', 'member', 'admin'] },
     // Upload
     { href: '/upload', label: 'Neuer Upload', section: 'Upload', roles: ['admin', 'finanzvorstand'] },
     // Verwaltung
-    { href: '/user', label: 'Benutzer', section: 'Verwaltung', roles: ['admin', 'finanzvorstand', 'springerin', 'eltern', 'member'] },
-    { href: '/user/[id]/edit', label: 'Profil bearbeiten', section: 'Verwaltung', roles: ['admin', 'finanzvorstand', 'springerin', 'eltern', 'member'] },
+    { href: '/user', label: 'Benutzer', section: 'Verwaltung', roles: ['admin', 'finanzvorstand', 'springerin', 'teammitglied', 'eltern', 'member'] },
+    { href: '/user/[id]/edit', label: 'Profil bearbeiten', section: 'Verwaltung', roles: ['admin', 'finanzvorstand', 'springerin', 'teammitglied', 'eltern', 'member'] },
     { href: '/verwaltung/belege', label: 'Buchungsbelege', section: 'Verwaltung', roles: ['admin', 'finanzvorstand'] },
     { href: '/verwaltung/kategorien', label: 'Kategorien verwalten', section: 'Verwaltung', roles: ['admin', 'finanzvorstand'] },
     { href: '/verwaltung/kategorien/regeln', label: 'Kategorieregeln', section: 'Verwaltung', roles: ['admin', 'finanzvorstand'] },
@@ -49,7 +50,7 @@ const ALL_PAGES: NavItem[] = [
     { href: '/logfiles', label: 'Audit-Log', section: 'Verwaltung', roles: ['admin'] },
 ];
 
-const ROLES: Role[] = ['admin', 'finanzvorstand', 'member', 'springerin', 'eltern'];
+const ROLES: Role[] = ['admin', 'finanzvorstand', 'member', 'springerin', 'teammitglied', 'eltern'];
 
 export default async function ZugriffsrechtePage() {
     const headersList = await headers();
