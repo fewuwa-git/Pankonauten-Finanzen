@@ -115,11 +115,11 @@ export default function UserEditClient({ user, currentUserRole, isSelf = false }
                 body.strasse = form.strasse;
                 body.ort = form.ort;
                 body.iban = form.iban;
+                body.handynummer = form.handynummer;
                 body.unterschrift = form.unterschrift;
             }
             if (form.role === 'springerin') {
                 body.steuerid = form.steuerid;
-                body.handynummer = form.handynummer;
                 body.stundensatz = Number(form.stundensatz);
             }
 

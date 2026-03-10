@@ -55,6 +55,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
         if (body.strasse !== undefined) user.strasse = body.strasse;
         if (body.ort !== undefined) user.ort = body.ort;
         if (body.iban !== undefined) user.iban = body.iban;
+        if (body.handynummer !== undefined) user.handynummer = body.handynummer;
         if (body.unterschrift !== undefined) user.unterschrift = body.unterschrift;
     }
 
@@ -62,7 +63,6 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     if (isAdmin || (isSelf && user.role === 'springerin')) {
         if (body.name !== undefined) user.name = body.name;
         if (body.steuerid !== undefined) user.steuerid = body.steuerid;
-        if (body.handynummer !== undefined) user.handynummer = body.handynummer;
     }
     // Stundensatz nur für Admins änderbar
     if (isAdmin && body.stundensatz !== undefined) {
