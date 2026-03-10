@@ -15,6 +15,10 @@ export const CHANGELOG: ChangelogEntry[] = [
             'Es gibt jetzt eine Rolle „Teammitglied" für interne Teammitglieder. Sie haben dieselben Zugriffsrechte wie Eltern (Meine Buchungen, Meine Belege) und werden auf der Benutzerseite unter „Team" aufgelistet.',
             '— Navigation —',
             'In der Seitenleiste gibt es einen neuen Bereich „Buchhaltung" mit dem Link zu den Buchungsbelegen.',
+            '— Buchungsbelege: PDF-Vorschau beim Zuordnen —',
+            'Beim Klick auf „Buchung wählen" öffnet sich jetzt neben der Buchungsliste direkt eine PDF-Vorschau des Belegs. Nach der Zuordnung lädt automatisch der nächste unzugeordnete Beleg.',
+            '— Buchungsbelege: KI-Analyse auf Übersicht —',
+            'Belege mit KI-Analyse zeigen ihre Ergebnisse (Aussteller, Betrag, Datum, Zweck, Buchungsvorschläge) jetzt direkt auf der „Nicht zugeordnet"-Übersicht an.',
         ],
     },
     {
