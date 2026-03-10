@@ -71,7 +71,7 @@ export default function VerwaltungBelegeClient({ receipts: initialReceipts, unli
         return () => document.removeEventListener('keydown', onKey);
     }, []);
     const [infoReceipt, setInfoReceipt] = useState<TransactionReceipt | null>(null);
-    const [linkModal, setLinkModal] = useState<{ id: string; fileName: string } | null>(null);
+    const [linkModal, setLinkModal] = useState<{ id: string; fileName: string; pdfUrl?: string } | null>(null);
     const [suggestingId, setSuggestingId] = useState<string | null>(null);
     const [autoLinkedId, setAutoLinkedId] = useState<string | null>(null);
     const [showKiSettings, setShowKiSettings] = useState(false);
@@ -240,7 +240,9 @@ export default function VerwaltungBelegeClient({ receipts: initialReceipts, unli
     function handleLinked(receiptId: string, tx: { id: string; date: string; description: string; counterparty: string; amount: number; category: string }) {
         const receipt = unlinked.find(r => r.id === receiptId);
         if (!receipt) return;
-        setUnlinked(prev => prev.filter(r => r.id !== receiptId));
+        const currentIndex = unlinked.findIndex(r => r.id === receiptId);
+        const remaining = unlinked.filter(r => r.id !== receiptId);
+        setUnlinked(remaining);
         setReceipts(prev => [{
             ...receipt,
             transaction_id: tx.id,
@@ -255,7 +257,18 @@ export default function VerwaltungBelegeClient({ receipts: initialReceipts, unli
             linked_by: null,
             ai_invoice_number: null,
         } as TransactionReceipt, ...prev]);
-        setLinkModal(null);
+        if (!linkModal) return;
+        const next = remaining[currentIndex] ?? remaining[currentIndex - 1] ?? null;
+        if (next) {
+            setLinkModal({ id: next.id, fileName: next.file_name });
+            fetch(`/api/receipts/${next.id}`)
+                .then(r => r.json())
+                .then(data => {
+                    if (data.url) setLinkModal(prev => prev?.id === next.id ? { ...prev, pdfUrl: data.url } : prev);
+                });
+        } else {
+            setLinkModal(null);
+        }
     }
 
     return (
@@ -371,7 +384,8 @@ export default function VerwaltungBelegeClient({ receipts: initialReceipts, unli
                             </thead>
                             <tbody>
                                 {unlinked.map(r => (
-                                    <tr key={r.id}>
+                                    <React.Fragment key={r.id}>
+                                    <tr>
                                         <td style={{ fontSize: 13, whiteSpace: 'nowrap' }}>
                                             <button
                                                 onClick={async () => {
@@ -388,7 +402,12 @@ export default function VerwaltungBelegeClient({ receipts: initialReceipts, unli
                                         </td>
                                         <td>
                                             <button
-                                                onClick={() => setLinkModal({ id: r.id, fileName: r.file_name })}
+                                                onClick={async () => {
+                                                    setLinkModal({ id: r.id, fileName: r.file_name });
+                                                    const res = await fetch(`/api/receipts/${r.id}`);
+                                                    const data = await res.json();
+                                                    if (data.url) setLinkModal(prev => prev?.id === r.id ? { ...prev, pdfUrl: data.url } : prev);
+                                                }}
                                                 style={{
                                                     display: 'flex', alignItems: 'center', gap: 6,
                                                     padding: '5px 10px', borderRadius: 'var(--radius-sm)',
@@ -418,6 +437,58 @@ export default function VerwaltungBelegeClient({ receipts: initialReceipts, unli
                                             </button>
                                         </td>
                                     </tr>
+                                    {suggestionResults[r.id] && (
+                                        <tr key={`${r.id}-ki`}>
+                                            <td colSpan={5} style={{ padding: '0 16px 12px', background: 'var(--bg)' }}>
+                                                <div style={{ borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', overflow: 'hidden' }}>
+                                                    {(() => {
+                                                        const ex = suggestionResults[r.id].extracted;
+                                                        const hasData = ex.vendor || ex.amount != null || ex.date || ex.description;
+                                                        return (
+                                                            <div style={{ padding: '10px 14px', background: 'var(--bg-secondary)', borderBottom: suggestionResults[r.id].suggestions.length > 0 ? '1px solid var(--border)' : 'none', display: 'flex', gap: 24, flexWrap: 'wrap', fontSize: 12, alignItems: 'center' }}>
+                                                                <span style={{ color: 'var(--text-muted)' }}>✨ KI-Analyse:</span>
+                                                                {ex.vendor && <span><strong>Aussteller:</strong> {ex.vendor}</span>}
+                                                                {ex.amount != null && <span><strong>Betrag:</strong> {formatCurrency(ex.amount!)}</span>}
+                                                                {ex.date && <span><strong>Datum:</strong> {fmtDate(ex.date!)}</span>}
+                                                                {ex.description && <span><strong>Zweck:</strong> {ex.description}</span>}
+                                                                {!hasData && <span style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>Beleginhalt nicht lesbar</span>}
+                                                                <button onClick={() => setSuggestionResults(prev => { const next = { ...prev }; delete next[r.id]; return next; })} style={{ marginLeft: 'auto', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', fontSize: 13 }}>✕</button>
+                                                            </div>
+                                                        );
+                                                    })()}
+                                                    {suggestionResults[r.id].suggestions.length === 0 && (
+                                                        <div style={{ padding: '10px 14px', fontSize: 12, color: 'var(--text-muted)' }}>
+                                                            Keine passende Buchung gefunden – bitte manuell zuordnen.
+                                                        </div>
+                                                    )}
+                                                    {suggestionResults[r.id].suggestions.map((s, i) => (
+                                                        <div key={s.transaction_id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px', borderBottom: i < suggestionResults[r.id].suggestions.length - 1 ? '1px solid var(--border)' : 'none', fontSize: 13 }}>
+                                                            <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'var(--bg-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 12, flexShrink: 0, color: s.confidence > 0.8 ? 'var(--green)' : 'var(--text-muted)' }}>
+                                                                {Math.round(s.confidence * 100)}%
+                                                            </div>
+                                                            <div style={{ flex: 1, minWidth: 0 }}>
+                                                                <div style={{ fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                                    {fmtDate(s.transaction.date)} · {s.transaction.counterparty || s.transaction.description}
+                                                                    <span className={`tx-amount ${s.transaction.amount >= 0 ? 'positive' : 'negative'}`} style={{ marginLeft: 8 }}>
+                                                                        {(s.transaction.amount >= 0 ? '+' : '') + formatCurrency(s.transaction.amount)}
+                                                                    </span>
+                                                                </div>
+                                                                <div style={{ color: 'var(--text-muted)', fontSize: 12, marginTop: 2 }}>{s.reason}</div>
+                                                            </div>
+                                                            <button
+                                                                onClick={() => handleLinkSuggestion(r.id, s.transaction)}
+                                                                className="btn btn-success"
+                                                                style={{ fontSize: 12, padding: '5px 12px', whiteSpace: 'nowrap' }}
+                                                            >
+                                                                Zuordnen
+                                                            </button>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    )}
+                                    </React.Fragment>
                                 ))}
                             </tbody>
                         </table>
@@ -916,6 +987,7 @@ export default function VerwaltungBelegeClient({ receipts: initialReceipts, unli
                 <LinkReceiptModal
                     receiptId={linkModal.id}
                     fileName={linkModal.fileName}
+                    pdfUrl={linkModal.pdfUrl}
                     linkedTransactionIds={new Set(receipts.map(r => r.transaction_id).filter(Boolean) as string[])}
                     onLinked={handleLinked}
                     onClose={() => setLinkModal(null)}
