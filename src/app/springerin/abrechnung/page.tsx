@@ -90,7 +90,7 @@ async function AbrechnungTable({
                         <table className="data-table">
                             <thead>
                                 <tr>
-                                    <th>Name</th>
+                                    {role === 'admin' && <th>Name</th>}
                                     <th style={{ textAlign: 'right' }}>Stunden</th>
                                     <th style={{ textAlign: 'right' }}>Betrag</th>
                                     <th>Status</th>
@@ -100,7 +100,7 @@ async function AbrechnungTable({
                             <tbody>
                                 {abrechnungen.length === 0 ? (
                                     <tr>
-                                        <td colSpan={5} style={{ textAlign: 'center', padding: '48px 16px', color: 'var(--text-muted)' }}>
+                                        <td colSpan={role === 'admin' ? 5 : 4} style={{ textAlign: 'center', padding: '48px 16px', color: 'var(--text-muted)' }}>
                                             <div style={{ fontSize: '24px', marginBottom: '8px' }}>📁</div>
                                             Bisher wurden keine Abrechnungen angelegt.
                                         </td>
@@ -108,7 +108,7 @@ async function AbrechnungTable({
                                 ) : groups.map(group => (
                                     <React.Fragment key={group.key}>
                                         <tr>
-                                            <td colSpan={5} style={{
+                                            <td colSpan={role === 'admin' ? 5 : 4} style={{
                                                 background: 'var(--bg)',
                                                 padding: '8px 16px',
                                                 fontWeight: 700,
@@ -128,9 +128,11 @@ async function AbrechnungTable({
                                             const isLocked = ab.status === 'eingereicht' || ab.status === 'bezahlt';
                                             return (
                                                 <tr key={ab.id}>
-                                                    <td style={{ color: 'var(--text-muted)', fontSize: '14px' }}>
-                                                        {ab.pankonauten_users?.name || 'Unbekannt'}
-                                                    </td>
+                                                    {role === 'admin' && (
+                                                        <td style={{ color: 'var(--text-muted)', fontSize: '14px' }}>
+                                                            {ab.pankonauten_users?.name || 'Unbekannt'}
+                                                        </td>
+                                                    )}
                                                     <td style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>
                                                         <span className="badge" style={{ background: 'var(--bg)', padding: '4px 10px', borderRadius: '4px', fontWeight: '500' }}>
                                                             {ab.totalStunden.toFixed(2)} h
