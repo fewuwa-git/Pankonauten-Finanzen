@@ -13,6 +13,8 @@ export const CHANGELOG: ChangelogEntry[] = [
             'Das Bearbeitungsformular ist jetzt übersichtlicher: Die Felder sind auf Tabs aufgeteilt (Konto, Kontakt, Abrechnung, Unterschrift). Beim Verlassen der Seite mit ungespeicherten Änderungen erscheint eine Warnung.',
             '— Neue Rolle: Teammitglied —',
             'Es gibt jetzt eine Rolle „Teammitglied" für interne Teammitglieder. Sie haben dieselben Zugriffsrechte wie Eltern (Meine Buchungen, Meine Belege) und werden auf der Benutzerseite unter „Team" aufgelistet.',
+            '— Navigation —',
+            'In der Seitenleiste gibt es einen neuen Bereich „Buchhaltung" mit dem Link zu den Buchungsbelegen.',
         ],
     },
     {
