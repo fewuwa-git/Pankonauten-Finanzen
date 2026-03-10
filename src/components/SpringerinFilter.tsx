@@ -32,8 +32,8 @@ export default function SpringerinFilter({ springerinnen, availableJahre, isAdmi
     };
 
     return (
-        <div className="card" style={{ marginBottom: '1.5rem' }}>
-            <div className="card-header" style={{ flexWrap: 'wrap', gap: '8px' }}>
+        <div className="card springerin-filter-card">
+            <div className="card-header" style={{ flexWrap: 'wrap', gap: '8px', paddingBottom: '20px' }}>
                 <div className="card-title">🔍 Filter</div>
                 <div style={{ display: 'flex', gap: '8px', marginLeft: 'auto', alignItems: 'center', flexWrap: 'wrap' }}>
                     {isAdmin && (

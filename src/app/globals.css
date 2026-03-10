@@ -258,6 +258,19 @@ body {
   gap: 12px;
 }
 
+.springerin-filter-card {
+  margin-bottom: 2.5rem;
+}
+
+@media (max-width: 640px) {
+  .springerin-filter-card {
+    margin-bottom: 1.25rem;
+  }
+  .springerin-filter-card .card-header {
+    padding-bottom: 20px;
+  }
+}
+
 .card-header .btn {
   margin-top: 0;
   margin-bottom: 0;
